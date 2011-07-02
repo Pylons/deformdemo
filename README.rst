@@ -23,7 +23,7 @@ Running the Demo
 
 - ``cd`` to the newly checked out deformdemo package::
 
-    $ cd deform
+    $ cd deformdemo
 
 - Run ``setup.py develop`` using the virtualenv's ``python`` command::
 
