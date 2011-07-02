@@ -1340,7 +1340,7 @@ class SequenceToTextWidgetAdapter(object):
 def main(global_config, **settings):
     # paster serve entry point
     settings['debug_templates'] = 'true'
-    renderer = settings['deform.renderer']
+    renderer = settings['deformdemo.renderer']
     config = Configurator(settings=settings)
     renderer = config.maybe_dotted(renderer)
     deform.Form.set_default_renderer(renderer)
