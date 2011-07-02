@@ -13,7 +13,6 @@
 ##############################################################################
 
 import os
-import sys
 
 from setuptools import setup
 from setuptools import find_packages
@@ -27,20 +26,16 @@ except:
     README = ''
     CHANGES = ''
 
-requires = [
-    'Chameleon>=1.2.3,<1.999', # debug arg, c2 doesnt yet work
-    'colander>=0.8', # Bindings-providing
-    'peppercorn>=0.3', # rename operation type
-    'translationstring',
-    ]
-
-if sys.version_info <(2,6,0):
-    requires.append('simplejson')
+requires = ['deform',
+            'pyramid',
+            'pygments',
+            'Babel',
+            'Chameleon<1.999'],
 
 setupkw = dict(
-    name='deform',
-    version='0.9.1',
-    description='Another form generation library',
+    name='deformdemo',
+    version='0.0',
+    description='Demonstration application for Deform form library',
     long_description=README + '\n\n' + CHANGES,
     classifiers=[
         "Intended Audience :: Developers",
@@ -54,31 +49,11 @@ setupkw = dict(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    tests_require=requires + ['BeautifulSoup'],
     install_requires=requires,
-    test_suite="deform",
     entry_points = """\
     [paste.app_factory]
-    demo = deformdemo.app:run
+    demo = deformdemo:main
     """,
-    extras_require = {
-        'demo': ['Pyramid', 'pygments', 'Babel'],
-        }
     )
-
-try:
-    import babel
-    babel = babel # PyFlakes
-    # if babel is installed, advertise message extractors (if we pass
-    # this to setup() unconditionally, and babel isn't installed,
-    # distutils warns pointlessly)
-    setupkw['message_extractors'] = { ".": [
-        ("deform/**.py",     "chameleon_python", None ),
-        ("deform/**.pt",     "chameleon_xml", None ),
-        ("deformdemo/**.py", "chameleon_python", None ),
-        ("deformdemo/**.pt", "chameleon_xml", None ),
-        ]}
-except ImportError:
-    pass
 
 setup(**setupkw)

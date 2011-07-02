@@ -3,3 +3,6 @@ Copyright (c) 2011 `Agendaless Consulting and Contributors
 
 Portions (c) 2011 `Wufoo <http://wufoo.com>`_, All Rights Reserved
 
+Portions (c) ThoughtWorks, All Rights Reserved.
+
+

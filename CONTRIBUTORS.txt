@@ -94,15 +94,12 @@ List of Contributors
 ====================
 
 The below-signed are contributors to a code repository that is part of the
-project named "Deform".  Each below-signed contributor has read, understand
-and agrees to the terms above in the section within this document entitled
-"Pylons Project Contributor Agreement" as of the date beside his or her name.
+project named "deformdemo".  Each below-signed contributor has read,
+understand and agrees to the terms above in the section within this document
+entitled "Pylons Project Contributor Agreement" as of the date beside his or
+her name.
 
 Contributors
 ------------
 
 - Chris McDonough, 2011/02/16
-- Patrick Gerken, 2011/02/22
-- Jonathan Ballet, 2011/03/03
-- Chris Withers, 2011/05/16
-- Wichert Akkerman / 2011/05/19

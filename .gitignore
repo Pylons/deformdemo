@@ -5,9 +5,6 @@
 *.pt.py
 *.txt.py
 *~
-.coverage
-.tox/
-nosetests.xml
 env26/
 env25/
 env24/
@@ -16,4 +13,3 @@ jyenv/
 pypyenv/
 build/
 dist/
-deform/coverage.xml

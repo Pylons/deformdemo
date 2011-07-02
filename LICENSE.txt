@@ -1,6 +1,7 @@
-Some CSS and code in this package (in the ``static`` directory) is
-provided via a `Creative Commons
+Some CSS and code in this package is provided via a `Creative Commons
 <http://creativecommons.org/licenses/by/3.0/>`_ license.
+
+The ``selenium.py`` driver is provided under the Apache 2.0 license.
 
 The remainder is provided under this license:
 
@@ -38,4 +39,3 @@ The remainder is provided under this license:
     TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF
     THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
     SUCH DAMAGE.
-
