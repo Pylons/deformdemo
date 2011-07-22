@@ -22,11 +22,18 @@
     <tal:block repeat="reqt js_links|[]">
       <script type="text/javascript" src="${static}/${reqt}"></script>
     </tal:block>
-
+    <script type="text/javascript">
+        var stylesheets = ['${static}/css/beautify.css'];
+    </script>
+    <script type="text/javascript" src="${app_url}/static_demo/swap_stylesheets.js"></script>
   </head>
   
   <body id="public">
     <div class="header-small">
+    <select class="swap_stylesheets">
+    <option value="off">CSS switcher - No additional styling</option>
+    <option value="0">CSS switcher - Example stylesheet 1</option>
+    </select>
     </div>
     <div tal:condition="showmenu" class="menu">
       <ul>
