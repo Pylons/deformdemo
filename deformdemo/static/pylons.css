@@ -14,7 +14,7 @@
 /* -- page layout ----------------------------------------------------------- */
  
 body {
-    font-family: "Nobile", sans-serif;
+    font-family: "NobileRegular", sans-serif;
     font-size: 16px;
     background-color: #393939;
     color: #ffffff;
@@ -297,7 +297,7 @@ tt {
 }
 
 .viewcode-back {
-    font-family: "Nobile", sans-serif;
+    font-family: "NobileRegular", sans-serif;
 }
 
 div.viewcode-block:target {
@@ -325,7 +325,7 @@ a:hover em.std-term {
 }
 
 .download {
-    font-family: "Nobile", sans-serif;
+    font-family: "NobileRegular", sans-serif;
 	font-weight: normal;
 	font-style: normal;
 }
