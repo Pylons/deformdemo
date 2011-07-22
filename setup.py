@@ -29,8 +29,7 @@ except:
 requires = ['deform',
             'pyramid',
             'pygments',
-            'Babel',
-            'Chameleon<1.999'],
+            'Babel']
 
 setupkw = dict(
     name='deformdemo',

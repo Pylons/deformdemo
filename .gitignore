@@ -11,5 +11,6 @@ env24/
 env27/
 jyenv/
 pypyenv/
+2xenv/
 build/
 dist/
