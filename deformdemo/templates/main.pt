@@ -12,8 +12,8 @@
     <!-- Meta Tags -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <!-- CSS -->
-    <link rel="stylesheet" href="${app_url}/static_demo/nobile.css" type="text/css" media="screen" charset="utf-8" />
-    <link rel="stylesheet" href="${app_url}/static_demo/neuton.css" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="${app_url}/static_demo/fonts/nobile/stylesheet.css" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="${app_url}/static_demo/fonts/neuton/stylesheet.css" type="text/css" media="screen" charset="utf-8" />
     <link rel="stylesheet" href="${app_url}/static_demo/pylons.css" type="text/css" />
     <link rel="stylesheet" href="${app_url}/static_demo/deformdemo.css" type="text/css" />
     <link rel="stylesheet" href="${app_url}/pygments.css" type="text/css" />
