@@ -477,6 +477,32 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
+    @view_config(renderer='templates/translated_form.pt',
+                 name='sequence_of_i18n')
+    @demonstrate('Sequence of I18N')
+    def sequence_of_i18n(self):
+        import datetime
+        from colander import Range
+        locale_name = get_locale_name(self.request)
+        class Sequence(colander.SequenceSchema):
+            date = colander.SchemaNode(
+                colander.Date(),
+                validator=Range(
+                    min=datetime.date(2010, 5, 5),
+                    min_err=_('${val} is earlier than earliest date ${min}')
+                    )
+                )
+        class Schema(colander.Schema):
+            dates = Sequence()
+            _LOCALE_ = colander.SchemaNode(
+                colander.String(),
+                widget = deform.widget.HiddenWidget(),
+                default=locale_name)
+        schema = Schema()
+        form = deform.Form(schema,
+                           buttons=[deform.Button('submit', _('Submit'))])
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='sequence_of_richtext')
     @demonstrate('Sequence of Rich Text Widgets')
     def sequence_of_richtext(self):

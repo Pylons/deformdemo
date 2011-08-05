@@ -29,7 +29,8 @@ except:
 requires = ['deform',
             'pyramid',
             'pygments',
-            'Babel']
+            'Babel',
+            'lingua']
 
 setupkw = dict(
     name='deformdemo',
@@ -53,6 +54,10 @@ setupkw = dict(
     [paste.app_factory]
     demo = deformdemo:main
     """,
+    message_extractors = { '.': [
+        ('**.py',   'lingua_python', None ),
+        ('**.pt',   'lingua_xml', None ),
+        ]},    
     )
 
 setup(**setupkw)
