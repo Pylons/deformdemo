@@ -487,6 +487,7 @@ class DeformDemo(object):
         class Sequence(colander.SequenceSchema):
             date = colander.SchemaNode(
                 colander.Date(),
+                title=_('Event date'),
                 validator=Range(
                     min=datetime.date(2010, 5, 5),
                     min_err=_('${val} is earlier than earliest date ${min}')
