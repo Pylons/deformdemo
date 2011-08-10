@@ -452,7 +452,7 @@ class DatePartsWidgetTests(unittest.TestCase):
         browser.wait_for_page_to_load("30000")
         self.failUnless(browser.get_text('css=.errorMsgLbl'))
         error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Incomplete')
+        self.assertEqual(browser.get_text(error_node), 'Incomplete date')
         self.assertEqual(browser.get_text('css=#captured'), 'None')
         self.assertEqual(browser.get_value('deformField1'), '2010')
         self.assertEqual(browser.get_value('deformField1-month'), '')
@@ -468,7 +468,7 @@ class DatePartsWidgetTests(unittest.TestCase):
         browser.wait_for_page_to_load("30000")
         self.failUnless(browser.get_text('css=.errorMsgLbl'))
         error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Incomplete')
+        self.assertEqual(browser.get_text(error_node), 'Incomplete date')
         self.assertEqual(browser.get_text('css=#captured'), 'None')
         self.assertEqual(browser.get_value('deformField1'), '2010')
         self.assertEqual(browser.get_value('deformField1-month'), '1')
