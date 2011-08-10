@@ -8,6 +8,9 @@
       <a href="${request.path_url}?_LOCALE_=en">English</a>
     </div>
     <div>
+      <a href="${request.path_url}?_LOCALE_=nl">Nederlands</a>
+    </div>
+    <div>
       <a href="${request.path_url}?_LOCALE_=ru">Russian</a>
     </div>
     <div>
