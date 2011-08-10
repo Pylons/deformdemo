@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: deformdemo 0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2011-08-05 06:44-0400\n"
+"POT-Creation-Date: 2011-08-10 09:21+0200\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,30 +17,34 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 0.9.6\n"
 
-#: deformdemo/__init__.py:471 deformdemo/__init__.py:492 deformdemo/__init__.py:680
-#: deformdemo/__init__.py:697
+#: deformdemo/__init__.py:471 deformdemo/__init__.py:493 deformdemo/__init__.py:681
+#: deformdemo/__init__.py:698
 msgid "${val} is earlier than earliest date ${min}"
 msgstr ""
 
-#: deformdemo/__init__.py:503 deformdemo/__init__.py:953
+#: deformdemo/__init__.py:490
+msgid "Event date"
+msgstr ""
+
+#: deformdemo/__init__.py:504 deformdemo/__init__.py:954
 msgid "Submit"
 msgstr ""
 
-#: deformdemo/__init__.py:715
+#: deformdemo/__init__.py:716
 msgid "${val} is earlier than earliest time ${min}"
 msgstr ""
 
-#: deformdemo/__init__.py:734
+#: deformdemo/__init__.py:735
 msgid "${val} is earlier than earliest datetime ${min}"
 msgstr ""
 
-#: deformdemo/__init__.py:939 deformdemo/__init__.py:941
+#: deformdemo/__init__.py:940 deformdemo/__init__.py:942
 msgid "A number between ${min} and ${max}"
 msgstr ""
 
-#: deformdemo/__init__.py:1062 deformdemo/__init__.py:1065
-#: deformdemo/__init__.py:1068 deformdemo/__init__.py:1083
-#: deformdemo/__init__.py:1086 deformdemo/__init__.py:1089
+#: deformdemo/__init__.py:1063 deformdemo/__init__.py:1066
+#: deformdemo/__init__.py:1069 deformdemo/__init__.py:1084
+#: deformdemo/__init__.py:1087 deformdemo/__init__.py:1090
 msgid "Error ${num}"
 msgstr ""
 

@@ -1,4 +1,4 @@
-# Russian translations for deformsite.
+# German translations for deformsite.
 # Copyright (C) 2010 ORGANIZATION
 # This file is distributed under the same license as the deformsite project.
 # FIRST AUTHOR <EMAIL@ADDRESS>, 2010.
@@ -8,11 +8,10 @@ msgstr ""
 "Project-Id-Version: deformsite 0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2011-08-10 09:21+0200\n"
-"PO-Revision-Date: 2010-04-25 19:14-0400\n"
-"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
-"Language-Team: ru <LL@li.org>\n"
-"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
-"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
+"PO-Revision-Date: 2010-09-11 01:20+0100\n"
+"Last-Translator: Wichert Akkerman <wichert@wiggy.net>\n"
+"Language-Team: nl <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -21,33 +20,33 @@ msgstr ""
 #: deformdemo/__init__.py:471 deformdemo/__init__.py:493
 #: deformdemo/__init__.py:681 deformdemo/__init__.py:698
 msgid "${val} is earlier than earliest date ${min}"
-msgstr ""
+msgstr "${val} is eerder dan de eerst toegestane datum ${min}"
 
 #: deformdemo/__init__.py:490
 msgid "Event date"
-msgstr ""
+msgstr "Evenement datum"
 
 #: deformdemo/__init__.py:504 deformdemo/__init__.py:954
 msgid "Submit"
-msgstr "отправить"
+msgstr "Verstuur"
 
 #: deformdemo/__init__.py:716
 msgid "${val} is earlier than earliest time ${min}"
-msgstr ""
+msgstr "${val} mag niet voor ${min} zijn"
 
 #: deformdemo/__init__.py:735
 msgid "${val} is earlier than earliest datetime ${min}"
-msgstr ""
+msgstr "${val} mag niet voor ${min} zijn"
 
 #: deformdemo/__init__.py:940 deformdemo/__init__.py:942
 msgid "A number between ${min} and ${max}"
-msgstr "Число между ${min} и ${max}"
+msgstr "Een getal tussen ${min} en ${max}"
 
 #: deformdemo/__init__.py:1063 deformdemo/__init__.py:1066
 #: deformdemo/__init__.py:1069 deformdemo/__init__.py:1084
 #: deformdemo/__init__.py:1087 deformdemo/__init__.py:1090
 msgid "Error ${num}"
-msgstr ""
+msgstr "Fout ${num}"
 
 #~ msgid "Enter a date after May 5, 2010"
 #~ msgstr ""
