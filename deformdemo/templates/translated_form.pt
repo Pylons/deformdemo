@@ -8,10 +8,13 @@
       <a href="${request.path_url}?_LOCALE_=en">English</a>
     </div>
     <div>
+      <a href="${request.path_url}?_LOCALE_=nl">Nederlands</a>
+    </div>
+    <div>
       <a href="${request.path_url}?_LOCALE_=ru">Russian</a>
     </div>
     <div>
-      <a href="${request.path_url}?_LOCALE_=es">Spanish</a>
+      <a href="${request.path_url}?_LOCALE_=es">Español</a>
     </div>
     <h1>Captured</h1>
     <div id="captured" tal:content="captured"/>
