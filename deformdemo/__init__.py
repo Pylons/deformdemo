@@ -40,6 +40,8 @@ deform_template_dir = resource_filename('deform', 'templates/')
 zpt_renderer = deform.ZPTRendererFactory(
     [deform_template_dir], translator=translator)
 
+# the zpt_renderer above is referred to within the demo.ini file by dotted name
+
 class demonstrate(object):
     def __init__(self, title):
         self.title = title
