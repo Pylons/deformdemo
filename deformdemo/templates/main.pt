@@ -36,6 +36,7 @@
     <option value="off">CSS switcher - No additional styling</option>
     <option value="0">CSS switcher - Example stylesheet 1</option>
     </select>
+    <a href="http://docs.pylonsproject.org/projects/deform/en/latest/">Deform documentation</a>
     </div>
     <div tal:condition="showmenu" class="menu">
       <ul>

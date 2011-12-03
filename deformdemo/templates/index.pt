@@ -2,7 +2,7 @@
   <div metal:fill-slot="main">
     <h1>Deform Demo</h1>
     <h3>
-      <a href="http://docs.pylonsproject.org/projects/deform/dev/">Deform</a> is an HTML
+      <a href="http://docs.pylonsproject.org/projects/deform/en/latest/">Deform</a> is an HTML
       form generation system.  Each link below demonstrates a
       capability.
     </h3>
@@ -26,7 +26,7 @@
 
       <p>
         For further information, see
-        the <a href="http://docs.pylonsproject.org/projects/deform/dev/">Deform documentation</a>.
+        the <a href="http://docs.pylonsproject.org/projects/deform/en/latest/">Deform documentation</a>.
       </p>
 
     </div>
