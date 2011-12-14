@@ -1336,7 +1336,6 @@ class DeformDemo(object):
         class CSRFSchema(colander.Schema):
             csrf = colander.SchemaNode(
                 colander.String(),
-                title = 'Body',
                 default = deferred_csrf_default,
                 validator = deferred_csrf_validator,
                 widget = deform.widget.HiddenWidget(),
