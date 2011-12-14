@@ -16,6 +16,7 @@ from pyramid.renderers import get_renderer
 from pyramid.i18n import get_localizer
 from pyramid.i18n import get_locale_name
 from pyramid.response import Response
+from pyramid.session import UnencryptedCookieSessionFactoryConfig
 from pyramid.threadlocal import get_current_request
 from pyramid.url import resource_url
 from pyramid.view import view_config
@@ -1314,6 +1315,46 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='pyramid_csrf_demo')
+    @demonstrate('Pyramid CSRF Demo (using schema binding)')
+    def pyramid_csrf_demo(self):
+        @colander.deferred
+        def deferred_csrf_default(node, kw):
+            request = kw.get('request')
+            csrf_token = request.session.get_csrf_token()
+            return csrf_token
+
+        @colander.deferred
+        def deferred_csrf_validator(node, kw):
+            def validate_csrf(node, value):
+                request = kw.get('request')
+                csrf_token = request.session.get_csrf_token()
+                if value != csrf_token:
+                    raise ValueError('Bad CSRF token')
+            return validate_csrf
+
+        class CSRFSchema(colander.Schema):
+            csrf = colander.SchemaNode(
+                colander.String(),
+                title = 'Body',
+                default = deferred_csrf_default,
+                validator = deferred_csrf_validator,
+                widget = deform.widget.HiddenWidget(),
+                )
+
+        # subclass from CSRFSchema everywhere to get CSRF validation
+        class MySchema(CSRFSchema):
+            text = colander.SchemaNode(
+                colander.String(),
+                validator=colander.Length(max=100),
+                widget=deform.widget.TextInputWidget(size=60),
+                description='Enter some text'
+                )
+
+        schema = MySchema().bind(request=self.request)
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
+        
 class MemoryTmpStore(dict):
     """ Instances of this class implement the
     :class:`deform.interfaces.FileUploadTempStore` interface"""
@@ -1370,10 +1411,10 @@ def main(global_config, **settings):
     # paster serve entry point
     settings['debug_templates'] = 'true'
     renderer = settings['deformdemo.renderer']
-    config = Configurator(settings=settings)
+    session_factory = UnencryptedCookieSessionFactoryConfig('seekrit!')
+    config = Configurator(settings=settings, session_factory=session_factory)
     renderer = config.maybe_dotted(renderer)
     deform.Form.set_default_renderer(renderer)
-    config.begin()
     config.add_static_view('static', 'deform:static')
     config.add_static_view('static_demo', 'deformdemo:static')
     config.add_translation_dirs(
@@ -1382,5 +1423,4 @@ def main(global_config, **settings):
         'deformdemo:locale'
         )
     config.scan()
-    config.end()
     return config.make_wsgi_app()
