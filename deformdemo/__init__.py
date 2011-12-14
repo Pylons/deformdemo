@@ -893,6 +893,52 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='select_with_default')
+    @demonstrate('Select Widget (with default)')
+    def select_with_default(self):
+        choices = (
+            ('', '- Select -'),
+            ('habanero', 'Habanero'),
+            ('jalapeno', 'Jalapeno'),
+            ('chipotle', 'Chipotle')
+            )
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.String(),
+                default='jalapeno',
+                widget=deform.widget.SelectWidget(values=choices)
+                )
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
+
+    @view_config(renderer='templates/form.pt', name='select_with_deferred')
+    @demonstrate('Select Widget (with deferred choices and default)')
+    def select_with_deferred(self):
+        @colander.deferred
+        def deferred_choices_widget(node, kw):
+            choices = kw.get('choices')
+            return deform.widget.SelectWidget(values=choices)
+        @colander.deferred
+        def deferred_default(node, kw):
+            return kw['default']
+        
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.String(),
+                default=deferred_default,
+                widget=deferred_choices_widget,
+                )
+        choices = (
+            ('', '- Select -'),
+            ('habanero', 'Habanero'),
+            ('jalapeno', 'Jalapeno'),
+            ('chipotle', 'Chipotle')
+            )
+        schema = Schema().bind(choices=choices, default='jalapeno')
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='checkboxchoice')
     @demonstrate('Checkbox Choice Widget')
     def checkboxchoice(self):
