@@ -257,6 +257,18 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='delayed_richtext')
+    @demonstrate('Delayed Rich Text Widget')
+    def delayed_richtext(self):
+        class Schema(colander.Schema):
+            text = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.RichTextWidget(delayed_load=True),
+                description='Enter some text')
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='password')
     @demonstrate('Password Widget')
     def password(self):

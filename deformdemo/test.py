@@ -1743,8 +1743,10 @@ class SequenceOfRichTextWidgetTests(unittest.TestCase):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
         browser.click('deformField1-seqAdd')
-        added = 'dom=document.forms[0].text'
-        browser.type(added, 'yo')
+        browser.wait_for_condition(\
+            "selenium.browserbot.getCurrentWindow().document"
+            ".getElementsByTagName('iframe')[0]", "10000")
+        browser.type('tinymce', 'yo')
         browser.click("submit")
         browser.wait_for_page_to_load("30000")
         self.failIf(browser.is_element_present('css=.errorMsgLbl'))
@@ -2000,6 +2002,24 @@ class TextAreaWidgetTests(unittest.TestCase):
         self.assertEqual(browser.get_value('deformField1'), 'hello')
         captured = browser.get_text('css=#captured')
         self.assertEqual(captured, "{'text': u'hello'}")
+
+class DelayedRichTextWidgetTests(unittest.TestCase):
+    url = "/delayed_richtext/"
+
+    def test_submit_filled(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.click('css=.tinymce-preload')
+        browser.wait_for_condition(\
+            "selenium.browserbot.getCurrentWindow().document"
+            ".getElementsByTagName('iframe')[0]", "10000")
+        browser.type('tinymce', 'hello')
+        browser.click('submit')
+        browser.wait_for_page_to_load("30000")
+        self.failIf(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertEqual(browser.get_value('deformField1'), '<p>hello</p>')
+        captured = browser.get_text('css=#captured')
+        self.assertEqual(captured, "{'text': u'<p>hello</p>'}")
 
 class RichTextWidgetTests(unittest.TestCase):
     url = "/richtext/"
