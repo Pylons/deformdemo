@@ -98,4 +98,3 @@ Testing an Alternate Renderer Implementation
 - Run ``pserve /path/to/your/copy/of/demo.ini``.
 
 - Run the selenium tests as above.
-
