@@ -30,7 +30,8 @@ requires = ['deform',
             'pyramid',
             'pygments',
             'Babel',
-            'lingua']
+            'lingua',
+            'waitress']
 
 setupkw = dict(
     name='deformdemo',

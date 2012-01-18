@@ -32,7 +32,7 @@ Running the Demo
 - While your working directory is still ``deformdemo``, start the demo
   application::
 
-    $ $VENV/bin/paster serve demo.ini
+    $ $VENV/bin/pserve demo.ini
 
 - Visit http://localhost:8521 in a browser to see the demo.
 
@@ -95,7 +95,7 @@ Testing an Alternate Renderer Implementation
 - Change the ``deform.renderer`` key in the ``demo.ini`` copy to point at
   your renderer (it's a Python dotted name).
 
-- Run ``paster serve /path/to/your/copy/of/demo.ini``.
+- Run ``pserve /path/to/your/copy/of/demo.ini``.
 
 - Run the selenium tests as above.
 
