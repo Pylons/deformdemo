@@ -30,7 +30,8 @@ requires = ['deform',
             'pyramid',
             'pygments',
             'Babel',
-            'lingua']
+            'lingua',
+            'waitress']
 
 setupkw = dict(
     name='deformdemo',
@@ -57,7 +58,7 @@ setupkw = dict(
     message_extractors = { '.': [
         ('**.py',   'lingua_python', None ),
         ('**.pt',   'lingua_xml', None ),
-        ]},    
+        ]},
     )
 
 setup(**setupkw)
