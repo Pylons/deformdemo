@@ -6,8 +6,19 @@ capabilities and which provides a functional test suite  """
 import inspect
 import sys
 import csv
-import StringIO
-import iso8601
+
+try:
+    from StringIO import StringIO
+except ImportError:
+    from io import StringIO
+
+from colander import iso8601
+
+PY3 = sys.version_info[0] == 3
+
+if PY3:
+    def unicode(val, encoding='utf-8'):
+        return val
 
 from pkg_resources import resource_filename
 
@@ -72,7 +83,7 @@ class DeformDemo(object):
                     if response is not None:
                         return response
                 html = form.render(captured)
-            except deform.ValidationFailure, e:
+            except deform.ValidationFailure as e:
                 # the submitted values could not be validated
                 html = e.render()
 
@@ -106,7 +117,8 @@ class DeformDemo(object):
         lines, start = inspect.getsourcelines(frame.f_code)
         end = start + len(lines)
         code = ''.join(lines)
-        code = unicode(code, 'utf-8')
+        if not PY3:
+            code = unicode(code, 'utf-8')
         formatter = HtmlFormatter()
         return highlight(code, PythonLexer(), formatter), start, end
 
@@ -746,7 +758,7 @@ class DeformDemo(object):
                 colander.DateTime(),
                 validator=Range(
                     min=datetime.datetime(
-                        2010, 5, 5, 12, 30, tzinfo=iso8601.iso8601.Utc()),
+                        2010, 5, 5, 12, 30, tzinfo=iso8601.Utc()),
                     min_err=_('${val} is earlier than earliest datetime ${min}')
                     )
                 )
@@ -832,7 +844,7 @@ class DeformDemo(object):
                 )
             notrequired = colander.SchemaNode(
                 colander.String(),
-                missing=u'',
+                missing=unicode(''),
                 description='Unrequired Field')
         schema = Schema()
         form = deform.Form(schema, buttons=('submit',))
@@ -860,10 +872,11 @@ class DeformDemo(object):
         class Schema(colander.Schema):
             field = colander.SchemaNode(
                 colander.String(),
-                title = u'По оживлённым берегам',
-                description=(u"子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？ "
-                             u"人不知而不慍，不亦君子乎？」"),
-                default=u'☃',
+                title = unicode('По оживлённым берегам', 'utf-8'),
+                description=unicode(
+                    "子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？ "
+                    "人不知而不慍，不亦君子乎？」", 'utf-8'),
+                default=unicode('☃', 'utf-8'),
                 )
         schema = Schema()
         form = deform.Form(schema, buttons=('submit',))
@@ -1100,11 +1113,11 @@ class DeformDemo(object):
         class Schema(colander.Schema):
             one = colander.SchemaNode(
                 colander.String(),
-                missing=u'',
+                missing=unicode(''),
                 title='One (required if Two is not supplied)')
             two = colander.SchemaNode(
                 colander.String(),
-                missing=u'',
+                missing=unicode(''),
                 title='Two (required if One is not supplied)')
         def validator(form, value):
             if not value['one'] and not value['two']:
@@ -1202,7 +1215,7 @@ class DeformDemo(object):
                         controls = self.request.POST.items()
                         captured = form.validate(controls)
                         html.append(form.render(captured))
-                    except deform.ValidationFailure, e:
+                    except deform.ValidationFailure as e:
                         # the submitted values could not be validated
                         html.append(e.render())
                 else:
@@ -1432,7 +1445,7 @@ class SequenceToTextWidgetAdapter(object):
             cstruct = []
         textrows = getattr(field, 'unparseable', None)
         if textrows is None:
-            outfile = StringIO.StringIO()
+            outfile = StringIO()
             writer = csv.writer(outfile)
             writer.writerows(cstruct)
             textrows = outfile.getvalue()
@@ -1446,10 +1459,10 @@ class SequenceToTextWidgetAdapter(object):
         if not text.strip():
             return colander.null
         try:
-            infile = StringIO.StringIO(text)
+            infile = StringIO(text)
             reader = csv.reader(infile)
             rows = list(reader)
-        except Exception, e:
+        except Exception as e:
             field.unparseable = pstruct
             raise colander.Invalid(field.schema, str(e))
         return rows
@@ -1479,5 +1492,7 @@ def main(global_config, **settings):
         'deform:locale',
         'deformdemo:locale'
         )
-    config.scan()
+    def onerror(*arg):
+        pass
+    config.scan('deformdemo', onerror=onerror)
     return config.make_wsgi_app()

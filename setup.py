@@ -13,6 +13,7 @@
 ##############################################################################
 
 import os
+import sys
 
 from setuptools import setup
 from setuptools import find_packages
@@ -26,12 +27,18 @@ except:
     README = ''
     CHANGES = ''
 
+PY3 = sys.version_info[0] == 3
+
 requires = ['deform',
             'pyramid',
             'pygments',
+            'waitress']
+
+if not PY3:
+    requires.extend((
             'Babel',
             'lingua',
-            'waitress']
+            ))
 
 setupkw = dict(
     name='deformdemo',

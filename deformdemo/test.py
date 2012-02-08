@@ -415,7 +415,7 @@ class DateTimeInputWidgetTests(unittest.TestCase):
         browser.wait_for_page_to_load("30000")
         self.failIf(browser.is_element_present('css=.errorMsgLbl'))
         self.failUnless(browser.get_text('css=#captured').startswith(
-            "{'date_time': datetime.datetime(2010, 5, 7, 12, 0, tzinfo=<iso8601.iso8601.Utc object at"))
+            "{'date_time': datetime.datetime(2010, 5, 7, 12, 0, tzinfo"))
         self.assertEqual(browser.get_value('deformField1'), '2010-05-07 12:00:00')
 
 class DatePartsWidgetTests(unittest.TestCase):
