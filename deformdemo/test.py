@@ -2363,6 +2363,7 @@ class AjaxFormTests(unittest.TestCase):
         browser.type('deformField4', '2010')
         browser.type('deformField4-month', '1')
         browser.type('deformField4-day', '1')
+        browser.type('deformField5', 'text')
         browser.click('submit')
         browser.wait_for_condition(
             'selenium.browserbot.getCurrentWindow().jQuery.active == 0',

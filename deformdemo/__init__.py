@@ -408,6 +408,9 @@ class DeformDemo(object):
             number = colander.SchemaNode(
                 colander.Integer())
             mapping = Mapping()
+            richtext = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.RichTextWidget())
         schema = Schema()
         def succeed():
             return Response('<div id="thanks">Thanks!</div>')
