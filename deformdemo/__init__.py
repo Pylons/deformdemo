@@ -967,6 +967,24 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='select_integer')
+    @demonstrate('Select Widget (with Integer values)')
+    def select_integer(self):
+        choices = (
+            ('', '- Select -'),
+            (0, 'Zero'),
+            (1, 'One'),
+            (2, 'Two')
+            )
+        class Schema(colander.Schema):
+            number = colander.SchemaNode(
+                colander.Integer(),
+                widget=deform.widget.SelectWidget(values=choices)
+                )
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='checkboxchoice')
     @demonstrate('Checkbox Choice Widget')
     def checkboxchoice(self):

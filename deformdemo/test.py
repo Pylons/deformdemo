@@ -1872,6 +1872,48 @@ class SelectWidgetTests(Base, unittest.TestCase):
             captured, 
             "{'pepper': u'habanero'}")
 
+class SelectWidgetIntegerTests(Base, unittest.TestCase):
+    url = '/select_integer/'
+    def test_render_default(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        self.assertTrue(browser.is_text_present("Number"))
+        self.assertEqual(browser.get_attribute("deformField1@name"), 'number')
+        self.assertEqual(browser.get_selected_index('deformField1'), '0')
+        options = browser.get_select_options('deformField1')
+        self.assertEqual(
+            options,
+            [u'- Select -', u'Zero', u'One', u'Two']) 
+        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertEqual(browser.get_text('css=#captured'), 'None')
+
+    def test_submit_default(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.click('submit')
+        browser.wait_for_page_to_load("30000")
+        self.assertTrue(browser.is_text_present("Number"))
+        self.assertEqual(browser.get_attribute("deformField1@name"), 'number')
+        self.assertEqual(browser.get_selected_index('deformField1'), '0')
+        self.assertEqual(browser.get_text('css=#error-deformField1'),
+                         'Required')
+        captured = browser.get_text('css=#captured')
+        self.assertEqual(captured, 'None')
+        self.assertEqual(browser.get_text('css=#captured'), 'None')
+
+    def test_submit_selected(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.select('deformField1', 'index=1')
+        browser.click('submit')
+        browser.wait_for_page_to_load("30000")
+        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertEqual(browser.get_selected_index('deformField1'), '1')
+        captured = browser.get_text('css=#captured')
+        self.assertSimilarRepr(
+            captured, 
+            "{'number': 0}")
+
 class SelectWidgetWithSizeTests(SelectWidgetTests):
     url = "/select_with_size/"
     
