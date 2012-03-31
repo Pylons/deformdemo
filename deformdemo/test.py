@@ -1832,7 +1832,10 @@ class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
 
 class SelectWidgetTests(Base, unittest.TestCase):
     url = "/select/"
-    submit_selected_captured = "{'pepper': 'habanero'}"
+    submit_selected_captured = (
+        "{'pepper': u'habanero'}",
+        "{'pepper': 'habanero'}",
+        )
 
     def test_render_default(self):
         browser.open(self.url)
@@ -1870,14 +1873,17 @@ class SelectWidgetTests(Base, unittest.TestCase):
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
         self.assertEqual(browser.get_selected_index('deformField1'), '1')
         captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(captured, self.submit_selected_captured)
+        self.assertTrue(captured in self.submit_selected_captured)
 
 class SelectWidgetWithSizeTests(SelectWidgetTests):
     url = "/select_with_size/"
 
 class SelectWidgetWithUnicodeTests(SelectWidgetTests):
     url = '/select_with_unicode/'
-    submit_selected_captured = r"{'pepper': '\u30cf\u30d0\u30cd\u30ed'}"
+    submit_selected_captured = (
+        u"{'pepper': '\u30cf\u30d0\u30cd\u30ed'}",
+        u"{'pepper': u'\\u30cf\\u30d0\\u30cd\\u30ed'}",
+        )
 
 class SelectWidgetIntegerTests(Base, unittest.TestCase):
     url = '/select_integer/'
