@@ -921,6 +921,24 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='select_with_unicode')
+    @demonstrate('Select Widget (with unicode)')
+    def select_with_unicode(self):
+        choices = (
+            ('', '- Select -'),
+            (unicode('ハバネロ', 'utf-8'), 'Habanero'),
+            (unicode('ハラペーニョ', 'utf-8'), 'Jalapeno'),
+            ('chipotle', 'Chipotle')
+            )
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectWidget(values=choices)
+                )
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='select_with_default')
     @demonstrate('Select Widget (with default)')
     def select_with_default(self):
@@ -988,8 +1006,10 @@ class DeformDemo(object):
     @view_config(renderer='templates/form.pt', name='checkboxchoice')
     @demonstrate('Checkbox Choice Widget')
     def checkboxchoice(self):
-        choices = (('habanero', 'Habanero'), ('jalapeno', 'Jalapeno'),
+        choices = (('habanero', 'Habanero'),
+                   ('jalapeno', 'Jalapeno'),
                    ('chipotle', 'Chipotle'))
+
         class Schema(colander.Schema):
             pepper = colander.SchemaNode(
                 deform.Set(),
@@ -1002,7 +1022,8 @@ class DeformDemo(object):
     @view_config(renderer='templates/form.pt', name='checkboxchoice2')
     @demonstrate('Checkbox Choice Widget 2')
     def checkboxchoice2(self):
-        choices = (('habanero', 'Habanero'), ('jalapeno', 'Jalapeno'),
+        choices = (('habanero', 'Habanero'),
+                   ('jalapeno', 'Jalapeno'),
                    ('chipotle', 'Chipotle'))
 
         @colander.deferred
