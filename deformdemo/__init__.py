@@ -269,6 +269,24 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
+    @view_config(renderer='templates/translated_form.pt',
+                 name='richtext_i18n')
+    @demonstrate('Rich Text Widget (internationalized)')
+    def richtext_i18n(self):
+        locale_name = get_locale_name(self.request)
+        class Schema(colander.Schema):
+            text = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.RichTextWidget(),
+                description='Enter some text')
+            _LOCALE_ = colander.SchemaNode(
+                colander.String(),
+                widget = deform.widget.HiddenWidget(),
+                default=locale_name)
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='delayed_richtext')
     @demonstrate('Delayed Rich Text Widget')
     def delayed_richtext(self):

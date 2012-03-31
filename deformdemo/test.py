@@ -2150,6 +2150,14 @@ class RichTextWidgetTests(Base, unittest.TestCase):
             "{'text': u'<p>hello</p>'}"
             )
 
+class RichTextWidgetInternationalized(Base, unittest.TestCase):
+    url = "/richtext_i18n/?_LOCALE_=ru"
+    def test_render_default(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        self.assertTrue(browser.is_text_present("Text"))
+        self.assertEqual(browser.get_attribute("deformField1_bold@title"),
+                         u"Полужирный (Ctrl+B)")
 
 class UnicodeEverywhereTests(Base, unittest.TestCase):
     url = "/unicodeeverywhere/"
