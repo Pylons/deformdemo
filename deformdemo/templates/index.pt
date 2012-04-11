@@ -20,8 +20,8 @@
         we just had to write a demo application in
         <i>something</i>. If, for some unfathomable reason, you'd like
         to run this demo application locally, please read the <a
-        href="https://github.com/Pylons/deform/raw/master/deformdemo/README.txt"
-        >README.txt for installation of this application</a>.
+        href="https://github.com/Pylons/deformdemo/blob/master/README.rst"
+        >README file for installation of this application</a>.
       </p>
 
       <p>
