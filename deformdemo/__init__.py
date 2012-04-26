@@ -203,6 +203,21 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='money_input')
+    @demonstrate('Money Input')
+    def money_input(self):
+        widget = deform.widget.MoneyInputWidget(
+            size=20, options={'allowZero':True})
+        class Schema(colander.Schema):
+            greenbacks = colander.SchemaNode(
+                colander.Decimal(),
+                widget = widget,
+                description='Enter some money'
+                )
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='autocomplete_input')
     @demonstrate('Autocomplete Input Widget')
     def autocomplete_input(self):
@@ -463,7 +478,14 @@ class DeformDemo(object):
         """
         def succeed():
             location = self.request.application_url + '/thanks.html'
-            return Response(headers = [('X-Relocate', location)])
+            # To appease jquery 1.6+, we need to return something that smells
+            # like HTML, or we get a "Node cannot be inserted at the
+            # specified point in the hierarchy" Javascript error.  This didn't
+            # used to be required under JQuery 1.4.
+            return Response(
+                '<div>hurr</div>',
+                headers=[('X-Relocate', location), ('Content-Type','text/html')]
+                )
         form = deform.Form(schema, buttons=('submit',), use_ajax=True,
                            ajax_options=options)
         return self.render_form(form, success=succeed)

@@ -1963,6 +1963,39 @@ class TextInputWidgetTests(Base, unittest.TestCase):
             captured, 
             "{'text': u'hello'}")
 
+class MoneyInputWidgetTests(Base, unittest.TestCase):
+    url = "/money_input/"
+    def test_render_default(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        self.assertTrue(browser.is_text_present("Greenbacks"))
+        self.assertEqual(browser.get_attribute("deformField1@name"),
+                         'greenbacks')
+        self.assertEqual(browser.get_attribute("deformField1@type"), 'text')
+        self.assertEqual(browser.get_value("deformField1"), '0.00')
+        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertEqual(browser.get_text('css=#captured'), 'None')
+
+    def test_submit_empty(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.click('submit')
+        browser.wait_for_page_to_load("30000")
+        captured = browser.get_text('css=#captured')
+        self.assertSimilarRepr(captured, "{'greenbacks': Decimal('0.00')}")
+
+    def test_submit_filled(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.focus('deformField1')
+        browser.type('deformField1', '100')
+        browser.click('submit')
+        browser.wait_for_page_to_load("30000")
+        captured = browser.get_text('css=#captured')
+        self.assertSimilarRepr(captured, "{'greenbacks': Decimal('100')}")
+        self.assertEqual(browser.get_value('deformField1'), '100')
+        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+
 class TextInputWithCssClassWidgetTests(Base, unittest.TestCase):
     url = "/textinput_with_css_class/"
     def test_render_default(self):
