@@ -1033,7 +1033,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         self.assertEqual(errorMsg,
                          u'Ниже вы найдёте подробное описание ошибок')
         error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), u'требуется')
+        self.assertEqual(browser.get_text(error_node), u'Требуется')
         label = browser.get_text('css=label')
         self.assertEqual(label, u'Число между 1 и 10*')
         button = browser.get_text('css=button')
