@@ -2029,21 +2029,23 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
     def test_submit_filled(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
-        browser.type_keys('deformField1', 'b')
+        browser.focus('deformField1')
+        browser.type('deformField1', 'bar')
+        browser.type_keys('deformField1', 'bar')
         import time
         time.sleep(.2)
         self.assertTrue(browser.is_text_present('bar'))
         self.assertTrue(browser.is_text_present('baz'))
-        browser.click("//html/body/ul/li[2]")
+        browser.mouse_over("//html/body/ul/li/a") # hurrr, necessary
+        browser.click("//html/body/ul/li/a")
         browser.click('submit')
         browser.wait_for_page_to_load("30000")
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        # this *should* be "bar" but i can't figure out how to make it so
-        self.assertEqual(browser.get_value('deformField1'), u'b')
+        self.assertEqual(browser.get_value('deformField1'), u'bar')
         captured = browser.get_text('css=#captured')
         self.assertSimilarRepr(
             captured, 
-            "{'text': u'b'}")
+            "{'text': u'bar'}")
 
 class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
     url = "/autocomplete_remote_input/"
@@ -2072,21 +2074,24 @@ class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
     def test_submit_filled(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
+        browser.type('deformField1', 't')
+        import time
+        time.sleep(.5)
         browser.type_keys('deformField1', 't')
         import time
-        time.sleep(1)
+        time.sleep(.5)
         self.assertTrue(browser.is_text_present('two'))
         self.assertTrue(browser.is_text_present('three'))
-        browser.click("//html/body/ul/li[2]")
+        browser.mouse_over("//html/body/ul/li/a")
+        browser.click("//html/body/ul/li/a")
         browser.click('submit')
         browser.wait_for_page_to_load("30000")
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        # this *should* be "two" but i can't figure out how to make it so
-        self.assertEqual(browser.get_value('deformField1'), u't')
+        self.assertEqual(browser.get_value('deformField1'), u'two')
         captured = browser.get_text('css=#captured')
         self.assertSimilarRepr(
             captured,
-            "{'text': u't'}")
+            "{'text': u'two'}")
 
 class TextAreaWidgetTests(Base, unittest.TestCase):
     url = "/textarea/"
