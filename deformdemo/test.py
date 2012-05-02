@@ -1885,6 +1885,26 @@ class SelectWidgetWithUnicodeTests(SelectWidgetTests):
         u"{'pepper': u'\\u30cf\\u30d0\\u30cd\\u30ed'}",
         )
 
+class SelectWidgetMultipleTests(Base, unittest.TestCase):
+    url = '/select_with_multiple/'
+
+    def test_submit_selected(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+
+        captured_default = "{'pepper': set([u'habanero', u'chipotle'])}"
+
+        browser.add_selection('deformField1', 'index=0')
+        browser.add_selection('deformField1', 'index=2')
+
+        browser.click('submit')
+        browser.wait_for_page_to_load("30000")
+
+        captured = browser.get_text('css=#captured')
+
+        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertEqual(captured, captured_default)
+
 class SelectWidgetIntegerTests(Base, unittest.TestCase):
     url = '/select_integer/'
     def test_render_default(self):

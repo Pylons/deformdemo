@@ -998,6 +998,23 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='select_with_multiple')
+    @demonstrate('Select Widget (with mulitple)')
+    def select_with_multiple(self):
+        choices = (('habanero', 'Habanero'),
+                   ('jalapeno', 'Jalapeno'),
+                   ('chipotle', 'Chipotle'))
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                deform.Set(),
+                widget=deform.widget.SelectWidget(values=choices,
+                    multiple=True)
+            )
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='select_with_deferred')
     @demonstrate('Select Widget (with deferred choices and default)')
     def select_with_deferred(self):
