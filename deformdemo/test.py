@@ -1196,6 +1196,20 @@ class RadioChoiceWidgetTests(Base, unittest.TestCase):
             browser.get_text('css=#captured'),
             "{'pepper': u'habanero'}")
 
+class RadioChoiceWidgetIntTests(RadioChoiceWidgetTests):
+    url = "/radiochoice_int/"
+    def test_submit_one_checked(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.click("deformField1-0")
+        browser.click("submit")
+        browser.wait_for_page_to_load("30000")
+        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertTrue(browser.is_checked("deformField1-0"))
+        self.assertSimilarRepr(
+            browser.get_text('css=#captured'),
+            "{'pepper': 0}")
+
 class ReadOnlySequenceOfMappingTests(Base, unittest.TestCase):
     url = "/readonly_sequence_of_mappings/"
     def test_render_default(self):
