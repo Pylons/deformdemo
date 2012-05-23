@@ -2258,6 +2258,14 @@ class SequenceOfSequences(Base, unittest.TestCase):
                              [{'name': u'name', 'title': u'title'}]]}
                          )
 
+    def test_remove_from_nested_mapping_sequence(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.click('deformField1-seqAdd')
+        browser.click("document.getElementsByClassName('deformClosebutton')[2]")
+        self.assertFalse(browser.is_element_present('dom=document.forms[0].name[1]'))
+
+
 class TextAreaCSVWidgetTests(Base, unittest.TestCase):
     url = "/textareacsv/"
     def test_render_default(self):
