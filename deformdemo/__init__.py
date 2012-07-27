@@ -356,6 +356,23 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='radiochoice_int')
+    @demonstrate('Radio Choice Widget (with int values)')
+    def radiochoice_int(self):
+        choices = ((0, 'Habanero'), (1, 'Jalapeno'),
+                   (2, 'Chipotle'))
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.Int(),
+                validator=colander.OneOf([x[0] for x in choices]),
+                widget=deform.widget.RadioChoiceWidget(values=choices),
+                title='Choose your pepper',
+                description='Select a Pepper')
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='checkedinput')
     @demonstrate('Checked Input Widget')
     def checkedinput(self):
