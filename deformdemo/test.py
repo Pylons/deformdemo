@@ -1961,6 +1961,64 @@ class SelectWidgetIntegerTests(Base, unittest.TestCase):
             captured, 
             "{'number': 0}")
 
+class SelectWidgetWithOptgroupTest(Base, unittest.TestCase):
+    url = "/select_with_optgroup/"
+
+    def test_render_default(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        self.assertTrue(browser.is_text_present('Musician'))
+        self.assertEqual(browser.get_attribute('deformField1@name'), 'musician')
+        self.assertEqual(browser.get_selected_index('deformField1'), '0')
+        options = browser.get_select_options('deformField1')
+        self.assertEqual(
+            options,
+            [u'Select your favorite musician',
+             u'Jimmy Page', u'Jimi Hendrix', u'Billy Cobham', u'John Bonham']) 
+        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(int(browser.get_xpath_count('//optgroup')), 2)
+
+    def test_submit_selected(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.select('deformField1', 'index=1')
+        browser.click('submit')
+        browser.wait_for_page_to_load("30000")
+        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertEqual(browser.get_selected_index('deformField1'), '1')
+        captured = browser.get_text('css=#captured')
+        # With or without "u"...
+        expected = ("{'musician': 'page'}", "{'musician': u'page'}")
+        self.assertTrue(captured in expected)
+
+class SelectWidgetWithOptgroupAndLabelTest(SelectWidgetWithOptgroupTest):
+    url = "/select_with_optgroup_and_label_attributes/"
+
+    def test_render_default(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        self.assertTrue(browser.is_text_present('Musician'))
+        self.assertEqual(browser.get_attribute('deformField1@name'), 'musician')
+        self.assertEqual(browser.get_selected_index('deformField1'), '0')
+        # We cannot test what the options look like because it depends
+        # on the browser.
+        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(int(browser.get_xpath_count('//optgroup')), 2)
+
+    def test_submit_selected(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.select('deformField1', 'index=1')
+        browser.click('submit')
+        browser.wait_for_page_to_load("30000")
+        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertEqual(browser.get_selected_index('deformField1'), '1')
+        captured = browser.get_text('css=#captured')
+        expected = ("{'musician': 'page'}", "{'musician': u'page'}")
+        self.assertTrue(captured in expected)
+
 class TextInputWidgetTests(Base, unittest.TestCase):
     url = "/textinput/"
     def test_render_default(self):
