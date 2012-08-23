@@ -1077,6 +1077,55 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='select_with_optgroup')
+    @demonstrate('Select Widget (with optgroup)')
+    def select_with_optgroup(self):
+        from deform.widget import OptGroup
+        choices = (
+               ('', 'Select your favorite musician'),
+               OptGroup('Guitarists',
+                        ('page', 'Jimmy Page'),
+                        ('hendrix', 'Jimi Hendrix')),
+               OptGroup('Drummers',
+                       ('cobham', 'Billy Cobham'),
+                       ('bonham', 'John Bonham')))
+        class Schema(colander.Schema):
+            musician = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectWidget(values=choices)
+                )
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
+
+    @view_config(renderer='templates/form.pt',
+                 name='select_with_optgroup_and_label_attributes')
+    @demonstrate('Select Widget (with optgroup and label attributes)')
+    def select_with_optgroup_and_label_attributes(self):
+        # One may or may not notice any difference with
+        # 'select_with_optgroup' above, depending on the browser being
+        # used. See widget's documentation for further details.
+        from deform.widget import OptGroup
+        choices = (
+               ('', 'Select your favorite musician'),
+               OptGroup('Guitarists',
+                        ('page', 'Jimmy Page'),
+                        ('hendrix', 'Jimi Hendrix')),
+               OptGroup('Drummers',
+                       ('cobham', 'Billy Cobham'),
+                       ('bonham', 'John Bonham')))
+        long_label_gener = lambda group, label: ' - '.join((group, label))
+        class Schema(colander.Schema):
+            musician = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectWidget(
+                    values=choices,
+                    long_label_generator=long_label_gener)
+                )
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='checkboxchoice')
     @demonstrate('Checkbox Choice Widget')
     def checkboxchoice(self):
