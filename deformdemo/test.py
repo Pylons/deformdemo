@@ -2362,6 +2362,81 @@ class SequenceOfSequences(Base, unittest.TestCase):
         browser.click("document.getElementsByClassName('deformClosebutton')[2]")
         self.assertFalse(browser.is_element_present('dom=document.forms[0].name[1]'))
 
+class SequenceOrderable(Base, unittest.TestCase):
+    url = "/sequence_orderable/"
+    def test_render_default(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        self.assertTrue(browser.is_element_present('css=.deformProto'))
+        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Person')
+        self.assertEqual(browser.get_text('css=#captured'), 'None')
+
+    def test_submit_complex_interaction(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.click('deformField1-seqAdd') # add one
+        # A single item shouldn't have an active reorder button.
+        self.assertEqual(int(browser.get_xpath_count(
+            "//span[@class='deformOrderbutton deformOrderbuttonActive']")), 0)
+        browser.click('deformField1-seqAdd') # add a second
+        # Now there should be 2 active reorder buttons.
+        self.assertEqual(int(browser.get_xpath_count(
+            "//span[@class='deformOrderbutton deformOrderbuttonActive']")), 2)
+        browser.click('deformField1-seqAdd') # add a third
+
+        browser.type("document.forms[0].name[0]", 'Name1')
+        browser.type("document.forms[0].age[0]", '11')
+        browser.type("document.forms[0].name[1]", 'Name2')
+        browser.type("document.forms[0].age[1]", '22')
+        browser.type("document.forms[0].name[2]", 'Name3')
+        browser.type("document.forms[0].age[2]", '33')
+
+        order1_id = browser.get_attribute(
+            "document.getElementsByClassName('deformOrderbutton')[0]@id")
+        order2_id = browser.get_attribute(
+            "document.getElementsByClassName('deformOrderbutton')[1]@id")
+        order3_id = browser.get_attribute(
+            "document.getElementsByClassName('deformOrderbutton')[2]@id")
+
+        # Determine the number of pixels between two order buttons.
+        # We'll use this value later in calls to drag_and_drop().
+        order1_top = int(browser.get_element_position_top(order1_id))
+        order2_top = int(browser.get_element_position_top(order2_id))
+        vertical_offset = order2_top - order1_top
+
+        # Move item 1 down one slot (actually a little more than 1 is
+        # needed to trigger jQuery Sortable when dragging down, so use 1.5).
+        browser.drag_and_drop( order1_id,  "0,+%s" % (1.5 * vertical_offset))
+
+        # Move item 3 up two
+        browser.drag_and_drop( order3_id,  "0,-%s" % (2 * vertical_offset))
+
+        browser.click("submit")
+        browser.wait_for_page_to_load("30000")
+
+        # Original 3 items should now be in reverse order: 3, 2, 1
+
+        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertEqual(browser.get_value('document.forms[0].name[0]'),
+                         'Name3')
+        self.assertEqual(browser.get_value('document.forms[0].age[0]'),
+                         '33')
+        self.assertEqual(browser.get_value('document.forms[0].name[1]'),
+                         'Name2')
+        self.assertEqual(browser.get_value('document.forms[0].age[1]'),
+                         '22')
+        self.assertEqual(browser.get_value('document.forms[0].name[2]'),
+                         'Name1')
+        self.assertEqual(browser.get_value('document.forms[0].age[2]'),
+                         '11')
+
+        captured = browser.get_text('css=#captured')
+        captured = eval(captured)
+        self.assertEqual(captured, {'people': [
+            {'name': 'Name3', 'age': 33},
+            {'name': 'Name2', 'age': 22},
+            {'name': 'Name1', 'age': 11},
+        ]})
 
 class TextAreaCSVWidgetTests(Base, unittest.TestCase):
     url = "/textareacsv/"

@@ -741,6 +741,23 @@ class DeformDemo(object):
         schema = Schema()
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
+
+    @view_config(renderer='templates/form.pt', name='sequence_orderable')
+    @demonstrate('Sequence (of Mappings) with Ordering Enabled')
+    def sequence_orderable(self):
+        class Person(colander.Schema):
+            name = colander.SchemaNode(colander.String())
+            age = colander.SchemaNode(colander.Integer(),
+                                      validator=colander.Range(0,200))
+        class People(colander.SequenceSchema):
+            person = Person()
+        class Schema(colander.Schema):
+            people = People(
+                widget=deform.widget.SequenceWidget(orderable=True)
+            )
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
         
     @view_config(renderer='templates/form.pt', name='file')
     @demonstrate('File Upload Widget')
