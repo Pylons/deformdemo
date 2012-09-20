@@ -256,7 +256,7 @@ class DeformDemo(object):
     @view_config(renderer='json', name='autocomplete_input_values')
     def autocomplete_input_values(self):
         text = self.request.params.get('term', '')
-        return [x for x in ['bar', 'baz', 'two', 'three'] 
+        return [x for x in ['bar', 'baz', 'two', 'three']
                 if x.startswith(text)]
 
     @view_config(renderer='templates/form.pt', name='textarea')
@@ -525,6 +525,27 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt',
+                    name='sequence_of_selects_with_initial_item_and_default')
+    @demonstrate('Sequence of Select Widgets (With Initial Item and Default)')
+    def sequence_of_radiochoices(self):
+        choices = (('habanero', 'Habanero'), ('jalapeno', 'Jalapeno'),
+                   ('chipotle', 'Chipotle'))
+        class Peppers(colander.SequenceSchema):
+            pepper = colander.SchemaNode(
+                colander.String(),
+                validator=colander.OneOf([x[0] for x in choices]),
+                widget=deform.widget.SelectWidget(values=choices),
+                default='jalapeno',
+                title='Pepper Chooser',
+                description='Select a Pepper')
+        class Schema(colander.Schema):
+            peppers = Peppers()
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+        form['peppers'].widget = deform.widget.SequenceWidget(min_len=1)
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='sequence_of_autocompletes')
     @demonstrate('Sequence of Autocomplete Widgets')
     def sequence_of_autocompletes(self):
@@ -758,7 +779,7 @@ class DeformDemo(object):
         schema = Schema()
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
-        
+
     @view_config(renderer='templates/form.pt', name='file')
     @demonstrate('File Upload Widget')
     def file(self):
@@ -1059,7 +1080,7 @@ class DeformDemo(object):
         @colander.deferred
         def deferred_default(node, kw):
             return kw['default']
-        
+
         class Schema(colander.Schema):
             pepper = colander.SchemaNode(
                 colander.String(),
@@ -1190,7 +1211,7 @@ class DeformDemo(object):
         minmax = {'min':1, 'max':10}
         locale_name = get_locale_name(self.request)
         class Schema(colander.Schema):
-            
+
             number = colander.SchemaNode(
                 colander.Integer(),
                 title=_('A number between ${min} and ${max}',
@@ -1372,8 +1393,8 @@ class DeformDemo(object):
         # form's element identifiers will not overlap the first
         # form's.
 
-        counter = itertools.count() 
-        
+        counter = itertools.count()
+
         class Schema1(colander.Schema):
             name1 = colander.SchemaNode(colander.String())
         schema1 = Schema1()
@@ -1421,7 +1442,7 @@ class DeformDemo(object):
             'end':end,
             'title':'Multiple Forms on the Same Page',
             }
-        
+
     @view_config(renderer='templates/form.pt', name='widget_adapter')
     @demonstrate('Widget Adapter')
     def widget_adapter(self):
@@ -1556,7 +1577,7 @@ class DeformDemo(object):
                 validator = deferred_category_validator,
                 widget = deferred_category_widget,
                 )
-        
+
         schema = BlogPostSchema().bind(
             max_date = datetime.date.max,
             max_bodylen = 5000,
@@ -1564,7 +1585,7 @@ class DeformDemo(object):
             default_date = datetime.date.today(),
             categories = [('one', 'One'), ('two', 'Two')]
             )
-        
+
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
@@ -1606,7 +1627,7 @@ class DeformDemo(object):
         schema = MySchema().bind(request=self.request)
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
-        
+
 class MemoryTmpStore(dict):
     """ Instances of this class implement the
     :class:`deform.interfaces.FileUploadTempStore` interface"""
@@ -1657,7 +1678,7 @@ class SequenceToTextWidgetAdapter(object):
             for e in error.children:
                 msgs.append('line %s: %s' % (e.pos+1, e))
             field.error = colander.Invalid(field.schema, '\n'.join(msgs))
-        
+
 
 def main(global_config, **settings):
     # paster serve entry point
