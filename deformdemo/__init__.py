@@ -528,7 +528,7 @@ class DeformDemo(object):
     @view_config(renderer='templates/form.pt',
                     name='sequence_of_selects_with_initial_item_and_default')
     @demonstrate('Sequence of Select Widgets (With Initial Item and Default)')
-    def sequence_of_radiochoices(self):
+    def sequence_of_selects(self):
         choices = (('habanero', 'Habanero'), ('jalapeno', 'Jalapeno'),
                    ('chipotle', 'Chipotle'))
         class Peppers(colander.SequenceSchema):
