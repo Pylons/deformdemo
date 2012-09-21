@@ -125,7 +125,7 @@ class CheckboxWidgetTests(Base, unittest.TestCase):
         browser.wait_for_page_to_load("30000")
         self.assertTrue(browser.is_checked("deformField1"))
         self.assertEqual(browser.get_text('css=#captured'), "{'want': True}")
-
+    
 class CheckedInputWidgetTests(Base, unittest.TestCase):
     url = "/checkedinput/"
     def test_render_default(self):
@@ -235,7 +235,7 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
         browser.wait_for_page_to_load("30000")
         self.assertSimilarRepr(browser.get_text('css=#captured'),
                             u"{'ssn': u'140-11-8866'}")
-
+        
 
 class CheckedPasswordWidgetTests(Base, unittest.TestCase):
     url = "/checkedpassword/"
@@ -791,7 +791,7 @@ class HiddenFieldWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_attribute('deformField1@name'), 'sneaky')
         self.assertEqual(browser.get_value('deformField1'), 'true')
         self.assertEqual(browser.get_text('css=#captured'), 'None')
-
+    
     def test_render_submitted(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -813,7 +813,7 @@ class HiddenmissingTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField1'), '')
         self.assertEqual(browser.get_value('deformField2'), '')
         self.assertEqual(browser.get_text('css=#captured'), 'None')
-
+    
     def test_render_submitted(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -902,7 +902,7 @@ class InterFieldValidationTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_attribute('deformField2@name'), 'title')
         self.assertEqual(browser.get_value('deformField2'), '')
         self.assertEqual(browser.get_text('css=#captured'), 'None')
-
+    
     def test_submit_both_empty(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -993,7 +993,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         self.assertEqual(label, 'A number between 1 and 10*')
         button = browser.get_text('css=button')
         self.assertEqual(button, 'Submit')
-
+    
     def test_render_ru(self):
         browser.open("%s?_LOCALE_=ru" % self.url)
         browser.wait_for_page_to_load("30000")
@@ -1003,7 +1003,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         self.assertEqual(label, u'Число между 1 и 10*')
         button = browser.get_text('css=button')
         self.assertEqual(button, u'отправить')
-
+    
     def test_submit_empty_en(self):
         browser.open("%s?_LOCALE_=en" % self.url)
         browser.wait_for_page_to_load("30000")
@@ -1128,7 +1128,7 @@ class PasswordWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_attribute('css=#deformField1@type'),
                          'password')
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-
+                         
     def test_render_submit_empty(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1303,7 +1303,7 @@ class SequenceOfFileUploads(Base, unittest.TestCase):
         captured = browser.get_text('css=#captured')
         self.assertTrue("'filename': u'%s" % filename in captured)
         self.assertTrue(uid in captured)
-
+    
     def test_upload_multi_interaction(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1322,7 +1322,7 @@ class SequenceOfFileUploads(Base, unittest.TestCase):
         captured = browser.get_text('css=#captured')
         self.assertTrue("'filename': u'%s" % filename in captured)
         self.assertTrue(uid in captured)
-
+    
         # resubmit without entering a new filename should not change the file
         browser.click('submit')
         browser.wait_for_page_to_load("30000")
@@ -1356,7 +1356,7 @@ class SequenceOfFileUploads(Base, unittest.TestCase):
         self.assertTrue("'filename': u'%s" % filename2 in captured)
         self.assertTrue("'filename': u'%s" % filename in captured)
         self.assertEqual(browser.get_value('css=#deformField3-uid'), uid)
-
+        
         # resubmit should not change either file
         browser.click('submit')
         browser.wait_for_page_to_load("30000")
@@ -1605,7 +1605,7 @@ class SequenceOfAutocompletes(Base, unittest.TestCase):
         self.assertTrue(browser.is_text_present("Texts"))
         self.assertEqual(browser.get_text('deformField1-addtext'),'Add Text')
         self.assertEqual(browser.get_text('css=#captured'), 'None')
-
+        
     def test_submit_none_added(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1649,7 +1649,7 @@ class SequenceOfAutocompletes(Base, unittest.TestCase):
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
         captured = browser.get_text('css=#captured')
         self.assertSimilarRepr(
-            captured,
+            captured,  
             "{'texts': [u'bar', u'baz']}")
 
 class SequenceOfDateInputs(Base, unittest.TestCase):
@@ -1660,7 +1660,7 @@ class SequenceOfDateInputs(Base, unittest.TestCase):
         self.assertTrue(browser.is_text_present("Dates"))
         self.assertEqual(browser.get_text('deformField1-addtext'),'Add Date')
         self.assertEqual(browser.get_text('css=#captured'), 'None')
-
+        
     def test_submit_none_added(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1741,7 +1741,7 @@ class SequenceOfConstrainedLength(Base, unittest.TestCase):
         self.assertSimilarRepr(
             captured,
             "{'names': [u'hello2', u'hello3', u'hello4', u'hello5']}")
-
+        
 class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
     url = "/sequence_of_richtext/"
     def test_render_default(self):
@@ -1750,7 +1750,7 @@ class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
         self.assertTrue(browser.is_text_present("Texts"))
         self.assertEqual(browser.get_text('deformField1-addtext'),'Add Text')
         self.assertEqual(browser.get_text('css=#captured'), 'None')
-
+        
     def test_submit_none_added(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1789,7 +1789,7 @@ class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
         captured = browser.get_text('css=#captured')
         self.assertSimilarRepr(
-            captured,
+            captured, 
             "{'texts': [u'<p>yo</p>']}")
 
 class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
@@ -1800,7 +1800,7 @@ class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
         self.assertTrue(browser.is_text_present("Texts"))
         self.assertEqual(browser.get_text('deformField1-addtext'),'Add Text')
         self.assertEqual(browser.get_text('css=#captured'), 'None')
-
+        
     def test_submit_none_added(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1860,7 +1860,7 @@ class SelectWidgetTests(Base, unittest.TestCase):
         options = browser.get_select_options('deformField1')
         self.assertEqual(
             options,
-            [u'- Select -', u'Habanero', u'Jalapeno', u'Chipotle'])
+            [u'- Select -', u'Habanero', u'Jalapeno', u'Chipotle']) 
         self.assertEqual(browser.get_text('css=.req'), '*')
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
@@ -1930,7 +1930,7 @@ class SelectWidgetIntegerTests(Base, unittest.TestCase):
         options = browser.get_select_options('deformField1')
         self.assertEqual(
             options,
-            [u'- Select -', u'Zero', u'One', u'Two'])
+            [u'- Select -', u'Zero', u'One', u'Two']) 
         self.assertEqual(browser.get_text('css=.req'), '*')
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
@@ -1958,7 +1958,7 @@ class SelectWidgetIntegerTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_selected_index('deformField1'), '1')
         captured = browser.get_text('css=#captured')
         self.assertSimilarRepr(
-            captured,
+            captured, 
             "{'number': 0}")
 
 class SelectWidgetWithOptgroupTest(Base, unittest.TestCase):
@@ -1974,7 +1974,7 @@ class SelectWidgetWithOptgroupTest(Base, unittest.TestCase):
         self.assertEqual(
             options,
             [u'Select your favorite musician',
-             u'Jimmy Page', u'Jimi Hendrix', u'Billy Cobham', u'John Bonham'])
+             u'Jimmy Page', u'Jimi Hendrix', u'Billy Cobham', u'John Bonham']) 
         self.assertEqual(browser.get_text('css=.req'), '*')
         self.assertEqual(browser.get_text('css=#captured'), 'None')
         self.assertEqual(int(browser.get_xpath_count('//optgroup')), 2)
@@ -2052,7 +2052,7 @@ class TextInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField1'), 'hello')
         captured = browser.get_text('css=#captured')
         self.assertSimilarRepr(
-            captured,
+            captured, 
             "{'text': u'hello'}")
 
 class MoneyInputWidgetTests(Base, unittest.TestCase):
@@ -2122,7 +2122,8 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
         browser.focus('deformField1')
-        browser.type_keys('deformField1', 'ba')
+        browser.type('deformField1', 'bar')
+        browser.type_keys('deformField1', 'bar')
         import time
         time.sleep(.2)
         self.assertTrue(browser.is_text_present('bar'))
@@ -2135,27 +2136,8 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField1'), u'bar')
         captured = browser.get_text('css=#captured')
         self.assertSimilarRepr(
-            captured,
+            captured, 
             "{'text': u'bar'}")
-
-    def test_special_chars(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.focus('deformField1')
-        browser.type_keys('deformField1', 'foo')
-        import time
-        time.sleep(.2)
-        self.assertTrue(browser.is_text_present('foo & bar'))
-        browser.mouse_over("//html/body/ul/li/a") # hurrr, necessary
-        browser.click("//html/body/ul/li/a")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), u'foo & bar')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-                captured,
-                "{'text': u'foo & bar'}")
 
 class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
     url = "/autocomplete_remote_input/"
@@ -2294,7 +2276,7 @@ class RichTextWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField1'), '<p>hello</p>')
         captured = browser.get_text('css=#captured')
         self.assertSimilarRepr(
-            captured,
+            captured, 
             "{'text': u'<p>hello</p>'}"
             )
 
@@ -2482,7 +2464,7 @@ class TextAreaCSVWidgetTests(Base, unittest.TestCase):
         captured = browser.get_text('css=#captured')
         self.assertEqual(
             eval(captured),
-            ({'csv': [(1, u'hello', Decimal("4.5")),
+            ({'csv': [(1, u'hello', Decimal("4.5")), 
                       (2, u'goodbye', Decimal("5.5"))]
               }))
 
@@ -2593,7 +2575,7 @@ class MultipleFormsTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField1'), 'hey')
         captured = browser.get_text('css=#captured')
         self.assertSimilarRepr(
-            captured,
+            captured, 
             u"{'name1': u'hey'}")
 
     def test_submit_second(self):
@@ -2605,7 +2587,7 @@ class MultipleFormsTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField3'), 'hey')
         captured = browser.get_text('css=#captured')
         self.assertSimilarRepr(
-            captured,
+            captured, 
             u"{'name2': u'hey'}"
             )
 
@@ -2641,7 +2623,7 @@ class RequireOneFieldOrAnotherTests(Base, unittest.TestCase):
         browser.wait_for_page_to_load("30000")
         captured = browser.get_text('css=#captured')
         self.assertSimilarRepr(
-            captured,
+            captured, 
             u"{'two': u'', 'one': u'one'}"
             )
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
