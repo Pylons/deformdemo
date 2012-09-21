@@ -291,8 +291,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="autocomplete_input")
     @demonstrate("Autocomplete Input Widget")
     def autocomplete_input(self):
-
-        choices = ["bar", "baz", "two", "three"]
+        choices = ['bar', 'baz', 'two', 'three', 'foo & bar']
         widget = deform.widget.AutocompleteInputWidget(
             values=choices, min_length=1
         )

@@ -85,7 +85,6 @@ def action_chains_on_id(eid):
         )
     )
 
-
 def action_chains_on_xpath(expath):
     return ActionChains(browser).move_to_element(
         WebDriverWait(browser, SELENIUM_IMPLICIT_WAIT).until(
@@ -2736,6 +2735,24 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         # py2/py3 compat, py2 adds extra u prefix
         self.assertTrue("bar" in text)
 
+    def test_special_chars(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.focus('deformField1')
+        browser.type_keys('deformField1', 'foo')
+        import time
+        time.sleep(.2)
+        self.assertTrue(browser.is_text_present('foo & bar'))
+        browser.mouse_over("//html/body/ul/li/a") # hurrr, necessary
+        browser.click("//html/body/ul/li/a")
+        browser.click('submit')
+        browser.wait_for_page_to_load("30000")
+        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertEqual(browser.get_value('deformField1'), u'foo & bar')
+        captured = browser.get_text('css=#captured')
+        self.assertSimilarRepr(
+                captured,
+                "{'text': u'foo & bar'}")
 
 class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/autocomplete_remote_input/")
