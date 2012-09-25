@@ -747,6 +747,30 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt',
+                 name='sequence_of_defaulted_selects_with_initial_item')
+    @demonstrate('Sequence of Defaulted Selects (With Initial Item)')
+    def sequence_of_defaulted_selects_with_initial_item(self):
+        # See https://github.com/Pylons/deformdemo/pull/15
+        choices = (('habanero', 'Habanero'), ('jalapeno', 'Jalapeno'),
+                   ('chipotle', 'Chipotle'))
+        class Peppers(colander.SequenceSchema):
+            pepper = colander.SchemaNode(
+                colander.String(),
+                default='jalapeno',
+                validator=colander.OneOf([x[0] for x in choices]),
+                widget=deform.widget.SelectWidget(values=choices),
+                title='Pepper Chooser',
+                description='Select a Pepper')
+        class Schema(colander.Schema):
+            peppers = Peppers()
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+        # raison d'etre below (1-length sequence widget means initial item
+        # rendered)
+        form['peppers'].widget = deform.widget.SequenceWidget(min_len=1)
+        return self.render_form(form)
+
+    @view_config(renderer='templates/form.pt',
                  name='sequence_of_constrained_len')
     @demonstrate('Sequence of Constrained Min and Max Lengths')
     def sequence_of_constrained_len(self):

@@ -1281,7 +1281,32 @@ class SequenceOfDefaultedSelects(Base, unittest.TestCase):
         browser.wait_for_page_to_load("30000")
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
         captured = browser.get_text('css=#captured')
-        self.assertEqual(eval(captured), # should be default values
+        self.assertEqual(eval(captured), # should be 2 values, both defaults
+                         {'peppers': ['jalapeno', 'jalapeno']})
+
+class SequenceOfDefaultedSelectsWithInitialItem(Base, unittest.TestCase):
+    url = "/sequence_of_defaulted_selects_with_initial_item/"
+    def test_submit_none_added(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.click("submit")
+        browser.wait_for_page_to_load("30000")
+        self.assertEqual(browser.get_text('deformField1-addtext'),
+                         'Add Pepper Chooser')
+        captured = browser.get_text('css=#captured')
+        self.assertEqual(eval(captured), # should be 1 value (min_len 1)
+                         {'peppers': ['jalapeno']})
+        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+
+    def test_submit_one_added(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.click('deformField1-seqAdd')
+        browser.click("submit")
+        browser.wait_for_page_to_load("30000")
+        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        captured = browser.get_text('css=#captured')
+        self.assertEqual(eval(captured), # should be 2 values, both defaults
                          {'peppers': ['jalapeno', 'jalapeno']})
 
 class SequenceOfFileUploads(Base, unittest.TestCase):
