@@ -3,8 +3,7 @@ Deform Demo
 
 Demonstration application for the `Deform
 <http://docs.pylonsproject.org/projects/deform/dev/>`_ Python HTML form
-library.  Please see `http://deformdemo.repoze.org
-<http://docs.pylonsproject.org/projects/deform/dev/>`_ for a running version
+library.  Please see http://deformdemo.repoze.org for a running version
 of this application.
 
 Running the Demo
