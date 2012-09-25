@@ -1253,6 +1253,37 @@ class SequenceOfRadioChoices(Base, unittest.TestCase):
         self.assertEqual(eval(captured),
                          {'peppers': ['habanero', 'jalapeno']})
 
+class SequenceOfDefaultedSelects(Base, unittest.TestCase):
+    url = "/sequence_of_defaulted_selects/"
+    def test_render_default(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        self.assertEqual(browser.get_text('deformField1-addtext'),
+                         'Add Pepper Chooser')
+        self.assertEqual(browser.get_text('css=#captured'), 'None')
+
+    def test_submit_none_added(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.click("submit")
+        browser.wait_for_page_to_load("30000")
+        self.assertEqual(browser.get_text('deformField1-addtext'),
+                         'Add Pepper Chooser')
+        self.assertEqual(browser.get_text('css=#captured'), "{'peppers': []}")
+        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+
+    def test_submit_two_filled(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        browser.click('deformField1-seqAdd')
+        browser.click('deformField1-seqAdd')
+        browser.click("submit")
+        browser.wait_for_page_to_load("30000")
+        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        captured = browser.get_text('css=#captured')
+        self.assertEqual(eval(captured), # should be default values
+                         {'peppers': ['jalapeno', 'jalapeno']})
+
 class SequenceOfFileUploads(Base, unittest.TestCase):
     url = "/sequence_of_fileuploads/"
     def test_render_default(self):
