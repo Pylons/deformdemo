@@ -1087,7 +1087,7 @@ class DeformDemo(object):
 
         class Schema(colander.Schema):
             pepper = colander.SchemaNode(
-                deform.Set(),
+                colander.Set(),
                 widget=deform.widget.SelectWidget(values=choices,
                     multiple=True)
             )
@@ -1198,7 +1198,7 @@ class DeformDemo(object):
 
         class Schema(colander.Schema):
             pepper = colander.SchemaNode(
-                deform.Set(),
+                colander.Set(),
                 widget=deform.widget.CheckboxChoiceWidget(values=choices),
                 )
         schema = Schema()
@@ -1218,7 +1218,7 @@ class DeformDemo(object):
 
         class Schema(colander.Schema):
             pepper = colander.SchemaNode(
-                deform.Set(),
+                colander.Set(),
                 widget=deferred_checkbox_widget,
                 )
             required = colander.SchemaNode(
