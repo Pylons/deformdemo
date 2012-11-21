@@ -61,7 +61,8 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         browser.wait_for_page_to_load("30000")
         self.assertTrue(browser.get_text('css=.errorMsgLbl'))
         error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
+        self.assertEqual(browser.get_text(error_node),
+                         'Shorter than minimum length 1')
         self.assertFalse(browser.is_checked("deformField1-0"))
         self.assertFalse(browser.is_checked("deformField1-1"))
         self.assertFalse(browser.is_checked("deformField1-2"))

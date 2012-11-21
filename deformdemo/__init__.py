@@ -1200,6 +1200,7 @@ class DeformDemo(object):
             pepper = colander.SchemaNode(
                 colander.Set(),
                 widget=deform.widget.CheckboxChoiceWidget(values=choices),
+                validator=colander.Length(min=1),
                 )
         schema = Schema()
         form = deform.Form(schema, buttons=('submit',))
