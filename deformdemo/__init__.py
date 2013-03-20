@@ -1653,6 +1653,22 @@ class DeformDemo(object):
         schema = MySchema().bind(request=self.request)
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
+
+
+    @view_config(renderer='templates/form.pt',
+                 name='sequence_with_prototype_that_has_no_name')
+    @demonstrate('Sequence With Prototype that Has No Name')
+    def sequence_with_prototype_that_has_no_name(self):
+        class EmailMessage(colander.Schema):
+            subject = colander.SchemaNode(colander.String())
+            to = colander.SchemaNode(
+                colander.Sequence(),
+                colander.SchemaNode(colander.String()),
+                name='to'
+                )
+        schema = EmailMessage()
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
         
 class MemoryTmpStore(dict):
     """ Instances of this class implement the
