@@ -340,6 +340,20 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='checkbox_with_label')
+    @demonstrate('Checkbox with Label')
+    def checkbox_with_label(self):
+        class Schema(colander.Schema):
+            want = colander.SchemaNode(
+                colander.Boolean(),
+                description='Check this box!',
+                widget=deform.widget.CheckboxWidget(),
+                label='Really',
+                title='I Want It!')
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='radiochoice')
     @demonstrate('Radio Choice Widget')
     def radiochoice(self):
