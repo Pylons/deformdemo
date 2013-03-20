@@ -1663,8 +1663,7 @@ class DeformDemo(object):
             subject = colander.SchemaNode(colander.String())
             to = colander.SchemaNode(
                 colander.Sequence(),
-                colander.SchemaNode(colander.String()),
-                name='to'
+                colander.SchemaNode(colander.String(), name='foo'),
                 )
         schema = EmailMessage()
         form = deform.Form(schema, buttons=('submit',))
