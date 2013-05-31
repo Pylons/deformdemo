@@ -1682,6 +1682,30 @@ class DeformDemo(object):
         schema = EmailMessage()
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
+
+    @view_config(renderer='templates/form.pt',
+                 name='readonly_value_nonvalidation')
+    @demonstrate('Dont Validate Readonly Fields')
+    def readonly_value_nonvalidation(self):
+        @colander.deferred
+        def deferred_missing(node, kw):
+            return appstruct['readonly']
+        class Values(colander.Schema):
+            readonly = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.TextInputWidget(readonly=True),
+                missing=deferred_missing,
+                )
+            readwrite = colander.SchemaNode(
+                colander.String(),
+                )
+        appstruct = {
+            'readonly':'Read Only',
+            'readwrite':'Read and Write',
+            }
+        schema = Values().bind()
+        form = deform.Form(schema, buttons=('submit',))
+        return self.render_form(form, appstruct=appstruct)
         
 class MemoryTmpStore(dict):
     """ Instances of this class implement the
