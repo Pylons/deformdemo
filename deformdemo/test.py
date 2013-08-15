@@ -2848,6 +2848,16 @@ class MultipleErrorMessagesInSequenceTest(Base, unittest.TestCase):
         self.assertEqual(browser.get_text('error-deformField3-1'), 'Error 2')
         self.assertEqual(browser.get_text('error-deformField3-2'), 'Error 3')
 
+class CssClassesOnTheOutermostHTMLElement(Base, unittest.TestCase):
+    url = "/custom_classes_on_outermost_html_element/"
+    def test_it(self):
+        browser.open(self.url)
+        browser.wait_for_page_to_load("30000")
+        self.assertTrue(browser.is_element_present('css=form > fieldset > ul > li.field.top_level_mapping_widget_custom_class'))
+        self.assertTrue(browser.is_element_present('css=[title=SequenceWidget] > .deformSeq > ul > li.sequenced_widget_custom_class'))
+        self.assertTrue(browser.is_element_present('css=[title=MappingWidget] > fieldset > ul > li.mapped_widget_custom_class'))
+        
+
 if __name__ == '__main__':
     setUpModule()
     try:

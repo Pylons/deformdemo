@@ -1706,7 +1706,35 @@ class DeformDemo(object):
         schema = Values().bind()
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form, appstruct=appstruct)
+    
+    @view_config(renderer='templates/form.pt', name='custom_classes_on_outermost_html_element')
+    @demonstrate('Custom classes on outermost html element of Widgets')
+    def custom_classes_on_outermost_html_element(self):
+        import datetime
+        class Mapping(colander.Schema):
+            upload = colander.SchemaNode(
+                deform.FileData(),
+                widget=deform.widget.FileUploadWidget(tmpstore, item_css_class='mapped_widget_custom_class')
+                )
         
+        class Schema(colander.Schema):
+            text = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.TextInputWidget(item_css_class='top_level_mapping_widget_custom_class'),
+            )
+            sequence = colander.SchemaNode(
+                colander.Sequence(),
+                colander.SchemaNode(
+                    colander.Date(),
+                    name="Sequence Item",
+                    widget=deform.widget.DatePartsWidget(item_css_class='sequenced_widget_custom_class')
+                ),
+                default=[datetime.date.today()],
+                description="SequenceWidget"
+            )
+            mapping = Mapping(description="MappingWidget")
+        return self.render_form(deform.Form(Schema(), buttons=('submit',)))
+    
 class MemoryTmpStore(dict):
     """ Instances of this class implement the
     :class:`deform.interfaces.FileUploadTempStore` interface"""
