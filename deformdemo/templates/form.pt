@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <div metal:use-macro="view.macros['master']">
   <div metal:fill-slot="main">
     <h1>${title}</h1>
