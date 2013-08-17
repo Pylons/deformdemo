@@ -1,0 +1,8 @@
+HTML Template Validation Known Issues
+=====================================
+
+Much work was done to make these tempaltes validate, but due to current limitations of HTML and form controls some things just aren't as nice as they should be. Here is the current list of things that just won't validate for now.
+
+* Extended Attribute usage on HTML elements to pack data into the form
+* There is a workaround for mapping items which sets the label of the mapping item for the first item of subfields but this cannot work with sequences which may initially render empty.
+* The validator runner is naive and currently reports all feedback from the validation service. This will improve when we switch to JSON reporting and gracefully handle errors that we know we cannot fix. 
