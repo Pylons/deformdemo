@@ -43,6 +43,7 @@ argv = sys.argv[1:]
 forceXml = 0
 forceHtml = 0
 gnu = 0
+json = 0
 errorsOnly = 0
 encoding = None
 fileName = None
@@ -55,6 +56,7 @@ for arg in argv:
     print '-h : force text/html'
     print '-x : force application/xhtml+xml'
     print '-g : GNU output'
+    print '-j: JSON output'
     print '-e : errors only (no info or warnings)'
     print '--encoding=foo : declare encoding foo'
     print '--service=url  : the address of the HTML5 validator'
@@ -77,6 +79,8 @@ for arg in argv:
         gnu = 1  		
       elif 'e' == c:
         errorsOnly = 1
+      elif 'j' == c:
+        json = 1
       else:
         sys.stderr.write('Unknown argument %s.\n' % arg)
         sys.exit(3)        		
@@ -136,6 +140,8 @@ redirectCount = 0
 url = service
 if gnu:
   url = url + '?out=gnu'
+elif json:
+  url = url + '?out=json'
 else:
   url = url + '?out=text'
   
