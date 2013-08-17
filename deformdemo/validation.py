@@ -1,13 +1,10 @@
-from pyramid import testing
 from pyramid.paster import bootstrap
-from deformdemo import DeformDemo, main
+from deformdemo import DeformDemo
 import unittest
 import httplib
-import os
 import sys
 import re
 import urlparse
-import string
 import gzip
 import StringIO
 import json
@@ -17,11 +14,11 @@ def validate(data):
 
     extPat = re.compile(r'^.*\.([A-Za-z]+)$')
     extDict = {
-        "html" : "text/html",
-        "htm" : "text/html",
-        "xhtml" : "application/xhtml+xml",
-        "xht" : "application/xhtml+xml",
-        "xml" : "application/xml",
+        "html": "text/html",
+        "htm": "text/html",
+        "xhtml": "application/xhtml+xml",
+        "xht": "application/xhtml+xml",
+        "xml": "application/xml",
     }
 
 
@@ -53,7 +50,7 @@ def validate(data):
         parsed = urlparse.urlsplit(url)
         if parsed[0] != 'http':
             sys.stderr.write('URI scheme %s not supported.\n' % parsed[0])
-            sys.exit(7)    
+            sys.exit(7)
         if redirectCount > 0:
             connection.close() # previous connection
             print 'Redirecting to %s' % url
