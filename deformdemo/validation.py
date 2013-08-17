@@ -1,10 +1,22 @@
 from pyramid import testing
 from deformdemo import DeformDemo, main
+import unittest
 
-config = dict()
-config['deformdemo.renderer'] = 'deformdemo.zpt_renderer'
-main(dict(), **config)
-request = testing.DummyRequest()
-demos = DeformDemo(request)
+class FunctionalTests(unittest.TestCase):
+    def setUp(self):
+        bs = bootstrap('demo.ini')
+        app = bs['app']
+        self.request = bs['request']
+        from webtest import TestApp
+        self.testapp = TestApp(app)
+        self.demos = DeformDemo(self.request)
 
-import pdb; pdb.set_trace()  # NOQA
+    def test_valid_html(self):
+        demos_urls = self.demos.get_demos()
+        for demo in demos_urls:
+            res = self.testapp.get(demo[1], status=200)
+            import pdb; pdb.set_trace()  # NOQA
+        #self.failUnless('Pyramid' in res.body)
+
+if __name__ == '__main__':
+    unittest.main()

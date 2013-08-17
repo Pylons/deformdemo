@@ -34,6 +34,8 @@ requires = ['deform>=0.9.6dev',
             'pygments',
             'waitress']
 
+testing_extras = ['webtest',]
+
 if not PY3:
     requires.extend((
             'Babel',
@@ -57,6 +59,7 @@ setupkw = dict(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
+    tests_require=testing_extras,
     install_requires=requires,
     entry_points = """\
     [paste.app_factory]
@@ -66,6 +69,9 @@ setupkw = dict(
         ('**.py',   'lingua_python', None ),
         ('**.pt',   'lingua_xml', None ),
         ]},
+    extras_require = {
+       'testing':testing_extras,
+       },
     )
 
 setup(**setupkw)
