@@ -48,7 +48,7 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
         self.assertTrue(browser.is_text_present("Pepper"))
-        self.assertFalse(browser.is_checked("deformField1-0"))
+        self.assertFalse(browser.is_checked("deformField1"))
         self.assertFalse(browser.is_checked("deformField1-1"))
         self.assertFalse(browser.is_checked("deformField1-2"))
         self.assertEqual(browser.get_text('css=.req'), '*')
@@ -75,7 +75,7 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         browser.click("submit")
         browser.wait_for_page_to_load("30000")
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_checked("deformField1-0"))
+        self.assertTrue(browser.is_checked("deformField1"))
         captured = browser.get_text('css=#captured')
         self.assertTrue(captured in (
             "{'pepper': set([u'habanero'])}", # py2
@@ -91,7 +91,7 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         browser.click("submit")
         browser.wait_for_page_to_load("30000")
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_checked("deformField1-0"))
+        self.assertTrue(browser.is_checked("deformField1"))
         self.assertTrue(browser.is_checked("deformField1-1"))
         self.assertTrue(browser.is_checked("deformField1-2"))
         captured = browser.get_text('css=#captured')
