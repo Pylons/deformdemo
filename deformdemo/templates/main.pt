@@ -34,6 +34,21 @@
         <script src="${app_url}/static/scripts/typeahead.min.js"
                 type="text/javascript"></script>
 
+        <!-- Added for pickadate -->
+        <link rel="stylesheet"
+              href="${request.static_url('deform:static/css/pickadate-classic.min.css')}"
+              type="text/css" media="screen" charset="utf-8"/>
+        <link rel="stylesheet"
+              href="${request.static_url('deform:static/css/pickadate-classic.date.min.css')}"
+              type="text/css" media="screen" charset="utf-8"/>
+        <script src="${request.static_url('deform:static/scripts/modernizr.custom.input-types-and-atts.js')}"
+                type="text/javascript"></script>
+        <script src="${request.static_url('deform:static/scripts/pickadate.min.js')}"
+                type="text/javascript"></script>
+        <script src="${request.static_url('deform:static/scripts/pickadate.date.min.js')}"
+                type="text/javascript"></script>
+
+
     </head>
 
     <body id="public">
