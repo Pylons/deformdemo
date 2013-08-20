@@ -1,0 +1,262 @@
+<!DOCTYPE html>
+<html>
+
+  <head>
+    <title>
+      Deform Demo Site
+    </title>
+    <!-- Meta Tags -->
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <!-- CSS -->
+    <link rel="stylesheet" href="http://localhost:8521/static_demo/fonts/nobile/stylesheet.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="http://localhost:8521/static_demo/fonts/neuton/stylesheet.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="http://localhost:8521/static_demo/pylons.css" type="text/css" />
+    <link rel="stylesheet" href="http://localhost:8521/static_demo/deformdemo.css" type="text/css" />
+    <link rel="stylesheet" href="http://localhost:8521/pygments.css" type="text/css" />
+    
+      <link rel="stylesheet" href="http://localhost:8521/static/css/form.css" type="text/css" />
+    
+    <!-- JavaScript -->
+    
+      <script type="text/javascript" src="http://localhost:8521/static/scripts/jquery-1.7.2.min.js"></script>
+    
+    
+      <script type="text/javascript" src="http://localhost:8521/static/scripts/jquery.form-3.09.js"></script>
+    
+    
+      <script type="text/javascript" src="http://localhost:8521/static/scripts/deform.js"></script>
+    
+    <script type="text/javascript">
+        var stylesheets = ['http://localhost:8521/static/css/beautify.css'];
+    </script>
+    <script type="text/javascript" src="http://localhost:8521/static_demo/swap_stylesheets.js"></script>
+  </head>
+  
+  <body id="public">
+    <div class="header-small">
+    <select class="swap_stylesheets">
+    <option value="off">CSS switcher - No additional styling</option>
+    <option value="0">CSS switcher - Example stylesheet 1</option>
+    </select>
+    </div>
+    <div class="menu">
+      <ul>
+        <li><a href="http://localhost:8521/ajaxform/">AJAX form submission (inline success)</a></li>
+        <li><a href="http://localhost:8521/ajaxform_redirect/">AJAX form submission (redirect on success)</a></li>
+        <li><a href="http://localhost:8521/autocomplete_input/">Autocomplete Input Widget</a></li>
+        <li><a href="http://localhost:8521/autocomplete_remote_input/">Autocomplete Input Widget with Remote Data Source</a></li>
+        <li><a href="http://localhost:8521/checkboxchoice/">Checkbox Choice Widget</a></li>
+        <li><a href="http://localhost:8521/checkboxchoice2/">Checkbox Choice Widget 2</a></li>
+        <li><a href="http://localhost:8521/checkbox/">Checkbox Widget</a></li>
+        <li><a href="http://localhost:8521/checkbox_with_label/">Checkbox with Label</a></li>
+        <li><a href="http://localhost:8521/checkedinput/">Checked Input Widget</a></li>
+        <li><a href="http://localhost:8521/checkedinput_withmask/">Checked Input Widget (With Input Mask)</a></li>
+        <li><a href="http://localhost:8521/checkedpassword/">Checked Password Widget</a></li>
+        <li><a href="http://localhost:8521/custom_classes_on_outermost_html_element/">Custom classes on outermost html element of Widgets</a></li>
+        <li><a href="http://localhost:8521/dateinput/">Date Input Widget</a></li>
+        <li><a href="http://localhost:8521/dateparts/">Date Parts Widget</a></li>
+        <li><a href="http://localhost:8521/datetimeinput/">DateTime Input Widget</a></li>
+        <li><a href="http://localhost:8521/deferred_schema_bindings/">Deferred Schema Bindings</a></li>
+        <li><a href="http://localhost:8521/delayed_richtext/">Delayed Rich Text Widget</a></li>
+        <li><a href="http://localhost:8521/readonly_value_nonvalidation/">Dont Validate Readonly Fields</a></li>
+        <li><a href="http://localhost:8521/edit/">Edit Form</a></li>
+        <li><a href="http://localhost:8521/fielddefaults/">Field Defaults</a></li>
+        <li><a href="http://localhost:8521/file/">File Upload Widget</a></li>
+        <li><a href="http://localhost:8521/hidden_field/">Hidden Field Widget</a></li>
+        <li><a href="http://localhost:8521/hiddenmissing/">Hidden, Missing Widget Representing an Integer</a></li>
+        <li><a href="http://localhost:8521/interfield/">Inter-Field Validation</a></li>
+        <li><a href="http://localhost:8521/i18n/">Internationalization</a></li>
+        <li><a href="http://localhost:8521/mapping/">Mapping Widget</a></li>
+        <li><a href="http://localhost:8521/money_input/">Money Input</a></li>
+        <li><a href="http://localhost:8521/multiple_error_messages_mapping/">Multiple Error Messages For a Single Widget (Mapping)</a></li>
+        <li><a href="http://localhost:8521/multiple_error_messages_seq/">Multiple Error Messages For a Single Widget (Sequence)</a></li>
+        <li><a href="http://localhost:8521/multiple_forms/">Multiple Forms on the Same Page</a></li>
+        <li><a href="http://localhost:8521/nonrequiredfields/">Non-Required Fields</a></li>
+        <li><a href="http://localhost:8521/nonrequired_number_fields/">Non-Required Number Fields</a></li>
+        <li><a href="http://localhost:8521/password/">Password Widget</a></li>
+        <li><a href="http://localhost:8521/pyramid_csrf_demo/">Pyramid CSRF Demo (using schema binding)</a></li>
+        <li><a href="http://localhost:8521/radiochoice/">Radio Choice Widget</a></li>
+        <li><a href="http://localhost:8521/radiochoice_int/">Radio Choice Widget (with int values)</a></li>
+        <li><a href="http://localhost:8521/readonly_sequence_of_mappings/">Read-Only Sequence of Mappings</a></li>
+        <li><a href="http://localhost:8521/require_one_or_another/">Require One Field or Another</a></li>
+        <li><a href="http://localhost:8521/richtext/">Rich Text Widget</a></li>
+        <li><a href="http://localhost:8521/richtext_i18n/">Rich Text Widget (internationalized)</a></li>
+        <li><a href="http://localhost:8521/select/">Select Widget</a></li>
+        <li><a href="http://localhost:8521/select_integer/">Select Widget (with Integer values)</a></li>
+        <li><a href="http://localhost:8521/select_with_default/">Select Widget (with default)</a></li>
+        <li><a href="http://localhost:8521/select_with_deferred/">Select Widget (with deferred choices and default)</a></li>
+        <li><a href="http://localhost:8521/select_with_multiple/">Select Widget (with mulitple)</a></li>
+        <li><a href="http://localhost:8521/select_with_optgroup_and_label_attributes/">Select Widget (with optgroup and label attributes)</a></li>
+        <li><a href="http://localhost:8521/select_with_optgroup/">Select Widget (with optgroup)</a></li>
+        <li><a href="http://localhost:8521/select_with_size/">Select Widget (with size)</a></li>
+        <li><a href="http://localhost:8521/select_with_unicode/">Select Widget (with unicode)</a></li>
+        <li><a href="http://localhost:8521/sequence_orderable/">Sequence (of Mappings) with Ordering Enabled</a></li>
+        <li><a href="http://localhost:8521/sequence_with_prototype_that_has_no_name/">Sequence With Prototype that Has No Name</a></li>
+        <li><a href="http://localhost:8521/sequence_of_autocompletes/">Sequence of Autocomplete Widgets</a></li>
+        <li><a href="http://localhost:8521/sequence_of_constrained_len/">Sequence of Constrained Min and Max Lengths</a></li>
+        <li><a href="http://localhost:8521/sequence_of_dateinputs/">Sequence of Date Inputs</a></li>
+        <li><a href="http://localhost:8521/sequence_of_defaulted_selects/">Sequence of Defaulted Selects</a></li>
+        <li><a href="http://localhost:8521/sequence_of_defaulted_selects_with_initial_item/">Sequence of Defaulted Selects (With Initial Item)</a></li>
+        <li><a href="http://localhost:8521/sequence_of_fileuploads/">Sequence of File Upload Widgets</a></li>
+        <li><a href="http://localhost:8521/sequence_of_fileuploads_with_initial_item/">Sequence of File Upload Widgets (With Initial Item)</a></li>
+        <li><a href="http://localhost:8521/sequence_of_i18n/">Sequence of I18N</a></li>
+        <li><a href="http://localhost:8521/sequence_of_mappings/">Sequence of Mapping Widgets</a></li>
+        <li><a href="http://localhost:8521/sequence_of_mappings_with_initial_item/">Sequence of Mapping Widgets (With Initial Item)</a></li>
+        <li><a href="http://localhost:8521/sequence_of_masked_textinputs/">Sequence of Masked Text Inputs</a></li>
+        <li><a href="http://localhost:8521/sequence_of_radiochoices/">Sequence of Radio Choice Widgets</a></li>
+        <li><a href="http://localhost:8521/sequence_of_richtext/">Sequence of Rich Text Widgets</a></li>
+        <li><a href="http://localhost:8521/sequence_of_sequences/">Sequence of Sequence Widgets</a></li>
+        <li><a href="http://localhost:8521/textareacsv/">Text Area CSV Widget</a></li>
+        <li><a href="http://localhost:8521/textarea/">Text Area Widget</a></li>
+        <li><a href="http://localhost:8521/textinputcsv/">Text Input CSV Widget</a></li>
+        <li><a href="http://localhost:8521/text_input_masks/">Text Input Masks</a></li>
+        <li><a href="http://localhost:8521/textinput/">Text Input Widget</a></li>
+        <li><a href="http://localhost:8521/textinput_with_css_class/">Text Input Widget with CSS Class</a></li>
+        <li><a href="http://localhost:8521/timeinput/">Time Input</a></li>
+        <li><a href="http://localhost:8521/unicodeeverywhere/">Unicode Everywhere</a></li>
+        <li><a href="http://localhost:8521/widget_adapter/">Widget Adapter</a></li>
+      </ul>
+    </div>
+    <div class="body">
+      <div>
+    <h1>Checkbox Choice Widget</h1>
+    <div id="form"><form
+  id="deform"
+  method="POST"
+  enctype="multipart/form-data"
+  accept-charset="utf-8" class="deform"
+  >
+
+  <fieldset class="deformFormFieldset">
+
+    
+
+    <input type="hidden" name="_charset_" />
+    <input type="hidden" name="__formid__" value="deform"/>
+    
+
+    
+
+    <ul>
+<li class="field  "
+    title=""
+    id="item-deformField1">
+
+  <!-- mapping_item -->
+
+  <label
+         class="desc"
+         title=""
+         for="deformField1"
+         >Pepper<span class="req"
+                        id="req-deformField1">*</span>
+  </label>
+
+  
+<input type="hidden" name="__start__" value="pepper:sequence"/>
+<ul class="deformSet">
+  
+    
+      <li class="deformSet-item">
+        <label for="deformField1">
+        <input
+               type="checkbox"
+               name="checkbox"
+               value="habanero"
+               id="deformField1"/>Habanero
+        </label>
+      </li>
+    
+  
+  
+    
+      <li class="deformSet-item">
+        <label for="deformField1-1">
+        <input
+               type="checkbox"
+               name="checkbox"
+               value="jalapeno"
+               id="deformField1-1"/>Jalapeno
+        </label>
+      </li>
+    
+  
+  
+    
+      <li class="deformSet-item">
+        <label for="deformField1-2">
+        <input
+               type="checkbox"
+               name="checkbox"
+               value="chipotle"
+               id="deformField1-2"/>Chipotle
+        </label>
+      </li>
+    
+  
+</ul>
+<input type="hidden" name="__end__" value="pepper:sequence"/>
+
+
+
+
+  
+
+  <!-- /mapping_item -->
+
+</li>
+</ul>
+
+
+    <ul>
+
+      <li class="buttons">
+        
+          <button
+              id="deformsubmit"
+              name="submit"
+              type="submit"
+              class="btnText submit "
+              value="submit">
+            <span>Submit</span>
+          </button>
+        
+      </li>
+
+    </ul>
+
+  </fieldset>
+
+
+
+</form>
+</div>
+    <h1>Captured</h1>
+    <div id="captured">None</div>
+    <h1>Code <a href="/allcode?start=1206&amp;end=1222#line-1206"
+               ><small>(show in context)</small></a>
+    </h1>
+    <div class="highlight"><pre>    <span class="nd">@view_config</span><span class="p">(</span><span class="n">renderer</span><span class="o">=</span><span class="s">&#39;templates/form.pt&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s">&#39;checkboxchoice&#39;</span><span class="p">)</span>
+    <span class="nd">@demonstrate</span><span class="p">(</span><span class="s">&#39;Checkbox Choice Widget&#39;</span><span class="p">)</span>
+    <span class="k">def</span> <span class="nf">checkboxchoice</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">choices</span> <span class="o">=</span> <span class="p">((</span><span class="s">&#39;habanero&#39;</span><span class="p">,</span> <span class="s">&#39;Habanero&#39;</span><span class="p">),</span>
+                   <span class="p">(</span><span class="s">&#39;jalapeno&#39;</span><span class="p">,</span> <span class="s">&#39;Jalapeno&#39;</span><span class="p">),</span>
+                   <span class="p">(</span><span class="s">&#39;chipotle&#39;</span><span class="p">,</span> <span class="s">&#39;Chipotle&#39;</span><span class="p">))</span>
+
+        <span class="k">class</span> <span class="nc">Schema</span><span class="p">(</span><span class="n">colander</span><span class="o">.</span><span class="n">Schema</span><span class="p">):</span>
+            <span class="n">pepper</span> <span class="o">=</span> <span class="n">colander</span><span class="o">.</span><span class="n">SchemaNode</span><span class="p">(</span>
+                <span class="n">colander</span><span class="o">.</span><span class="n">Set</span><span class="p">(),</span>
+                <span class="n">widget</span><span class="o">=</span><span class="n">deform</span><span class="o">.</span><span class="n">widget</span><span class="o">.</span><span class="n">CheckboxChoiceWidget</span><span class="p">(</span><span class="n">values</span><span class="o">=</span><span class="n">choices</span><span class="p">),</span>
+                <span class="n">validator</span><span class="o">=</span><span class="n">colander</span><span class="o">.</span><span class="n">Length</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+                <span class="p">)</span>
+        <span class="n">schema</span> <span class="o">=</span> <span class="n">Schema</span><span class="p">()</span>
+        <span class="n">form</span> <span class="o">=</span> <span class="n">deform</span><span class="o">.</span><span class="n">Form</span><span class="p">(</span><span class="n">schema</span><span class="p">,</span> <span class="n">buttons</span><span class="o">=</span><span class="p">(</span><span class="s">&#39;submit&#39;</span><span class="p">,))</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">render_form</span><span class="p">(</span><span class="n">form</span><span class="p">)</span>
+</pre></div>
+
+  </div>
+    </div>
+  </body>
+
+</html>
+

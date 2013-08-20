@@ -1,0 +1,33 @@
+{"messages": [
+    {
+        "type": "error",
+        "lastLine": 158,
+        "lastColumn": 65,
+        "firstColumn": 5,
+        "message": "Element “input” not allowed as child of element “ul” in this context. (Suppressing further errors from this subtree.)",
+        "extract": "et\"> \n    <input type=\"hidden\" name=\"__start__\" value=\"pepper:rename\"/>\n    \n",
+        "hiliteStart": 10,
+        "hiliteLength": 61
+    },
+    {
+        "type": "error",
+        "lastLine": 195,
+        "lastColumn": 63,
+        "firstColumn": 5,
+        "message": "Element “input” not allowed as child of element “ul” in this context. (Suppressing further errors from this subtree.)",
+        "extract": "\n    \n    <input type=\"hidden\" name=\"__end__\" value=\"pepper:rename\"/>\n</ul>",
+        "hiliteStart": 10,
+        "hiliteLength": 59
+    },
+    {
+        "type": "error",
+        "lastLine": 152,
+        "firstLine": 148,
+        "lastColumn": 10,
+        "firstColumn": 3,
+        "message": "The “for” attribute of the “label” element must refer to a form control.",
+        "extract": "em -->\n\n  <label\n         class=\"desc\"\n         title=\"Select a Pepper\"\n         for=\"deformField1\"\n         >Choose",
+        "hiliteStart": 10,
+        "hiliteLength": 100
+    }
+]}
