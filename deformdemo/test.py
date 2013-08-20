@@ -48,7 +48,7 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
         self.assertTrue(browser.is_text_present("Pepper"))
-        self.assertFalse(browser.is_checked("deformField1-0"))
+        self.assertFalse(browser.is_checked("deformField1"))
         self.assertFalse(browser.is_checked("deformField1-1"))
         self.assertFalse(browser.is_checked("deformField1-2"))
         self.assertEqual(browser.get_text('css=.req'), '*')
@@ -63,7 +63,7 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         error_node = 'css=#error-deformField1'
         self.assertEqual(browser.get_text(error_node),
                          'Shorter than minimum length 1')
-        self.assertFalse(browser.is_checked("deformField1-0"))
+        self.assertFalse(browser.is_checked("deformField1"))
         self.assertFalse(browser.is_checked("deformField1-1"))
         self.assertFalse(browser.is_checked("deformField1-2"))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
@@ -71,11 +71,11 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
     def test_submit_one_checked(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
-        browser.click("deformField1-0")
+        browser.click("deformField1")
         browser.click("submit")
         browser.wait_for_page_to_load("30000")
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_checked("deformField1-0"))
+        self.assertTrue(browser.is_checked("deformField1"))
         captured = browser.get_text('css=#captured')
         self.assertTrue(captured in (
             "{'pepper': set([u'habanero'])}", # py2
@@ -85,13 +85,13 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
     def test_submit_three_checked(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
-        browser.click("deformField1-0")
+        browser.click("deformField1")
         browser.click("deformField1-1")
         browser.click("deformField1-2")
         browser.click("submit")
         browser.wait_for_page_to_load("30000")
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_checked("deformField1-0"))
+        self.assertTrue(browser.is_checked("deformField1"))
         self.assertTrue(browser.is_checked("deformField1-1"))
         self.assertTrue(browser.is_checked("deformField1-2"))
         captured = browser.get_text('css=#captured')
@@ -1166,7 +1166,7 @@ class RadioChoiceWidgetTests(Base, unittest.TestCase):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
         self.assertTrue(browser.is_text_present("Pepper"))
-        self.assertFalse(browser.is_checked("deformField1-0"))
+        self.assertFalse(browser.is_checked("deformField1"))
         self.assertFalse(browser.is_checked("deformField1-1"))
         self.assertFalse(browser.is_checked("deformField1-2"))
         self.assertEqual(browser.get_text('css=.req'), '*')
@@ -1180,7 +1180,7 @@ class RadioChoiceWidgetTests(Base, unittest.TestCase):
         self.assertTrue(browser.get_text('css=.errorMsgLbl'))
         error_node = 'css=#error-deformField1'
         self.assertEqual(browser.get_text(error_node), 'Required')
-        self.assertFalse(browser.is_checked("deformField1-0"))
+        self.assertFalse(browser.is_checked("deformField1"))
         self.assertFalse(browser.is_checked("deformField1-1"))
         self.assertFalse(browser.is_checked("deformField1-2"))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
@@ -1188,11 +1188,11 @@ class RadioChoiceWidgetTests(Base, unittest.TestCase):
     def test_submit_one_checked(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
-        browser.click("deformField1-0")
+        browser.click("deformField1")
         browser.click("submit")
         browser.wait_for_page_to_load("30000")
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_checked("deformField1-0"))
+        self.assertTrue(browser.is_checked("deformField1"))
         self.assertSimilarRepr(
             browser.get_text('css=#captured'),
             "{'pepper': u'habanero'}")
@@ -1202,11 +1202,11 @@ class RadioChoiceWidgetIntTests(RadioChoiceWidgetTests):
     def test_submit_one_checked(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
-        browser.click("deformField1-0")
+        browser.click("deformField1")
         browser.click("submit")
         browser.wait_for_page_to_load("30000")
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_checked("deformField1-0"))
+        self.assertTrue(browser.is_checked("deformField1"))
         self.assertSimilarRepr(
             browser.get_text('css=#captured'),
             "{'pepper': 0}")
@@ -2855,7 +2855,7 @@ class CssClassesOnTheOutermostHTMLElement(Base, unittest.TestCase):
         browser.wait_for_page_to_load("30000")
         self.assertTrue(browser.is_element_present('css=form > fieldset > ul > li.field.top_level_mapping_widget_custom_class'))
         self.assertTrue(browser.is_element_present('css=[title=SequenceWidget] > .deformSeq > ul > li.sequenced_widget_custom_class'))
-        self.assertTrue(browser.is_element_present('css=[title=MappingWidget] > fieldset > ul > li.mapped_widget_custom_class'))
+        self.assertTrue(browser.is_element_present('css=[title=MappingWidget] > fieldset > ul.mapping > li > ul > li.mapped_widget_custom_class'))
         
 
 if __name__ == '__main__':

@@ -1,7 +1,4 @@
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
-"http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html xmlns="http://www.w3.org/1999/xhtml"
-      metal:define-macro="master"
+<html metal:define-macro="master"
       tal:define="app_url request.application_url;
                   static app_url + '/static'">
 
@@ -12,8 +9,8 @@
     <!-- Meta Tags -->
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
     <!-- CSS -->
-    <link rel="stylesheet" href="${app_url}/static_demo/fonts/nobile/stylesheet.css" type="text/css" media="screen" charset="utf-8" />
-    <link rel="stylesheet" href="${app_url}/static_demo/fonts/neuton/stylesheet.css" type="text/css" media="screen" charset="utf-8" />
+    <link rel="stylesheet" href="${app_url}/static_demo/fonts/nobile/stylesheet.css" type="text/css" media="screen" />
+    <link rel="stylesheet" href="${app_url}/static_demo/fonts/neuton/stylesheet.css" type="text/css" media="screen" />
     <link rel="stylesheet" href="${app_url}/static_demo/pylons.css" type="text/css" />
     <link rel="stylesheet" href="${app_url}/static_demo/deformdemo.css" type="text/css" />
     <link rel="stylesheet" href="${app_url}/pygments.css" type="text/css" />
