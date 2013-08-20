@@ -2855,7 +2855,7 @@ class CssClassesOnTheOutermostHTMLElement(Base, unittest.TestCase):
         browser.wait_for_page_to_load("30000")
         self.assertTrue(browser.is_element_present('css=form > fieldset > ul > li.field.top_level_mapping_widget_custom_class'))
         self.assertTrue(browser.is_element_present('css=[title=SequenceWidget] > .deformSeq > ul > li.sequenced_widget_custom_class'))
-        self.assertTrue(browser.is_element_present('css=[title=MappingWidget] > fieldset > ul > li.mapped_widget_custom_class'))
+        self.assertTrue(browser.is_element_present('css=[title=MappingWidget] > fieldset > ul.mapping > li > ul > li.mapped_widget_custom_class'))
         
 
 if __name__ == '__main__':
