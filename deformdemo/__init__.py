@@ -112,7 +112,6 @@ class DeformDemo(object):
             'start':start,
             'end':end,
             'demos':self.get_demos(),
-            'showmenu':True,
             'title':self.get_title(),
             'css_links':reqts['css'],
             'js_links':reqts['js'],
@@ -148,7 +147,7 @@ class DeformDemo(object):
         formatter = HtmlFormatter(linenos='table', lineanchors='line',
                                   hl_lines=hl_lines)
         html = highlight(code, PythonLexer(), formatter)
-        return {'code':html, 'showmenu':False}
+        return {'code':html, 'demos':self.get_demos()}
 
     def get_title(self):
         # gross hack; avert your eyes
@@ -168,7 +167,6 @@ class DeformDemo(object):
     def index(self):
         return {
             'demos':self.get_demos(),
-            'showmenu':False,
             }
 
     def get_demos(self):
@@ -1483,7 +1481,6 @@ class DeformDemo(object):
             'code': code,
             'start':start,
             'demos':self.get_demos(),
-            'showmenu':True,
             'end':end,
             'title':'Multiple Forms on the Same Page',
             }
