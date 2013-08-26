@@ -6,6 +6,7 @@ capabilities and which provides a functional test suite  """
 import inspect
 import sys
 import csv
+import pprint
 
 try:
     from StringIO import StringIO
@@ -43,6 +44,7 @@ from translationstring import TranslationStringFactory
 
 _ = TranslationStringFactory('deform')
 css = HtmlFormatter().get_style_defs('.highlight')
+formatter = HtmlFormatter(nowrap=True)
 
 def translator(term):
     return get_localizer(get_current_request()).translate(term)
@@ -98,10 +100,14 @@ class DeformDemo(object):
 
         reqts = form.get_widget_resources()
 
+        captured = highlight(pprint.pformat(captured, width=1),
+                             PythonLexer(),
+                             formatter)
+
         # values passed to template for rendering
         return {
             'form':html,
-            'captured':repr(captured),
+            'captured': captured,
             'code': code,
             'start':start,
             'end':end,
@@ -119,7 +125,6 @@ class DeformDemo(object):
         code = ''.join(lines)
         if not PY3:
             code = unicode(code, 'utf-8')
-        formatter = HtmlFormatter()
         return highlight(code, PythonLexer(), formatter), start, end
 
     @view_config(name='thanks.html')
