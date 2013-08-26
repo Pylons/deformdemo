@@ -8,7 +8,7 @@
         <meta name="viewport"
               content="width=device-width, initial-scale=1.0">
         <title>
-            Deform Demo Site
+            Deform 2 Demo Site
         </title>
 
         <link rel="stylesheet" href="${app_url}/pygments.css"
@@ -55,7 +55,7 @@
 
     <div class="navbar navbar-default" role="navigation">
         <div class="container">
-            <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-info-sign"></span> Deform Demo</a>
+            <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-info-sign"></span> Deform 2 Demo</a>
         </div>
     </div>
 
