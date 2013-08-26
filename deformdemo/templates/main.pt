@@ -14,6 +14,12 @@
         <link rel="stylesheet" href="${app_url}/pygments.css"
               type="text/css"/>
 
+        <style type="text/css">
+           .linenodiv pre {
+             word-break: normal;
+           }
+        </style>
+
         <!-- CSS -->
         <link rel="stylesheet"
               href="${request.static_url('deform:static/css/bootstrap.min.css')}"

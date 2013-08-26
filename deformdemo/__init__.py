@@ -43,8 +43,8 @@ import colander
 from translationstring import TranslationStringFactory
 
 _ = TranslationStringFactory('deform')
-css = HtmlFormatter().get_style_defs('.highlight')
 formatter = HtmlFormatter(nowrap=True)
+css = formatter.get_style_defs()
 
 def translator(term):
     return get_localizer(get_current_request()).translate(term)
@@ -145,6 +145,7 @@ class DeformDemo(object):
         code = open(inspect.getsourcefile(self.__class__), 'r').read()
         code = code.decode('utf-8')
         formatter = HtmlFormatter(linenos='table', lineanchors='line',
+                                  cssclass="hightlight ",
                                   hl_lines=hl_lines)
         html = highlight(code, PythonLexer(), formatter)
         return {'code':html, 'demos':self.get_demos()}

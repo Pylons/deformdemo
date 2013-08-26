@@ -20,12 +20,12 @@
 
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title">Code <a href="/allcode?start=${start}&amp;end=${end}#line-${start}"
-               ><small>(click to show in context)</small></a>
+        <h3 class="panel-title">Code <a href="/allcode?start=${start}&amp;end=${end}#line-${start}"><small>
+        (click to show in context)</small></a>
         </h3>
       </div>
       <div class="panel-body highlight">
-        <pre style="border: none" tal:content="structure code"/>
+        <pre style="border: none; background-color: #FFF" tal:content="structure code"/>
       </div>
     </div>
   </div>
