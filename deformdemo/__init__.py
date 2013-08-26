@@ -70,7 +70,7 @@ class DeformDemo(object):
         self.macros = get_renderer('templates/main.pt').implementation().macros
 
     def render_form(self, form, appstruct=colander.null, submitted='submit',
-                    success=None, readonly=False):
+                    success=None, readonly=False, is_i18n=False):
 
         captured = None
 
@@ -97,6 +97,7 @@ class DeformDemo(object):
             return Response(html)
 
         code, start, end = self.get_code(2)
+        locale_name = get_locale_name(self.request)
 
         reqts = form.get_widget_resources()
 
@@ -111,6 +112,8 @@ class DeformDemo(object):
             'code': code,
             'start':start,
             'end':end,
+            'is_i18n':is_i18n,
+            'locale': locale_name,
             'demos':self.get_demos(),
             'title':self.get_title(),
             'css_links':reqts['css'],
@@ -288,7 +291,7 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
-    @view_config(renderer='templates/translated_form.pt',
+    @view_config(renderer='templates/form.pt',
                  name='richtext_i18n')
     @demonstrate('Rich Text Widget (internationalized)')
     def richtext_i18n(self):
@@ -304,7 +307,7 @@ class DeformDemo(object):
                 default=locale_name)
         schema = Schema()
         form = deform.Form(schema, buttons=('submit',))
-        return self.render_form(form)
+        return self.render_form(form, is_i18n=True)
 
     @view_config(renderer='templates/form.pt', name='delayed_richtext')
     @demonstrate('Rich Text Widget (delayed)')
@@ -582,7 +585,7 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
-    @view_config(renderer='templates/translated_form.pt',
+    @view_config(renderer='templates/form.pt',
                  name='sequence_of_i18n')
     @demonstrate('Sequence of I18N')
     def sequence_of_i18n(self):
@@ -607,7 +610,7 @@ class DeformDemo(object):
         schema = Schema()
         form = deform.Form(schema,
                            buttons=[deform.Button('submit', _('Submit'))])
-        return self.render_form(form)
+        return self.render_form(form, is_i18n=True)
 
     @view_config(renderer='templates/form.pt', name='sequence_of_richtext')
     @demonstrate('Sequence of Rich Text Widgets')
@@ -1275,9 +1278,7 @@ class DeformDemo(object):
             buttons=[deform.Button('submit', _('Submit'))],
             )
 
-        d = self.render_form(form)
-        d.update({'is_i18n': True, 'locale': locale_name})
-        return d
+        return self.render_form(form, is_i18n=True)
 
     @view_config(renderer='templates/form.pt', name='hidden_field')
     @demonstrate('Hidden Widget')
