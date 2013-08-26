@@ -1,17 +1,12 @@
 <div metal:use-macro="view.macros['master']">
   <div metal:fill-slot="main">
-    <h1>Deform Demo</h1>
-    <h3>
-      <a href="http://docs.pylonsproject.org/projects/deform/dev/">Deform</a> is an HTML
-      form generation system.  Each link below demonstrates a
-      capability.
-    </h3>
+    <div class="page-header">
+      <h1><a href="http://docs.pylonsproject.org/projects/deform/dev/">Deform</a> is an HTML
+          form generation system. <small>Each link on the left demonstrates a capability</small>
+      </h1>
+    </div>
 
-    <ul>
-      <li tal:repeat="(title, name) demos"><a href="${name}/">${title}</a></li>
-    </ul>
-
-    <div>
+    <div class="well">
 
       <p>
         This demo is written using <a
