@@ -2,7 +2,7 @@
   <div metal:fill-slot="main">
     <div class="page-header">
       <h1><a href="http://docs.pylonsproject.org/projects/deform/dev/">Deform</a> is an HTML
-          form generation system. <small>Each link on the left demonstrates a capability</small>
+        form generation system. <br/><small>Each link on the left demonstrates a capability</small>
       </h1>
     </div>
 
