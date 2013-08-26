@@ -1249,7 +1249,7 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         return self.render_form(form)
 
-    @view_config(renderer='templates/translated_form.pt', name='i18n')
+    @view_config(renderer='templates/form.pt', name='i18n')
     @demonstrate('Internationalization')
     def i18n(self):
         minmax = {'min':1, 'max':10}
@@ -1275,7 +1275,9 @@ class DeformDemo(object):
             buttons=[deform.Button('submit', _('Submit'))],
             )
 
-        return self.render_form(form)
+        d = self.render_form(form)
+        d.update({'is_i18n': True, 'locale': locale_name})
+        return d
 
     @view_config(renderer='templates/form.pt', name='hidden_field')
     @demonstrate('Hidden Widget')
