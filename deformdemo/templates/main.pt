@@ -1,7 +1,7 @@
 <metal:block define-macro="master">
     <!DOCTYPE html>
     <html tal:define="app_url request.application_url;
-                  static app_url + '/static'">
+                      static app_url + '/static'">
 
     <head>
         <meta charset="utf-8"/>
