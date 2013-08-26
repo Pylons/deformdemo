@@ -190,7 +190,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='textinput_with_css_class')
-    @demonstrate('Text Input Widget with CSS Class')
+    @demonstrate('Text Input Widget (with CSS class)')
     def textinput_with_css_class(self):
         css_widget = deform.widget.TextInputWidget(
             size=60, css_class='deformWidgetWithStyle')
@@ -237,7 +237,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='autocomplete_remote_input')
-    @demonstrate('Autocomplete Input Widget with Remote Data Source')
+    @demonstrate('Autocomplete Input Widget (with Remote Data Source)')
     def autocomplete_remote_input(self):
         widget = deform.widget.AutocompleteInputWidget(
             size=60,
@@ -303,7 +303,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='delayed_richtext')
-    @demonstrate('Delayed Rich Text Widget')
+    @demonstrate('Rich Text Widget (delayed)')
     def delayed_richtext(self):
         class Schema(colander.Schema):
             text = colander.SchemaNode(
@@ -341,7 +341,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='checkbox_with_label')
-    @demonstrate('Checkbox with Label')
+    @demonstrate('Checkbox Widget (with Label)')
     def checkbox_with_label(self):
         class Schema(colander.Schema):
             want = colander.SchemaNode(
@@ -419,7 +419,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='checkedinput_withmask')
-    @demonstrate('Checked Input Widget (With Input Mask)')
+    @demonstrate('Checked Input Widget (with Input Mask)')
     def checkedinput_withmask(self):
         widget = deform.widget.CheckedInputWidget(
             subject='SSN',
@@ -650,7 +650,7 @@ class DeformDemo(object):
 
     @view_config(renderer='templates/form.pt',
               name='sequence_of_fileuploads_with_initial_item')
-    @demonstrate('Sequence of File Upload Widgets (With Initial Item)')
+    @demonstrate('Sequence of File Upload Widgets (with Initial Item)')
     def sequence_of_fileuploads_with_initial_item(self):
         class Sequence(colander.SequenceSchema):
             upload = colander.SchemaNode(
@@ -681,7 +681,7 @@ class DeformDemo(object):
 
     @view_config(renderer='templates/form.pt',
               name='sequence_of_mappings_with_initial_item')
-    @demonstrate('Sequence of Mapping Widgets (With Initial Item)')
+    @demonstrate('Sequence of Mapping Widgets (with Initial Item)')
     def sequence_of_mappings_with_initial_item(self):
         class Person(colander.Schema):
             name = colander.SchemaNode(colander.String())
@@ -698,7 +698,7 @@ class DeformDemo(object):
 
     @view_config(renderer='templates/form.pt',
               name='readonly_sequence_of_mappings')
-    @demonstrate('Read-Only Sequence of Mappings')
+    @demonstrate('Sequence of Mappings (read-only)')
     def readonly_sequence_of_mappings(self):
         class Person(colander.Schema):
             name = colander.SchemaNode(colander.String())
@@ -762,7 +762,7 @@ class DeformDemo(object):
 
     @view_config(renderer='templates/form.pt',
                  name='sequence_of_defaulted_selects_with_initial_item')
-    @demonstrate('Sequence of Defaulted Selects (With Initial Item)')
+    @demonstrate('Sequence of Defaulted Selects (with Initial Item)')
     def sequence_of_defaulted_selects_with_initial_item(self):
         # See https://github.com/Pylons/deformdemo/pull/15
         choices = (('habanero', 'Habanero'), ('jalapeno', 'Jalapeno'),
@@ -1221,7 +1221,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='checkboxchoice2')
-    @demonstrate('Checkbox Choice Widget 2')
+    @demonstrate('Checkbox Choice Widget (with required field)')
     def checkboxchoice2(self):
         choices = (('habanero', 'Habanero'),
                    ('jalapeno', 'Jalapeno'),
@@ -1274,7 +1274,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='hidden_field')
-    @demonstrate('Hidden Field Widget')
+    @demonstrate('Hidden Widget')
     def hidden_field(self):
         class Schema(colander.Schema):
             sneaky = colander.SchemaNode(
@@ -1287,7 +1287,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='hiddenmissing')
-    @demonstrate('Hidden, Missing Widget Representing an Integer')
+    @demonstrate('Hidden Widget (missing, representing an Integer)')
     def hiddenmissing(self):
         class Schema(colander.Schema):
             title = colander.SchemaNode(
