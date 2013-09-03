@@ -104,3 +104,5 @@ Contributors
 
 - Chris McDonough, 2011/02/16
 - Domen Kožar, 2012/11/10
+- Charlie Clark, 2013/09/03
+- Calvin Hendryx-Parker, 2013/09/03
