@@ -30,8 +30,10 @@ from pyramid.i18n import get_locale_name
 from pyramid.response import Response
 from pyramid.session import UnencryptedCookieSessionFactoryConfig
 from pyramid.threadlocal import get_current_request
-from pyramid.url import resource_url
-from pyramid.view import view_config
+from pyramid.view import (
+    view_config,
+    view_defaults,
+    )
 
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
@@ -64,6 +66,7 @@ class demonstrate(object):
         method.demo = self.title
         return method
 
+@view_defaults(route_name='deformdemo')
 class DeformDemo(object):
     def __init__(self, request):
         self.request = request
@@ -174,14 +177,17 @@ class DeformDemo(object):
             }
 
     def get_demos(self):
-        context = self.request.context
-        base_url = resource_url(context, self.request)
         def predicate(value):
             if getattr(value, 'demo', None) is not None:
                 return True
         demos = inspect.getmembers(self, predicate)
-        return sorted([(method.demo, base_url + name) for name, method in \
-                       demos])
+        L = []
+        for name, method in demos:
+            url = self.request.resource_url(
+                self.request.root, name, route_name='deformdemo')
+            L.append((method.demo, url))
+        L.sort()
+        return L
 
     @view_config(renderer='templates/form.pt', name='textinput')
     @demonstrate('Text Input Widget')
@@ -264,7 +270,10 @@ class DeformDemo(object):
         widget = deform.widget.AutocompleteInputWidget(
             size=60,
             min_length=1,
-            values='/autocomplete_input_values')
+            values=self.request.route_path(
+                'deformdemo', traverse=('autocomplete_input_values',)
+                )
+            )
 
         class Schema(colander.Schema):
             text = colander.SchemaNode(
@@ -583,7 +592,11 @@ class DeformDemo(object):
         """
 
         def succeed():
-            location = self.request.application_url + '/thanks.html'
+            location = self.request.resource_url(
+                self.request.root,
+                'thanks.html',
+                route_name='deformdemo',
+                )
             # To appease jquery 1.6+, we need to return something that smells
             # like HTML, or we get a "Node cannot be inserted at the
             # specified point in the hierarchy" Javascript error.  This didn't
@@ -2076,8 +2089,9 @@ def main(global_config, **settings):
     config = Configurator(settings=settings, session_factory=session_factory)
     renderer = config.maybe_dotted(renderer)
     deform.Form.set_default_renderer(renderer)
-    config.add_static_view('static', 'deform:static')
+    config.add_static_view('static_deform', 'deform:static')
     config.add_static_view('static_demo', 'deformdemo:static')
+    config.add_route('deformdemo', '*traverse')
     config.add_translation_dirs(
         'colander:locale',
         'deform:locale',

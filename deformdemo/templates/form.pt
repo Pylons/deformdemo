@@ -30,7 +30,7 @@
 
     <div class="panel panel-default">
       <div class="panel-heading">
-        <h3 class="panel-title">Code <a href="/allcode?start=${start}&amp;end=${end}#line-${start}"><small>
+        <h3 class="panel-title">Code <a href="${request.resource_url(request.root, 'allcode', query={'start':start, 'end':end}, anchor='line-%s' % start)}"><small>
         (click to show in context)</small></a>
         </h3>
       </div>

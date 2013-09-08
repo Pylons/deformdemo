@@ -1,7 +1,7 @@
 <metal:block define-macro="master">
-    <!DOCTYPE html>
+  <!DOCTYPE html>
     <html tal:define="app_url request.application_url;
-                      static app_url + '/static'">
+                      static request.static_url('deform:static/')">
 
     <head>
         <meta charset="utf-8"/>
@@ -11,7 +11,8 @@
             Deform 2 Demo Site
         </title>
 
-        <link rel="stylesheet" href="${app_url}/pygments.css"
+        <link rel="stylesheet" 
+              href="${request.resource_url(request.root, 'pygments.css', route_name='deformdemo')}"
               type="text/css"/>
 
         <style type="text/css">
@@ -34,7 +35,7 @@
         <script src="${request.static_url('deform:static/scripts/bootstrap.min.js')}"
                 type="text/javascript"></script>
         <tal:block repeat="reqt js_links|[]">
-          <script type="text/javascript" src="${static}/${reqt}"></script>
+          <script type="text/javascript" src="${static}${reqt}"></script>
         </tal:block>
 
     </head>
