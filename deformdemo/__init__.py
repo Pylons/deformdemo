@@ -1233,7 +1233,7 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
 
         return self.render_form(form)
-
+    
     @view_config(renderer='templates/form.pt', name='select_with_size')
     @demonstrate('Select Widget (with size)')
     def select_with_size(self):
@@ -1435,6 +1435,28 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='select2')
+    @demonstrate('Select2 Widget (Single)')
+    def select2(self):
+
+        choices = (
+            ('', '- Select -'),
+            ('habanero', 'Habanero'),
+            ('jalapeno', 'Jalapeno'),
+            ('chipotle', 'Chipotle')
+            )
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.Select2Widget(values=choices)
+                )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form)
+    
     @view_config(renderer='templates/form.pt', name='checkboxchoice')
     @demonstrate('Checkbox Choice Widget')
     def checkboxchoice(self):
