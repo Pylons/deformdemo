@@ -1436,7 +1436,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='select2')
-    @demonstrate('Select2 Widget (Single)')
+    @demonstrate('Select2 Widget')
     def select2(self):
 
         choices = (
@@ -1456,7 +1456,53 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
 
         return self.render_form(form)
+
+    @view_config(renderer='templates/form.pt', name='select2_with_multiple')
+    @demonstrate('Select2 Widget (with mulitple)')
+    def select2_with_multiple(self):
+
+        choices = (('habanero', 'Habanero'),
+                   ('jalapeno', 'Jalapeno'),
+                   ('chipotle', 'Chipotle'))
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.Set(),
+                widget=deform.widget.Select2Widget(
+                    values=choices,
+                    multiple=True)
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form)
     
+    @view_config(renderer='templates/form.pt', name='select2_with_optgroup')
+    @demonstrate('Select2 Widget (with optgroup)')
+    def select2_with_optgroup(self):
+        from deform.widget import OptGroup
+
+        choices = (
+               ('', 'Select your favorite musician'),
+               OptGroup('Guitarists',
+                        ('page', 'Jimmy Page'),
+                        ('hendrix', 'Jimi Hendrix')),
+               OptGroup('Drummers',
+                       ('cobham', 'Billy Cobham'),
+                       ('bonham', 'John Bonham')))
+
+        class Schema(colander.Schema):
+            musician = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.Select2Widget(values=choices)
+                )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='checkboxchoice')
     @demonstrate('Checkbox Choice Widget')
     def checkboxchoice(self):
