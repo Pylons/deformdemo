@@ -33,6 +33,11 @@ def _getFile(name='test.py'):
     filename = os.path.split(path)[-1]
     return path, filename
 
+BASE_PATH = ''
+
+def test_url(url):
+    return BASE_PATH + url
+
 class Base(object):
     urepl = re.compile('\\bu(\'.*?\'|".*?")')
 
@@ -43,7 +48,7 @@ class Base(object):
         self.assertEqual(ar, br)
 
 class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
-    url = "/checkboxchoice/"
+    url = test_url("/checkboxchoice/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -101,7 +106,7 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
             ))
 
 class CheckboxWidgetTests(Base, unittest.TestCase):
-    url = "/checkbox/"
+    url = test_url("/checkbox/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -128,7 +133,7 @@ class CheckboxWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_text('css=#captured'), "{'want': True}")
     
 class CheckedInputWidgetTests(Base, unittest.TestCase):
-    url = "/checkedinput/"
+    url = test_url("/checkedinput/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -195,7 +200,7 @@ class CheckedInputWidgetTests(Base, unittest.TestCase):
                                "{'email': u'user@example.com'}")
 
 class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
-    url = "/checkedinput_withmask/"
+    url = test_url("/checkedinput_withmask/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -239,7 +244,7 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
         
 
 class CheckedPasswordWidgetTests(Base, unittest.TestCase):
-    url = "/checkedpassword/"
+    url = test_url("/checkedpassword/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -337,7 +342,7 @@ class CheckedPasswordWidgetTests(Base, unittest.TestCase):
             'password')
 
 class DateInputWidgetTests(Base, unittest.TestCase):
-    url = '/dateinput/'
+    url = test_url('/dateinput/')
     def test_render_default(self):
         browser.open(self.url)
         self.assertTrue(browser.is_text_present("Date"))
@@ -387,7 +392,7 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField1'), '2010-05-06')
 
 class DateTimeInputWidgetTests(Base, unittest.TestCase):
-    url = '/datetimeinput/'
+    url = test_url('/datetimeinput/')
     def test_render_default(self):
         browser.open(self.url)
         self.assertTrue(browser.is_text_present("Date Time"))
@@ -437,7 +442,7 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField1'), '2010-05-07 12:00:00')
 
 class DatePartsWidgetTests(Base, unittest.TestCase):
-    url = '/dateparts/'
+    url = test_url('/dateparts/')
     def test_render_default(self):
         browser.open(self.url)
         self.assertTrue(browser.is_text_present("Date"))
@@ -527,7 +532,7 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField1-day'), '01')
 
 class EditFormTests(Base, unittest.TestCase):
-    url = "/edit/"
+    url = test_url("/edit/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -581,7 +586,7 @@ class EditFormTests(Base, unittest.TestCase):
              "'name': u'name'}}"))
 
 class MappingWidgetTests(Base, unittest.TestCase):
-    url = "/mapping/"
+    url = test_url("/mapping/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -682,7 +687,7 @@ class MappingWidgetTests(Base, unittest.TestCase):
              "'name': u'name'}}"))
 
 class FieldDefaultTests(Base, unittest.TestCase):
-    url = "/fielddefaults/"
+    url = test_url("/fielddefaults/")
     def test_render_default(self):
         browser.open(self.url)
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
@@ -732,7 +737,7 @@ class FieldDefaultTests(Base, unittest.TestCase):
             u"{'album': u'def', 'song': u'ghi', 'artist': u'abc'}")
 
 class NonRequiredFieldTests(Base, unittest.TestCase):
-    url = "/nonrequiredfields/"
+    url = test_url("/nonrequiredfields/")
     def test_render_default(self):
         browser.open(self.url)
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
@@ -784,7 +789,7 @@ class NonRequiredFieldTests(Base, unittest.TestCase):
             u"{'required': u'abc', 'notrequired': u'def'}")
 
 class HiddenFieldWidgetTests(Base, unittest.TestCase):
-    url = "/hidden_field/"
+    url = test_url("/hidden_field/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -804,7 +809,7 @@ class HiddenFieldWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_text('css=#captured'), "{'sneaky': True}")
 
 class HiddenmissingTests(Base, unittest.TestCase):
-    url = "/hiddenmissing/"
+    url = test_url("/hiddenmissing/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -829,7 +834,7 @@ class HiddenmissingTests(Base, unittest.TestCase):
             "{'number': <colander.null>, 'title': u'yup'}")
 
 class FileUploadTests(Base, unittest.TestCase):
-    url = "/file/"
+    url = test_url("/file/")
 
     def test_render_default(self):
         browser.open(self.url)
@@ -891,7 +896,7 @@ class FileUploadTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('css=#deformField1-uid'), uid)
 
 class InterFieldValidationTests(Base, unittest.TestCase):
-    url=  "/interfield/"
+    url=  test_url("/interfield/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -972,7 +977,7 @@ class InterFieldValidationTests(Base, unittest.TestCase):
                          {'name': 'abc', 'title': 'abcdef'})
 
 class InternationalizationTests(Base, unittest.TestCase):
-    url = "/i18n/"
+    url = test_url("/i18n/")
     def test_render_default(self):
         browser.open(self.url)
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
@@ -1119,7 +1124,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         self.assertEqual(button, u'отправить')
 
 class PasswordWidgetTests(Base, unittest.TestCase):
-    url = "/password/"
+    url = test_url("/password/")
     def test_render_default(self):
         browser.open(self.url)
         self.assertTrue(browser.is_text_present("Password"))
@@ -1161,7 +1166,7 @@ class PasswordWidgetTests(Base, unittest.TestCase):
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
 
 class RadioChoiceWidgetTests(Base, unittest.TestCase):
-    url = "/radiochoice/"
+    url = test_url("/radiochoice/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1198,7 +1203,7 @@ class RadioChoiceWidgetTests(Base, unittest.TestCase):
             "{'pepper': u'habanero'}")
 
 class RadioChoiceWidgetIntTests(RadioChoiceWidgetTests):
-    url = "/radiochoice_int/"
+    url = test_url("/radiochoice_int/")
     def test_submit_one_checked(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1212,7 +1217,7 @@ class RadioChoiceWidgetIntTests(RadioChoiceWidgetTests):
             "{'pepper': 0}")
 
 class ReadOnlySequenceOfMappingTests(Base, unittest.TestCase):
-    url = "/readonly_sequence_of_mappings/"
+    url = test_url("/readonly_sequence_of_mappings/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1222,7 +1227,7 @@ class ReadOnlySequenceOfMappingTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_text('deformField10'), '25')
 
 class SequenceOfRadioChoices(Base, unittest.TestCase):
-    url = "/sequence_of_radiochoices/"
+    url = test_url("/sequence_of_radiochoices/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1255,7 +1260,7 @@ class SequenceOfRadioChoices(Base, unittest.TestCase):
                          {'peppers': ['habanero', 'jalapeno']})
 
 class SequenceOfDefaultedSelects(Base, unittest.TestCase):
-    url = "/sequence_of_defaulted_selects/"
+    url = test_url("/sequence_of_defaulted_selects/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1286,7 +1291,7 @@ class SequenceOfDefaultedSelects(Base, unittest.TestCase):
                          {'peppers': ['jalapeno', 'jalapeno']})
 
 class SequenceOfDefaultedSelectsWithInitialItem(Base, unittest.TestCase):
-    url = "/sequence_of_defaulted_selects_with_initial_item/"
+    url = test_url("/sequence_of_defaulted_selects_with_initial_item/")
     def test_submit_none_added(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1311,7 +1316,7 @@ class SequenceOfDefaultedSelectsWithInitialItem(Base, unittest.TestCase):
                          {'peppers': ['jalapeno', 'jalapeno']})
 
 class SequenceOfFileUploads(Base, unittest.TestCase):
-    url = "/sequence_of_fileuploads/"
+    url = test_url("/sequence_of_fileuploads/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1436,7 +1441,7 @@ class SequenceOfFileUploads(Base, unittest.TestCase):
         self.assertFalse("'filename': u'%s" % filename in captured)
 
 class SequenceOfFileUploadsWithInitialItem(Base, unittest.TestCase):
-    url = "/sequence_of_fileuploads_with_initial_item/"
+    url = test_url("/sequence_of_fileuploads_with_initial_item/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1491,7 +1496,7 @@ class SequenceOfFileUploadsWithInitialItem(Base, unittest.TestCase):
         self.assertTrue(uid in captured)
 
 class SequenceOfMappings(Base, unittest.TestCase):
-    url = "/sequence_of_mappings/"
+    url = test_url("/sequence_of_mappings/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1592,7 +1597,7 @@ class SequenceOfMappings(Base, unittest.TestCase):
 
 
 class SequenceOfMappingsWithInitialItem(Base, unittest.TestCase):
-    url = "/sequence_of_mappings_with_initial_item/"
+    url = test_url("/sequence_of_mappings_with_initial_item/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1655,7 +1660,7 @@ class SequenceOfMappingsWithInitialItem(Base, unittest.TestCase):
                          )
 
 class SequenceOfAutocompletes(Base, unittest.TestCase):
-    url = '/sequence_of_autocompletes/'
+    url = test_url('/sequence_of_autocompletes/')
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1710,7 +1715,7 @@ class SequenceOfAutocompletes(Base, unittest.TestCase):
             "{'texts': [u'bar', u'baz']}")
 
 class SequenceOfDateInputs(Base, unittest.TestCase):
-    url = '/sequence_of_dateinputs/'
+    url = test_url('/sequence_of_dateinputs/')
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1758,7 +1763,7 @@ class SequenceOfDateInputs(Base, unittest.TestCase):
         self.assertTrue(captured.startswith(u"{'dates': [datetime.date"))
 
 class SequenceOfConstrainedLength(Base, unittest.TestCase):
-    url = '/sequence_of_constrained_len/'
+    url = test_url('/sequence_of_constrained_len/')
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1800,7 +1805,7 @@ class SequenceOfConstrainedLength(Base, unittest.TestCase):
             "{'names': [u'hello2', u'hello3', u'hello4', u'hello5']}")
         
 class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
-    url = "/sequence_of_richtext/"
+    url = test_url("/sequence_of_richtext/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1850,7 +1855,7 @@ class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
             "{'texts': [u'<p>yo</p>']}")
 
 class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
-    url = "/sequence_of_masked_textinputs/"
+    url = test_url("/sequence_of_masked_textinputs/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -1902,7 +1907,7 @@ class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
             )
 
 class SelectWidgetTests(Base, unittest.TestCase):
-    url = "/select/"
+    url = test_url("/select/")
     submit_selected_captured = (
         "{'pepper': u'habanero'}",
         "{'pepper': 'habanero'}",
@@ -1947,17 +1952,17 @@ class SelectWidgetTests(Base, unittest.TestCase):
         self.assertTrue(captured in self.submit_selected_captured)
 
 class SelectWidgetWithSizeTests(SelectWidgetTests):
-    url = "/select_with_size/"
+    url = test_url("/select_with_size/")
 
 class SelectWidgetWithUnicodeTests(SelectWidgetTests):
-    url = '/select_with_unicode/'
+    url = test_url('/select_with_unicode/')
     submit_selected_captured = (
         u"{'pepper': '\u30cf\u30d0\u30cd\u30ed'}",
         u"{'pepper': u'\\u30cf\\u30d0\\u30cd\\u30ed'}",
         )
 
 class SelectWidgetMultipleTests(Base, unittest.TestCase):
-    url = '/select_with_multiple/'
+    url = test_url('/select_with_multiple/')
 
     def test_submit_selected(self):
         browser.open(self.url)
@@ -1977,7 +1982,7 @@ class SelectWidgetMultipleTests(Base, unittest.TestCase):
         self.assertEqual(captured, captured_default)
 
 class SelectWidgetIntegerTests(Base, unittest.TestCase):
-    url = '/select_integer/'
+    url = test_url('/select_integer/')
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2019,7 +2024,7 @@ class SelectWidgetIntegerTests(Base, unittest.TestCase):
             "{'number': 0}")
 
 class SelectWidgetWithOptgroupTest(Base, unittest.TestCase):
-    url = "/select_with_optgroup/"
+    url = test_url("/select_with_optgroup/")
 
     def test_render_default(self):
         browser.open(self.url)
@@ -2050,7 +2055,7 @@ class SelectWidgetWithOptgroupTest(Base, unittest.TestCase):
         self.assertTrue(captured in expected)
 
 class SelectWidgetWithOptgroupAndLabelTest(SelectWidgetWithOptgroupTest):
-    url = "/select_with_optgroup_and_label_attributes/"
+    url = test_url("/select_with_optgroup_and_label_attributes/")
 
     def test_render_default(self):
         browser.open(self.url)
@@ -2077,7 +2082,7 @@ class SelectWidgetWithOptgroupAndLabelTest(SelectWidgetWithOptgroupTest):
         self.assertTrue(captured in expected)
 
 class TextInputWidgetTests(Base, unittest.TestCase):
-    url = "/textinput/"
+    url = test_url("/textinput/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2113,7 +2118,7 @@ class TextInputWidgetTests(Base, unittest.TestCase):
             "{'text': u'hello'}")
 
 class MoneyInputWidgetTests(Base, unittest.TestCase):
-    url = "/money_input/"
+    url = test_url("/money_input/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2146,14 +2151,14 @@ class MoneyInputWidgetTests(Base, unittest.TestCase):
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
 
 class TextInputWithCssClassWidgetTests(Base, unittest.TestCase):
-    url = "/textinput_with_css_class/"
+    url = test_url("/textinput_with_css_class/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
         self.assertTrue(browser.is_element_present('css=.deformWidgetWithStyle'))
 
 class AutocompleteInputWidgetTests(Base, unittest.TestCase):
-    url = "/autocomplete_input/"
+    url = test_url("/autocomplete_input/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2197,7 +2202,7 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
             "{'text': u'bar'}")
 
 class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
-    url = "/autocomplete_remote_input/"
+    url = test_url("/autocomplete_remote_input/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2243,7 +2248,7 @@ class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
             "{'text': u'two'}")
 
 class TextAreaWidgetTests(Base, unittest.TestCase):
-    url = "/textarea/"
+    url = test_url("/textarea/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2281,7 +2286,7 @@ class TextAreaWidgetTests(Base, unittest.TestCase):
             )
 
 class DelayedRichTextWidgetTests(Base, unittest.TestCase):
-    url = "/delayed_richtext/"
+    url = test_url("/delayed_richtext/")
 
     def test_submit_filled(self):
         browser.open(self.url)
@@ -2302,7 +2307,7 @@ class DelayedRichTextWidgetTests(Base, unittest.TestCase):
             )
 
 class RichTextWidgetTests(Base, unittest.TestCase):
-    url = "/richtext/"
+    url = test_url("/richtext/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2338,7 +2343,7 @@ class RichTextWidgetTests(Base, unittest.TestCase):
             )
 
 class RichTextWidgetInternationalized(Base, unittest.TestCase):
-    url = "/richtext_i18n/?_LOCALE_=ru"
+    url = test_url("/richtext_i18n/?_LOCALE_=ru")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2347,7 +2352,7 @@ class RichTextWidgetInternationalized(Base, unittest.TestCase):
                          u"Полужирный (Ctrl+B)")
 
 class UnicodeEverywhereTests(Base, unittest.TestCase):
-    url = "/unicodeeverywhere/"
+    url = test_url("/unicodeeverywhere/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2379,7 +2384,7 @@ class UnicodeEverywhereTests(Base, unittest.TestCase):
             )
 
 class SequenceOfSequences(Base, unittest.TestCase):
-    url = "/sequence_of_sequences/"
+    url = test_url("/sequence_of_sequences/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2420,7 +2425,7 @@ class SequenceOfSequences(Base, unittest.TestCase):
         self.assertFalse(browser.is_element_present('dom=document.forms[0].name[1]'))
 
 class SequenceOrderable(Base, unittest.TestCase):
-    url = "/sequence_orderable/"
+    url = test_url("/sequence_orderable/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2496,7 +2501,7 @@ class SequenceOrderable(Base, unittest.TestCase):
         ]})
 
 class TextAreaCSVWidgetTests(Base, unittest.TestCase):
-    url = "/textareacsv/"
+    url = test_url("/textareacsv/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2555,7 +2560,7 @@ class TextAreaCSVWidgetTests(Base, unittest.TestCase):
         self.assertEqual(captured, "None")
 
 class TextInputCSVWidgetTests(Base, unittest.TestCase):
-    url = "/textinputcsv/"
+    url = test_url("/textinputcsv/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2610,10 +2615,10 @@ class TextInputCSVWidgetTests(Base, unittest.TestCase):
         self.assertEqual(captured, "None")
 
 class WidgetAdapterTests(TextAreaCSVWidgetTests):
-    url = "/widget_adapter/"
+    url = test_url("/widget_adapter/")
 
 class MultipleFormsTests(Base, unittest.TestCase):
-    url = "/multiple_forms/"
+    url = test_url("/multiple_forms/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2649,7 +2654,7 @@ class MultipleFormsTests(Base, unittest.TestCase):
             )
 
 class RequireOneFieldOrAnotherTests(Base, unittest.TestCase):
-    url = "/require_one_or_another/"
+    url = test_url("/require_one_or_another/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2686,7 +2691,7 @@ class RequireOneFieldOrAnotherTests(Base, unittest.TestCase):
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
 
 class AjaxFormTests(Base, unittest.TestCase):
-    url = "/ajaxform/"
+    url = test_url("/ajaxform/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2760,7 +2765,7 @@ class AjaxFormTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_text('css=#thanks'), 'Thanks!')
 
 class RedirectingAjaxFormTests(AjaxFormTests):
-    url = "/ajaxform_redirect/"
+    url = test_url("/ajaxform_redirect/")
     def test_submit_success(self):
         import time
         browser.open(self.url)
@@ -2779,7 +2784,7 @@ class RedirectingAjaxFormTests(AjaxFormTests):
         self.assertTrue(location.endswith('thanks.html'))
 
 class TextInputMaskTests(Base, unittest.TestCase):
-    url = "/text_input_masks/"
+    url = test_url("/text_input_masks/")
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2824,7 +2829,7 @@ class TextInputMaskTests(Base, unittest.TestCase):
             )
 
 class MultipleErrorMessagesInMappingTest(Base, unittest.TestCase):
-    url = "/multiple_error_messages_mapping/"
+    url = test_url("/multiple_error_messages_mapping/")
     def test_it(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2836,7 +2841,7 @@ class MultipleErrorMessagesInMappingTest(Base, unittest.TestCase):
         self.assertEqual(browser.get_text('error-deformField1-2'), 'Error 3')
 
 class MultipleErrorMessagesInSequenceTest(Base, unittest.TestCase):
-    url = "/multiple_error_messages_seq/"
+    url = test_url("/multiple_error_messages_seq/")
     def test_it(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
@@ -2849,7 +2854,7 @@ class MultipleErrorMessagesInSequenceTest(Base, unittest.TestCase):
         self.assertEqual(browser.get_text('error-deformField3-2'), 'Error 3')
 
 class CssClassesOnTheOutermostHTMLElement(Base, unittest.TestCase):
-    url = "/custom_classes_on_outermost_html_element/"
+    url = test_url("/custom_classes_on_outermost_html_element/")
     def test_it(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
