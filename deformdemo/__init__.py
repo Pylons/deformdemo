@@ -324,8 +324,7 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
-    @view_config(renderer='templates/form.pt',
-                 name='richtext_i18n')
+    @view_config(renderer='templates/form.pt', name='richtext_i18n')
     @demonstrate('Rich Text Widget (internationalized)')
     def richtext_i18n(self):
 

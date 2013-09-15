@@ -85,10 +85,13 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
         self.assertTrue(browser.is_checked("deformField1-0"))
         captured = browser.get_text('css=#captured')
-        self.assertTrue(captured in (
-            "{'pepper': set([u'habanero'])}", # py2
-            "{'pepper': {'habanero'}}"        # py3
-            ))
+        # normalize between py2 and py3
+        captured = captured.replace('set([', '{')
+        captured = captured.replace('])','}')
+        self.assertSimilarRepr(
+            captured,
+            u"{'pepper': {'habanero'}}",
+            )
 
     def test_submit_three_checked(self):
         browser.open(self.url)
@@ -103,10 +106,13 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         self.assertTrue(browser.is_checked("deformField1-1"))
         self.assertTrue(browser.is_checked("deformField1-2"))
         captured = browser.get_text('css=#captured')
-        self.assertTrue(captured in (
-            u"{'pepper': set([u'habanero', u'chipotle', u'jalapeno'])}", # py2
-            u"{'pepper': {'habanero', 'chipotle', 'jalapeno'}}",         # py3
-            ))
+        # normalize between py2 and py3
+        captured = captured.replace('set([', '{')
+        captured = captured.replace('])','}')
+        self.assertSimilarRepr(
+            captured,
+            u"{'pepper': {'chipotle', 'habanero', 'jalapeno'}}",
+            )
 
 class CheckboxWidgetTests(Base, unittest.TestCase):
     url = test_url("/checkbox/")
