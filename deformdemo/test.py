@@ -41,13 +41,17 @@ def test_url(url):
 
 class Base(object):
     urepl = re.compile('\\bu(\'.*?\'|".*?")')
+    setrepl = re.compile('set\(\[(.*)\]\)')
 
     def assertSimilarRepr(self, a, b):
-        # ignore u'' and and \n in reprs
-        ar = self.urepl.sub(r'\1', a)
-        ar = ar.replace('\n', '')
-        br = self.urepl.sub(r'\1', b)
-        br = br.replace('\n', '')
+        # ignore u'' and and \n in reprs, normalize set syntax between py2 and
+        # py3
+        ar = a.replace('\n', '')
+        ar = self.urepl.sub(r'\1', ar)
+        ar = self.setrepl.sub(r'{\1}', ar)
+        br = b.replace('\n', '')
+        br = self.urepl.sub(r'\1', br)
+        br = self.setrepl.sub(r'{\1}', br)
         self.assertEqual(ar, br)
 
 class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
@@ -85,9 +89,6 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
         self.assertTrue(browser.is_checked("deformField1-0"))
         captured = browser.get_text('css=#captured')
-        # normalize between py2 and py3
-        captured = captured.replace('set([', '{')
-        captured = captured.replace('])','}')
         self.assertSimilarRepr(
             captured,
             u"{'pepper': {'habanero'}}",
@@ -106,9 +107,6 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         self.assertTrue(browser.is_checked("deformField1-1"))
         self.assertTrue(browser.is_checked("deformField1-2"))
         captured = browser.get_text('css=#captured')
-        # normalize between py2 and py3
-        captured = captured.replace('set([', '{')
-        captured = captured.replace('])','}')
         self.assertSimilarRepr(
             captured,
             u"{'pepper': {'chipotle', 'habanero', 'jalapeno'}}",
