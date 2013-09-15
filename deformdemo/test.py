@@ -989,7 +989,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField1'), '')
         self.assertEqual(browser.get_text('css=#captured'), 'None')
         label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10*')
+        self.assertEqual(label, 'A number between 1 and 10')
         button = browser.get_text('css=button')
         self.assertEqual(button, 'Submit')
 
@@ -999,7 +999,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
         self.assertTrue(browser.is_element_present('css=#req-deformField1'))
         label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10*')
+        self.assertEqual(label, 'A number between 1 and 10')
         button = browser.get_text('css=button')
         self.assertEqual(button, 'Submit')
     
@@ -1009,7 +1009,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
         self.assertTrue(browser.is_element_present('css=#req-deformField1'))
         label = browser.get_text('css=label')
-        self.assertEqual(label, u'Число между 1 и 10*')
+        self.assertEqual(label, u'Число между 1 и 10')
         button = browser.get_text('css=button')
         self.assertEqual(button, u'отправить')
     
@@ -1019,14 +1019,12 @@ class InternationalizationTests(Base, unittest.TestCase):
         browser.click('submit')
         browser.wait_for_page_to_load("30000")
         errorMsgLbl = browser.get_text('css=.errorMsgLbl')
-        errorMsg = browser.get_text('css=.errorMsg')
         self.assertEqual(errorMsgLbl,
                          'There was a problem with your submission')
-        self.assertEqual(errorMsg, 'Errors have been highlighted below')
         error_node = 'css=#error-deformField1'
         self.assertEqual(browser.get_text(error_node), 'Required')
         label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10*')
+        self.assertEqual(label, 'A number between 1 and 10')
         button = browser.get_text('css=button')
         self.assertEqual(button, 'Submit')
 
@@ -1036,15 +1034,12 @@ class InternationalizationTests(Base, unittest.TestCase):
         browser.click('submit')
         browser.wait_for_page_to_load("30000")
         errorMsgLbl = browser.get_text('css=.errorMsgLbl')
-        errorMsg = browser.get_text('css=.errorMsg')
         self.assertEqual(errorMsgLbl,
                          u'Данные которые вы предоставили содержат ошибку')
-        self.assertEqual(errorMsg,
-                         u'Ниже вы найдёте подробное описание ошибок')
         error_node = 'css=#error-deformField1'
         self.assertEqual(browser.get_text(error_node), u'Требуется')
         label = browser.get_text('css=label')
-        self.assertEqual(label, u'Число между 1 и 10*')
+        self.assertEqual(label, u'Число между 1 и 10')
         button = browser.get_text('css=button')
         self.assertEqual(button, u'отправить')
 
@@ -1055,15 +1050,13 @@ class InternationalizationTests(Base, unittest.TestCase):
         browser.click('submit')
         browser.wait_for_page_to_load("30000")
         errorMsgLbl = browser.get_text('css=.errorMsgLbl')
-        errorMsg = browser.get_text('css=.errorMsg')
         self.assertEqual(errorMsgLbl,
                          'There was a problem with your submission')
-        self.assertEqual(errorMsg, 'Errors have been highlighted below')
         error_node = 'css=#error-deformField1'
         self.assertEqual(browser.get_text(error_node),
                          '0 is less than minimum value 1')
         label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10*')
+        self.assertEqual(label, 'A number between 1 and 10')
         button = browser.get_text('css=button')
         self.assertEqual(button, 'Submit')
 
@@ -1074,16 +1067,13 @@ class InternationalizationTests(Base, unittest.TestCase):
         browser.click('submit')
         browser.wait_for_page_to_load("30000")
         errorMsgLbl = browser.get_text('css=.errorMsgLbl')
-        errorMsg = browser.get_text('css=.errorMsg')
         self.assertEqual(errorMsgLbl,
                          u'Данные которые вы предоставили содержат ошибку')
-        self.assertEqual(errorMsg,
-                         u'Ниже вы найдёте подробное описание ошибок')
         error_node = 'css=#error-deformField1'
         self.assertEqual(browser.get_text(error_node),
                          u'0 меньше чем 1')
         label = browser.get_text('css=label')
-        self.assertEqual(label, u'Число между 1 и 10*')
+        self.assertEqual(label, u'Число между 1 и 10')
         button = browser.get_text('css=button')
         self.assertEqual(button, u'отправить')
 
@@ -1094,15 +1084,13 @@ class InternationalizationTests(Base, unittest.TestCase):
         browser.click('submit')
         browser.wait_for_page_to_load("30000")
         errorMsgLbl = browser.get_text('css=.errorMsgLbl')
-        errorMsg = browser.get_text('css=.errorMsg')
         self.assertEqual(errorMsgLbl,
                          'There was a problem with your submission')
-        self.assertEqual(errorMsg, 'Errors have been highlighted below')
         error_node = 'css=#error-deformField1'
         self.assertEqual(browser.get_text(error_node),
                          '11 is greater than maximum value 10')
         label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10*')
+        self.assertEqual(label, 'A number between 1 and 10')
         button = browser.get_text('css=button')
         self.assertEqual(button, 'Submit')
 
@@ -1113,16 +1101,13 @@ class InternationalizationTests(Base, unittest.TestCase):
         browser.click('submit')
         browser.wait_for_page_to_load("30000")
         errorMsgLbl = browser.get_text('css=.errorMsgLbl')
-        errorMsg = browser.get_text('css=.errorMsg')
         self.assertEqual(errorMsgLbl,
                          u'Данные которые вы предоставили содержат ошибку')
-        self.assertEqual(errorMsg,
-                         u'Ниже вы найдёте подробное описание ошибок')
         error_node = 'css=#error-deformField1'
         self.assertEqual(browser.get_text(error_node),
                          u'11 больше чем 10')
         label = browser.get_text('css=label')
-        self.assertEqual(label, u'Число между 1 и 10*')
+        self.assertEqual(label, u'Число между 1 и 10')
         button = browser.get_text('css=button')
         self.assertEqual(button, u'отправить')
 
