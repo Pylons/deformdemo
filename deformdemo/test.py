@@ -43,9 +43,11 @@ class Base(object):
     urepl = re.compile('\\bu(\'.*?\'|".*?")')
 
     def assertSimilarRepr(self, a, b):
-        # ignore u'' in reprs
+        # ignore u'' and and \n in reprs
         ar = self.urepl.sub(r'\1', a)
+        ar = ar.replace('\n', '')
         br = self.urepl.sub(r'\1', b)
+        br = br.replace('\n', '')
         self.assertEqual(ar, br)
 
 class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
