@@ -1041,7 +1041,7 @@ class DeformDemo(object):
         import datetime
 
         class Schema(colander.Schema):
-            date = colander.SchemaNode(
+            time = colander.SchemaNode(
                 colander.Time(),
                 validator=colander.Range(
                     min=datetime.time(12, 16),
@@ -1053,7 +1053,7 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
         when = datetime.time(14, 35)
 
-        return self.render_form(form, appstruct={'date': when})
+        return self.render_form(form, appstruct={'time': when})
 
     @view_config(renderer='templates/form.pt', name='datetimeinput')
     @demonstrate('DateTime Input Widget')
