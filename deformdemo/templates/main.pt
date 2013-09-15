@@ -15,20 +15,12 @@
               href="${request.resource_url(request.root, 'pygments.css', route_name='deformdemo')}"
               type="text/css"/>
         <link rel="stylesheet" 
-              href="${request.resource_url(request.root, 'static', 'form.css', route_name='deformdemo')}"
+              href="${request.static_url('deform:static/css/form.css')}"
               type="text/css"/>
 
         <style type="text/css">
            .linenodiv pre {
              word-break: normal;
-           }
-           form .required {
-             font-weight: bold;
-           }
-           form .required:after {
-             color: #e32;
-             content: '*';
-             display:inline;
            }
         </style>
 
