@@ -11,7 +11,7 @@ Running the Demo
 
 - Create a virtualenv::
 
-    $ virtualenv2.6 --no-site-packages /path/to/my/venv
+    $ virtualenv2.7 --no-site-packages /path/to/my/venv
 
   Hereafter ``/path/to/my/venv`` will be referred to as $VENV in steps
   below.
