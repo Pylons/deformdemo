@@ -58,6 +58,9 @@ setupkw = dict(
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
+    extras_require = {
+        'testing': ['nose'],
+    },
     entry_points = """\
     [paste.app_factory]
     demo = deformdemo:main

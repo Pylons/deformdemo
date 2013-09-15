@@ -24,9 +24,9 @@ Running the Demo
 
     $ cd deformdemo
 
-- Run ``setup.py develop`` using the virtualenv's ``python`` command::
+- Run ``setup.py dev`` using the virtualenv's ``python`` command::
 
-    $ $VENV/bin/python setup.py develop
+    $ $VENV/bin/python setup.py dev
 
 - While your working directory is still ``deformdemo``, start the demo
   application::
@@ -68,7 +68,7 @@ wise to run these tests before submitting a patch.  Here's how:
 
 - Run the tests::
 
-   $ $VENV/bin/python deformdemo/test.py
+   $ $VENV/bin/nosetests
 
   ``$VENV`` is defined as it was in "Running the Demo" above.
 
