@@ -1972,7 +1972,7 @@ class SelectWidgetMultipleTests(Base, unittest.TestCase):
         captured = browser.get_text('css=#captured')
 
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertSimlarRepr(captured, captured_default)
+        self.assertSimilarRepr(captured, captured_default)
 
 class SelectWidgetIntegerTests(Base, unittest.TestCase):
     url = test_url('/select_integer/')
