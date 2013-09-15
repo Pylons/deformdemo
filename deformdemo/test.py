@@ -2,6 +2,7 @@
 
 import unittest
 import re
+import os
 
 # to run:
 # console 1: java -jar selenium-server.jar
@@ -17,10 +18,13 @@ import re
 
 browser = None
 
+BASE_PATH = os.environ.get('BASE_PATH', '')
+URL = os.environ.get('URL', 'http://localhost:8521/')
+
 def setUpModule():
     from selenium import selenium
     global browser
-    browser = selenium("localhost", 4444, "*chrome", "http://localhost:8521/")
+    browser = selenium("localhost", 4444, "*chrome", URL)
     browser.start()
     return browser
 
@@ -28,12 +32,9 @@ def tearDownModule():
     browser.stop()
 
 def _getFile(name='test.py'):
-    import os
     path = os.path.join(os.path.abspath(os.path.dirname(__file__)), name)
     filename = os.path.split(path)[-1]
     return path, filename
-
-BASE_PATH = ''
 
 def test_url(url):
     return BASE_PATH + url
@@ -56,7 +57,7 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         self.assertFalse(browser.is_checked("deformField1-0"))
         self.assertFalse(browser.is_checked("deformField1-1"))
         self.assertFalse(browser.is_checked("deformField1-2"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
     def test_submit_unchecked(self):
@@ -112,7 +113,7 @@ class CheckboxWidgetTests(Base, unittest.TestCase):
         browser.wait_for_page_to_load("30000")
         self.assertTrue(browser.is_text_present("I Want It!"))
         self.assertFalse(browser.is_checked("deformField1"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
     def test_submit_unchecked(self):
@@ -138,7 +139,7 @@ class CheckedInputWidgetTests(Base, unittest.TestCase):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
         self.assertTrue(browser.is_text_present("Email Address"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
         self.assertEqual(browser.get_value('deformField1'), '')
         self.assertEqual(browser.get_value('deformField1-confirm'), '')
@@ -204,7 +205,7 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
         self.assertEqual(browser.get_value('deformField1'), '###-##-####')
         self.assertEqual(browser.get_value('deformField1-confirm'), '')
@@ -249,7 +250,7 @@ class CheckedPasswordWidgetTests(Base, unittest.TestCase):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
         self.assertTrue(browser.is_text_present("Password"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
         self.assertEqual(browser.get_value('deformField1'), '')
         self.assertEqual(browser.get_value('deformField1-confirm'), '')
@@ -346,7 +347,7 @@ class DateInputWidgetTests(Base, unittest.TestCase):
     def test_render_default(self):
         browser.open(self.url)
         self.assertTrue(browser.is_text_present("Date"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
         self.assertEqual(browser.get_value('deformField1'), '2010-05-05')
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
@@ -396,7 +397,7 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
     def test_render_default(self):
         browser.open(self.url)
         self.assertTrue(browser.is_text_present("Date Time"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
         self.assertEqual(browser.get_value('deformField1'), '2010-05-06 12:00:00')
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
@@ -446,7 +447,7 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
     def test_render_default(self):
         browser.open(self.url)
         self.assertTrue(browser.is_text_present("Date"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
         self.assertEqual(browser.get_value('deformField1'), '')
         self.assertEqual(browser.get_value('deformField1-month'), '')
@@ -1128,7 +1129,7 @@ class PasswordWidgetTests(Base, unittest.TestCase):
     def test_render_default(self):
         browser.open(self.url)
         self.assertTrue(browser.is_text_present("Password"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
         self.assertEqual(browser.get_value('deformField1'), '')
         self.assertEqual(browser.get_attribute('css=#deformField1@type'),
@@ -1141,7 +1142,7 @@ class PasswordWidgetTests(Base, unittest.TestCase):
         browser.click('submit')
         browser.wait_for_page_to_load("30000")
         self.assertTrue(browser.is_text_present("Password"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
         self.assertEqual(browser.get_value('deformField1'), '')
         self.assertEqual(browser.get_attribute('css=#deformField1@type'),
@@ -1174,7 +1175,7 @@ class RadioChoiceWidgetTests(Base, unittest.TestCase):
         self.assertFalse(browser.is_checked("deformField1-0"))
         self.assertFalse(browser.is_checked("deformField1-1"))
         self.assertFalse(browser.is_checked("deformField1-2"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
     def test_submit_unchecked(self):
@@ -1923,7 +1924,7 @@ class SelectWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             options,
             [u'- Select -', u'Habanero', u'Jalapeno', u'Chipotle']) 
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
     def test_submit_default(self):
@@ -1993,7 +1994,7 @@ class SelectWidgetIntegerTests(Base, unittest.TestCase):
         self.assertEqual(
             options,
             [u'- Select -', u'Zero', u'One', u'Two']) 
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
     def test_submit_default(self):
@@ -2037,7 +2038,7 @@ class SelectWidgetWithOptgroupTest(Base, unittest.TestCase):
             options,
             [u'Select your favorite musician',
              u'Jimmy Page', u'Jimi Hendrix', u'Billy Cobham', u'John Bonham']) 
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
         self.assertEqual(int(browser.get_xpath_count('//optgroup')), 2)
 
@@ -2065,7 +2066,7 @@ class SelectWidgetWithOptgroupAndLabelTest(SelectWidgetWithOptgroupTest):
         self.assertEqual(browser.get_selected_index('deformField1'), '0')
         # We cannot test what the options look like because it depends
         # on the browser.
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
         self.assertEqual(int(browser.get_xpath_count('//optgroup')), 2)
 
@@ -2090,7 +2091,7 @@ class TextInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_attribute("deformField1@name"), 'text')
         self.assertEqual(browser.get_attribute("deformField1@type"), 'text')
         self.assertEqual(browser.get_value("deformField1"), '')
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
     def test_submit_empty(self):
@@ -2127,7 +2128,7 @@ class MoneyInputWidgetTests(Base, unittest.TestCase):
                          'greenbacks')
         self.assertEqual(browser.get_attribute("deformField1@type"), 'text')
         self.assertEqual(browser.get_value("deformField1"), '0.00')
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
     def test_submit_empty(self):
@@ -2166,7 +2167,7 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_attribute("deformField1@name"), 'text')
         self.assertEqual(browser.get_attribute("deformField1@type"), 'text')
         self.assertEqual(browser.get_value("deformField1"), '')
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
     def test_submit_empty(self):
@@ -2211,7 +2212,7 @@ class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_attribute("deformField1@name"), 'text')
         self.assertEqual(browser.get_attribute("deformField1@type"), 'text')
         self.assertEqual(browser.get_value("deformField1"), '')
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
     def test_submit_empty(self):
@@ -2257,7 +2258,7 @@ class TextAreaWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_attribute("deformField1@rows"), '10')
         self.assertEqual(browser.get_attribute("deformField1@cols"), '60')
         self.assertEqual(browser.get_value("deformField1"), '')
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
     def test_submit_empty(self):
@@ -2314,7 +2315,7 @@ class RichTextWidgetTests(Base, unittest.TestCase):
         self.assertTrue(browser.is_text_present("Text"))
         self.assertEqual(browser.get_attribute("deformField1@name"), 'text')
         self.assertEqual(browser.get_value("deformField1"), '')
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
     def test_submit_empty(self):
@@ -2511,7 +2512,7 @@ class TextAreaCSVWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_attribute("deformField1@cols"), '60')
         self.assertEqual(browser.get_value("deformField1"),
                          '1,hello,4.5\n2,goodbye,5.5')
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
     def test_submit_default(self):
@@ -2568,7 +2569,7 @@ class TextInputCSVWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_attribute("deformField1@name"), 'csv')
         self.assertEqual(browser.get_value("deformField1"),
                          '1,hello,4.5')
-        self.assertEqual(browser.get_text('css=.req'), '*')
+        self.assertTrue(browser.is_element_present('css=.required'))
         self.assertEqual(browser.get_text('css=#captured'), 'None')
 
     def test_submit_default(self):
