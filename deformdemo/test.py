@@ -36,7 +36,8 @@ def _getFile(name='test.py'):
     filename = os.path.split(path)[-1]
     return path, filename
 
-def test_url(url):
+# appease nosetests by giving a default argument, it thinks this is a test
+def test_url(url=''): 
     return BASE_PATH + url
 
 class Base(object):
@@ -589,8 +590,8 @@ class EditFormTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField4-day'), '09')
         self.assertSimilarRepr(
             browser.get_text('css=#captured'),
-            (u"{'number': 42, 'mapping': {'date': datetime.date(2010, 4, 9), "
-             "'name': u'name'}}"))
+            (u"{'mapping': {'date': datetime.date(2010, 4, 9), "
+             "'name': u'name'}, 'number': 42}"))
 
 class MappingWidgetTests(Base, unittest.TestCase):
     url = test_url("/mapping/")
@@ -690,8 +691,8 @@ class MappingWidgetTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField4-day'), '01')
         self.assertSimilarRepr(
             browser.get_text('css=#captured'),
-            (u"{'number': 1, 'mapping': {'date': datetime.date(2010, 1, 1), "
-             "'name': u'name'}}"))
+            (u"{'mapping': {'date': datetime.date(2010, 1, 1), "
+             "'name': u'name'}, 'number': 1}"))
 
 class FieldDefaultTests(Base, unittest.TestCase):
     url = test_url("/fielddefaults/")
@@ -741,7 +742,7 @@ class FieldDefaultTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField3'), 'ghi')
         self.assertSimilarRepr(
             browser.get_text('css=#captured'),
-            u"{'album': u'def', 'song': u'ghi', 'artist': u'abc'}")
+            u"{'album': u'def', 'artist': u'abc', 'song': u'ghi'}")
 
 class NonRequiredFieldTests(Base, unittest.TestCase):
     url = test_url("/nonrequiredfields/")
@@ -779,7 +780,7 @@ class NonRequiredFieldTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField2'), '')
         self.assertSimilarRepr(
             browser.get_text('css=#captured'),
-            u"{'required': u'abc', 'notrequired': u''}")
+            u"{'notrequired': u'', 'required': u'abc'}")
 
     def test_submit_success_required_and_notrequired_filled(self):
         browser.open(self.url)
@@ -793,7 +794,7 @@ class NonRequiredFieldTests(Base, unittest.TestCase):
         self.assertEqual(browser.get_value('deformField2'), 'def')
         self.assertSimilarRepr(
             browser.get_text('css=#captured'),
-            u"{'required': u'abc', 'notrequired': u'def'}")
+            u"{'notrequired': u'def', 'required': u'abc'}")
 
 class HiddenFieldWidgetTests(Base, unittest.TestCase):
     url = test_url("/hidden_field/")
@@ -1960,7 +1961,7 @@ class SelectWidgetMultipleTests(Base, unittest.TestCase):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
 
-        captured_default = "{'pepper': set([u'habanero', u'chipotle'])}"
+        captured_default = "{'pepper': set([u'chipotle', u'habanero'])}"
 
         browser.add_selection('deformField1', 'index=0')
         browser.add_selection('deformField1', 'index=2')
@@ -1971,7 +1972,7 @@ class SelectWidgetMultipleTests(Base, unittest.TestCase):
         captured = browser.get_text('css=#captured')
 
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(captured, captured_default)
+        self.assertSimlarRepr(captured, captured_default)
 
 class SelectWidgetIntegerTests(Base, unittest.TestCase):
     url = test_url('/select_integer/')
@@ -2678,7 +2679,7 @@ class RequireOneFieldOrAnotherTests(Base, unittest.TestCase):
         captured = browser.get_text('css=#captured')
         self.assertSimilarRepr(
             captured, 
-            u"{'two': u'', 'one': u'one'}"
+            u"{'one': u'one', 'two': u''}"
             )
         self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
 
