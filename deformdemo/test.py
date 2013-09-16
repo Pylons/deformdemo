@@ -1692,12 +1692,12 @@ class SequenceOfAutocompletes(Base, unittest.TestCase):
         browser.click('deformField1-seqAdd')
         added = 'dom=document.forms[0].text'
         self.assertEqual(browser.get_attribute(added + '@class'),
-                         'ui-autocomplete-input')
+                         'form-control  tt-query')
         browser.type(added, 'bar')
         browser.click('deformField1-seqAdd')
         added = 'dom=document.forms[0].text[1]'
         self.assertEqual(browser.get_attribute(added + '@class'),
-                         'ui-autocomplete-input')
+                         'form-control  tt-query')
         browser.type(added, 'baz')
         browser.click("submit")
         browser.wait_for_page_to_load("30000")
