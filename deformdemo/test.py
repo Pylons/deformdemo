@@ -2432,11 +2432,22 @@ class SequenceOrderable(Base, unittest.TestCase):
         browser.click('deformField1-seqAdd') # add one
         # A single item shouldn't have an active reorder button.
         self.assertEqual(int(browser.get_xpath_count(
-            "//span[@class='deformOrderbutton deformOrderbuttonActive']")), 0)
+            "//span[@class='deformOrderbutton close glyphicon "
+            "glyphicon-resize-vertical']")), 1)
+        order1_style = browser.get_attribute(
+            "document.getElementsByClassName('deformOrderbutton')[0]@style")
+        self.assertEqual(order1_style, 'display: none;')
         browser.click('deformField1-seqAdd') # add a second
         # Now there should be 2 active reorder buttons.
         self.assertEqual(int(browser.get_xpath_count(
-            "//span[@class='deformOrderbutton deformOrderbuttonActive']")), 2)
+            "//span[@class='deformOrderbutton close glyphicon "
+            "glyphicon-resize-vertical']")), 2)
+        order1_style = browser.get_attribute(
+            "document.getElementsByClassName('deformOrderbutton')[0]@style")
+        self.assertEqual(order1_style, 'display: block;')
+        order2_style = browser.get_attribute(
+            "document.getElementsByClassName('deformOrderbutton')[1]@style")
+        self.assertEqual(order2_style, ';')
         browser.click('deformField1-seqAdd') # add a third
 
         browser.type("document.forms[0].name[0]", 'Name1')
