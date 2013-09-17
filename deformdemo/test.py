@@ -2792,6 +2792,7 @@ class TextInputMaskTests(Base, unittest.TestCase):
     def test_render_default(self):
         browser.open(self.url)
         browser.wait_for_page_to_load("30000")
+        browser.focus('deformField1')
         self.assertEqual(browser.get_attribute("deformField1@name"), 'ssn')
         self.assertEqual(browser.get_value('deformField1'), '___-__-____')
         self.assertEqual(browser.get_attribute("deformField2@name"), 'date')
@@ -2822,6 +2823,7 @@ class TextInputMaskTests(Base, unittest.TestCase):
             browser.key_press('deformField1', key)
             time.sleep(.005)
         browser.focus('deformField2')
+        time.sleep(1)
         for key in '10102010':
             browser.key_press('deformField2', key)
             time.sleep(.005)
