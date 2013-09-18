@@ -72,7 +72,7 @@ wise to run these tests before submitting a patch.  Here's how:
 
   ``$VENV`` is defined as it was in "Running the Demo" above.
 
-- You will (hopefully) see Chrome pop up in a two-windowed
+- You will (hopefully) see Firefox pop up in a two-windowed
   arrangement, and it will begin to display in quick succession the
   loading of pages in the bottom window and some test output in the
   top window.  The tests will run for a minute or two.
