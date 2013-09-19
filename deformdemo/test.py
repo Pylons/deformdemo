@@ -1074,63 +1074,29 @@ class SequenceOfMappingsTests(Base, unittest.TestCase):
             {'people': [{'name': 'name2', 'age': 26}]})
 
 
-class SequenceOfMappingsWithInitialItem(Base, unittest.TestCase):
+class SequenceOfMappingsWithInitialItemTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_mappings_with_initial_item/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_element_present('css=.deformProto'))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Person')
-        self.assertEqual(browser.get_attribute('css=#deformField6@name'),
-                         'name')
-        self.assertEqual(browser.get_attribute('css=#deformField7@name'),
-                         'age')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue(browser.find_element_by_css_selector('.deformProto'))
+        self.assertEqual(browser.find_element_by_id('deformField1-addtext').text, 'Add Person')
+        self.assertEqual(browser.find_element_by_id('captured').text, 'None')
 
     def test_submit_none_added(self):
-        browser.get(self.url)
-        browser.click("submit")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Person')
-        self.assertEqual(browser.get_text('css=#error-deformField6'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField7'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#captured'), "None")
-        self.assertTrue(browser.is_element_present('css=.has-error'))
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(browser.find_element_by_id('error-deformField6').text, 'Required')
+        self.assertEqual(browser.find_element_by_id('error-deformField7').text, 'Required')
+        self.assertEqual(browser.find_element_by_id('captured').text, 'None')
 
     def test_submit_add_one(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd')
-        browser.type("dom=document.forms[0].name[0]", 'name0')
-        browser.type("dom=document.forms[0].age[0]", '23')
-        browser.type("dom=document.forms[0].name[1]", 'name1')
-        browser.type("dom=document.forms[0].age[1]", '25')
-        browser.click("submit")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Person')
-        self.assertEqual(browser.get_attribute('css=#deformField6@name'),
-                         'name')
-        self.assertEqual(browser.get_attribute('css=#deformField6@value'),
-                         'name0')
-        self.assertEqual(browser.get_attribute('css=#deformField7@name'),
-                         'age')
-        self.assertEqual(browser.get_attribute('css=#deformField7@value'),
-                         '23')
-        self.assertEqual(browser.get_attribute('css=#deformField9@name'),
-                         'name')
-        self.assertEqual(browser.get_attribute('css=#deformField9@value'),
-                         'name1')
-        self.assertEqual(browser.get_attribute('css=#deformField10@name'),
-                         'age')
-        self.assertEqual(browser.get_attribute('css=#deformField10@value'),
-                         '25')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(eval(captured),
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.find_elements_by_xpath('//input[@name="name"]')[0].send_keys('name0')
+        browser.find_elements_by_xpath('//input[@name="name"]')[1].send_keys('name1')
+        browser.find_elements_by_xpath('//input[@name="age"]')[0].send_keys('23')
+        browser.find_elements_by_xpath('//input[@name="age"]')[1].send_keys('25')
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(eval(browser.find_element_by_id('captured').text),
                          {'people': [{'name': 'name0', 'age': 23},
-                                     {'name': 'name1', 'age': 25}]}
-                         )
+                                     {'name': 'name1', 'age': 25}]})
 
 class SequenceOfAutocompletes(Base, unittest.TestCase):
     url = test_url('/sequence_of_autocompletes/')
