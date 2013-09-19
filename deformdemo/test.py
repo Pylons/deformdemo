@@ -805,45 +805,41 @@ class PasswordWidgetTests(Base, unittest.TestCase):
 class RadioChoiceWidgetTests(Base, unittest.TestCase):
     url = test_url("/radiochoice/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present("Pepper"))
-        self.assertFalse(browser.is_checked("deformField1-0"))
-        self.assertFalse(browser.is_checked("deformField1-1"))
-        self.assertFalse(browser.is_checked("deformField1-2"))
-        self.assertEqual(browser.get_text('css=.required'), 'Pepper')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Password' in browser.page_source)
+        self.assertFalse(browser.find_element_by_id('deformField1-0').is_selected())
+        self.assertFalse(browser.find_element_by_id('deformField1-1').is_selected())
+        self.assertFalse(browser.find_element_by_id('deformField1-2').is_selected())
+        self.assertEqual(browser.find_element_by_css_selector('.required').text, 'Choose your pepper')
+        self.assertEqual(browser.find_element_by_id('captured').text, 'None')
 
     def test_submit_unchecked(self):
-        browser.get(self.url)
-        browser.click("submit")
-        self.assertTrue(browser.get_text('css=.has-error'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        self.assertFalse(browser.is_checked("deformField1-0"))
-        self.assertFalse(browser.is_checked("deformField1-1"))
-        self.assertFalse(browser.is_checked("deformField1-2"))
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(browser.find_element_by_id('error-deformField1').text, 'Required')
+        self.assertFalse(browser.find_element_by_id('deformField1-0').is_selected())
+        self.assertFalse(browser.find_element_by_id('deformField1-1').is_selected())
+        self.assertFalse(browser.find_element_by_id('deformField1-2').is_selected())
+        self.assertEqual(browser.find_element_by_id('captured').text, 'None')
 
     def test_submit_one_checked(self):
-        browser.get(self.url)
-        browser.click("deformField1-0")
-        browser.click("submit")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertTrue(browser.is_checked("deformField1-0"))
+        browser.find_element_by_id('deformField1-0').click()
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertTrue(browser.find_element_by_id('deformField1-0').is_selected())
+        self.assertFalse(browser.find_element_by_id('deformField1-1').is_selected())
+        self.assertFalse(browser.find_element_by_id('deformField1-2').is_selected())
         self.assertSimilarRepr(
-            browser.get_text('css=#captured'),
+            browser.find_element_by_id('captured').text,
             "{'pepper': u'habanero'}")
 
 class RadioChoiceWidgetIntTests(RadioChoiceWidgetTests):
     url = test_url("/radiochoice_int/")
     def test_submit_one_checked(self):
-        browser.get(self.url)
-        browser.click("deformField1-0")
-        browser.click("submit")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertTrue(browser.is_checked("deformField1-0"))
+        browser.find_element_by_id('deformField1-0').click()
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertTrue(browser.find_element_by_id('deformField1-0').is_selected())
+        self.assertFalse(browser.find_element_by_id('deformField1-1').is_selected())
+        self.assertFalse(browser.find_element_by_id('deformField1-2').is_selected())
         self.assertSimilarRepr(
-            browser.get_text('css=#captured'),
+            browser.find_element_by_id('captured').text,
             "{'pepper': 0}")
 
 class ReadOnlySequenceOfMappingTests(Base, unittest.TestCase):
