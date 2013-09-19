@@ -995,7 +995,7 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
         self.assertEqual(browser.find_element_by_id('deformField3-filename').text, filename2)
         self.assertRaises(NoSuchElementException, browser.find_element_by_id, 'deformField4-filename')
 
-class SequenceOfFileUploadsWithInitialItem(Base, unittest.TestCase):
+class SequenceOfFileUploadsWithInitialItemTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_fileuploads_with_initial_item/")
     def test_render_default(self):
         from selenium.common.exceptions import NoSuchElementException
@@ -1025,95 +1025,52 @@ class SequenceOfFileUploadsWithInitialItem(Base, unittest.TestCase):
         uid = browser.find_element_by_id('deformField4-uid').get_attribute('value')
         self.assertTrue(uid in browser.find_element_by_id('captured').text)
 
-class SequenceOfMappings(Base, unittest.TestCase):
+class SequenceOfMappingsTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_mappings/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_element_present('css=.deformProto'))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Person')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(browser.find_element_by_id('deformField1-addtext').text, 'Add Person')
+        self.assertEqual(browser.find_element_by_id('captured').text, 'None')
+        self.assertTrue(browser.find_element_by_css_selector('.deformProto'))
 
     def test_submit_none_added(self):
-        browser.get(self.url)
-        browser.click("submit")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Person')
-        self.assertEqual(browser.get_text('css=#captured'), "{'people': []}")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(browser.find_element_by_id('deformField1-addtext').text, 'Add Person')
+        self.assertEqual(browser.find_element_by_id('captured').text, "{'people': []}")
 
     def test_submit_two_unfilled(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.click("submit")
-        self.assertTrue(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_text('css=#error-deformField6'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField7'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField9'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField10'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(browser.find_element_by_id('error-deformField6').text, 'Required')
+        self.assertEqual(browser.find_element_by_id('error-deformField7').text, 'Required')
+        self.assertEqual(browser.find_element_by_id('error-deformField9').text, 'Required')
+        self.assertEqual(browser.find_element_by_id('error-deformField10').text, 'Required')
+        self.assertEqual(browser.find_element_by_id('captured').text, 'None')
 
     def test_submit_complex_interaction(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd') # add one
-        browser.type("name", 'name')
-        browser.type("age", '23')
-        browser.click("submit")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_attribute('deformField6@name'), 'name')
-        self.assertEqual(browser.get_value('deformField6'), 'name')
-        self.assertEqual(browser.get_attribute('deformField7@name'), 'age')
-        self.assertEqual(browser.get_value('deformField7'), '23')
-        captured = browser.get_text('css=#captured')
-        captured = eval(captured)
-        self.assertEqual(captured,
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.find_element_by_id('deformField1').send_keys('abcdef123')
+        browser.find_element_by_xpath('//input[@name="name"]').send_keys('name')
+        browser.find_element_by_xpath('//input[@name="age"]').send_keys('23')
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(eval(browser.find_element_by_id('captured').text),
                          {'people': [{'name': 'name', 'age': 23}]})
 
-        browser.click('deformField1-seqAdd') # add another
-        name1 = 'dom=document.forms[0].name[0]'
-        age1 = 'dom=document.forms[0].age[0]'
-        name2 = 'dom=document.forms[0].name[1]'
-        age2 = 'dom=document.forms[0].age[1]'
-        browser.type(name1, 'name-changed')
-        browser.type(age1, '24')
-        browser.type(name2, 'name2')
-        browser.type(age2, '26')
-        browser.click("submit")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_attribute('deformField6@name'), 'name')
-        self.assertEqual(browser.get_value('deformField6'), 'name-changed')
-        self.assertEqual(browser.get_attribute('deformField7@name'), 'age')
-        self.assertEqual(browser.get_value('deformField7'), '24')
-        self.assertEqual(browser.get_attribute('deformField9@name'), 'name')
-        self.assertEqual(browser.get_value('deformField9'), 'name2')
-        self.assertEqual(browser.get_attribute('deformField10@name'), 'age')
-        self.assertEqual(browser.get_value('deformField10'), '26')
-        captured = browser.get_text('css=#captured')
-        captured = eval(captured)
-
-        self.assertEqual(
-            captured,
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.find_elements_by_xpath('//input[@name="name"]')[0].clear()
+        browser.find_elements_by_xpath('//input[@name="name"]')[0].send_keys('name-changed')
+        browser.find_elements_by_xpath('//input[@name="name"]')[1].send_keys('name2')
+        browser.find_elements_by_xpath('//input[@name="age"]')[0].clear()
+        browser.find_elements_by_xpath('//input[@name="age"]')[0].send_keys('24')
+        browser.find_elements_by_xpath('//input[@name="age"]')[1].send_keys('26')
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(eval(browser.find_element_by_id('captured').text),
             {'people': [{'name': 'name-changed', 'age': 24},
                         {'name': 'name2', 'age': 26}]})
 
-        browser.click('deformField5-close') # remove the first mapping
-        browser.click('submit')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_attribute('deformField6@name'), 'name')
-        self.assertEqual(browser.get_value('deformField6'), 'name2')
-        self.assertEqual(browser.get_attribute('deformField7@name'), 'age')
-        self.assertEqual(browser.get_value('deformField7'), '26')
-
-        captured = browser.get_text('css=#captured')
-        captured = eval(captured)
-
-        self.assertEqual(
-            captured,
+        browser.find_element_by_id("deformField5-close").click() # remove the first mapping
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(eval(browser.find_element_by_id('captured').text),
             {'people': [{'name': 'name2', 'age': 26}]})
 
 
