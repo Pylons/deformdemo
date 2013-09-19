@@ -998,52 +998,32 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
 class SequenceOfFileUploadsWithInitialItem(Base, unittest.TestCase):
     url = test_url("/sequence_of_fileuploads_with_initial_item/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertEqual(browser.get_text('deformField1-addtext'), 'Add Upload')
-        self.assertEqual(browser.get_attribute('deformField3@name'),
-                         'upload')
-        self.assertEqual(browser.get_attribute('deformField3@type'),
-                         'file')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        from selenium.common.exceptions import NoSuchElementException
+        self.assertEqual(browser.find_element_by_id('deformField1-addtext').text, 'Add Upload')
+        self.assertRaises(NoSuchElementException, browser.find_element_by_css_selector, '.has-error')
+        self.assertEqual(browser.find_element_by_id('captured').text, 'None')
 
     def test_submit_none_added(self):
-        browser.get(self.url)
-        browser.click("submit")
-        self.assertTrue(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(browser.find_element_by_id('error-deformField3').text, 'Required')
+        self.assertEqual(browser.find_element_by_id('captured').text, 'None')
 
     def test_upload_one_success(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd')
         path, filename = _getFile()
-        browser.type("dom=document.forms[0].upload[0]", path)
-        browser.type("dom=document.forms[0].upload[1]", path)
-        browser.click("submit")
-
-        self.assertFalse(browser.is_element_present('css=.has-error'))
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.find_elements_by_xpath('//input[@name="upload"]')[0].send_keys(path)
+        browser.find_elements_by_xpath('//input[@name="upload"]')[1].send_keys(path)
+        browser.find_element_by_id("deformsubmit").click()
 
         # first element present
-        self.assertEqual(browser.get_attribute('deformField3@name'), 'upload')
-        self.assertEqual(browser.get_value('deformField3'), '')
-        self.assertEqual(browser.get_text('css=#deformField3-filename'),
-                         filename)
-        uid = browser.get_value('css=#deformField3-uid')
+        self.assertEqual(browser.find_element_by_id('deformField3-filename').text, filename)
+        uid = browser.find_element_by_id('deformField3-uid').get_attribute('value')
+        self.assertTrue(uid in browser.find_element_by_id('captured').text)
 
         # second element present
-        self.assertEqual(browser.get_attribute('deformField4@name'), 'upload')
-        self.assertEqual(browser.get_value('deformField4'), '')
-        self.assertEqual(browser.get_text('css=#deformField4-filename'),
-                         filename)
-        uid = browser.get_value('css=#deformField3-uid')
-
-        # got some files
-        captured = browser.get_text('css=#captured')
-        self.assertTrue("'filename': u'%s" % filename in captured)
-        self.assertTrue(uid in captured)
+        self.assertEqual(browser.find_element_by_id('deformField4-filename').text, filename)
+        uid = browser.find_element_by_id('deformField4-uid').get_attribute('value')
+        self.assertTrue(uid in browser.find_element_by_id('captured').text)
 
 class SequenceOfMappings(Base, unittest.TestCase):
     url = test_url("/sequence_of_mappings/")
