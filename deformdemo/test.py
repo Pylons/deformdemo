@@ -845,38 +845,33 @@ class RadioChoiceWidgetIntTests(RadioChoiceWidgetTests):
 class ReadOnlySequenceOfMappingTests(Base, unittest.TestCase):
     url = test_url("/readonly_sequence_of_mappings/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertEqual(browser.get_text('deformField6'), 'name1')
-        self.assertEqual(browser.get_text('deformField7'), '23')
-        self.assertEqual(browser.get_text('deformField9'), 'name2')
-        self.assertEqual(browser.get_text('deformField10'), '25')
+        self.assertEqual(browser.find_element_by_id('deformField6').get_attribute('value'), 'name1')
+        self.assertEqual(browser.find_element_by_id('deformField7').get_attribute('value'), '23')
+        self.assertEqual(browser.find_element_by_id('deformField9').get_attribute('value'), 'name2')
+        self.assertEqual(browser.find_element_by_id('deformField10').get_attribute('value'), '25')
 
 class SequenceOfRadioChoices(Base, unittest.TestCase):
     url = test_url("/sequence_of_radiochoices/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Pepper Chooser')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(browser.find_element_by_id('deformField1-addtext').text, 'Add Pepper Chooser')
+        self.assertEqual(browser.find_element_by_id('captured').text, 'None')
 
     def test_submit_none_added(self):
-        browser.get(self.url)
-        browser.click("submit")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Pepper Chooser')
-        self.assertEqual(browser.get_text('css=#captured'), "{'peppers': []}")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
+        from selenium.common.exceptions import NoSuchElementException
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(browser.find_element_by_id('deformField1-addtext').text, 'Add Pepper Chooser')
+        self.assertEqual(browser.find_element_by_id('captured').text, "{'peppers': []}")
+        self.assertRaises(NoSuchElementException, browser.find_element_by_css_selector, '.has-error')
 
     def test_submit_two_filled(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.click('dom=document.forms[0].elements[5]')
-        browser.click('dom=document.forms[0].elements[11]')
-        browser.click("submit")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(eval(captured),
+        from selenium.common.exceptions import NoSuchElementException
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.find_elements_by_xpath('//input')[4].click()
+        browser.find_elements_by_xpath('//input')[10].click()
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, browser.find_element_by_css_selector, '.has-error')
+        self.assertEqual(eval(browser.find_element_by_id('captured').text),
                          {'peppers': ['habanero', 'jalapeno']})
 
 class SequenceOfDefaultedSelects(Base, unittest.TestCase):
