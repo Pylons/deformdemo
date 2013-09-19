@@ -711,125 +711,67 @@ class InterFieldValidationTests(Base, unittest.TestCase):
 
 class InternationalizationTests(Base, unittest.TestCase):
     url = test_url("/i18n/")
+
+    def setUp(self):
+        pass  # each tests has a different url
+
     def test_render_default(self):
+        from selenium.common.exceptions import NoSuchElementException
         browser.get(self.url)
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField1'))
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'number')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, 'Submit')
+        self.assertRaises(NoSuchElementException, browser.find_element_by_css_selector, '.has-error')
+        self.assertEqual(browser.find_element_by_id('deformField1').get_attribute('value'), '')
+        self.assertEqual(browser.find_element_by_css_selector('label').text, 'A number between 1 and 10')
+        self.assertEqual(browser.find_element_by_id("deformsubmit").text, 'Submit')
 
     def test_render_en(self):
+        from selenium.common.exceptions import NoSuchElementException
         browser.get("%s?_LOCALE_=en" % self.url)
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField1'))
-        label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, 'Submit')
+        self.assertRaises(NoSuchElementException, browser.find_element_by_css_selector, '.has-error')
+        self.assertEqual(browser.find_element_by_id('deformField1').get_attribute('value'), '')
+        self.assertEqual(browser.find_element_by_css_selector('label').text, 'A number between 1 and 10')
+        self.assertEqual(browser.find_element_by_id("deformsubmit").text, 'Submit')
     
     def test_render_ru(self):
+        from selenium.common.exceptions import NoSuchElementException
         browser.get("%s?_LOCALE_=ru" % self.url)
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField1'))
-        label = browser.get_text('css=label')
-        self.assertEqual(label, u'Число между 1 и 10')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, u'отправить')
+        self.assertRaises(NoSuchElementException, browser.find_element_by_css_selector, '.has-error')
+        self.assertEqual(browser.find_element_by_css_selector('label').text, u'Число между 1 и 10')
+        self.assertEqual(browser.find_element_by_id("deformsubmit").text, u'отправить')
     
     def test_submit_empty_en(self):
         browser.get("%s?_LOCALE_=en" % self.url)
-        browser.click('submit')
-        errorMsgLbl = browser.get_text('css=.has-error')
-        errorMsg = browser.get_text('css=.errorMsg')
-        self.assertEqual(errorMsgLbl,
-                         'There was a problem with your submission')
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, 'Submit')
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(browser.find_element_by_css_selector('.alert-danger').text, 'There was a problem with your submission')
+        self.assertEqual(browser.find_element_by_id('error-deformField1').text, 'Required')
+        self.assertEqual(browser.find_element_by_css_selector('label').text, 'A number between 1 and 10')
+        self.assertEqual(browser.find_element_by_id("deformsubmit").text, 'Submit')
 
     def test_submit_empty_ru(self):
         browser.get("%s?_LOCALE_=ru" % self.url)
-        browser.click('submit')
-        errorMsgLbl = browser.get_text('css=.has-error')
-        errorMsg = browser.get_text('css=.errorMsg')
-        self.assertEqual(errorMsgLbl,
-                         u'Данные которые вы предоставили содержат ошибку')
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), u'Требуется')
-        label = browser.get_text('css=label')
-        self.assertEqual(label, u'Число между 1 и 10')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, u'отправить')
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(browser.find_element_by_css_selector('.alert-danger').text, u'Данные которые вы предоставили содержат ошибку')
+        self.assertEqual(browser.find_element_by_id('error-deformField1').text, u'Требуется')
+        self.assertEqual(browser.find_element_by_css_selector('label').text, u'Число между 1 и 10')
+        self.assertEqual(browser.find_element_by_id("deformsubmit").text, u'отправить')
 
     def test_submit_toolow_en(self):
         browser.get("%s?_LOCALE_=en" % self.url)
-        browser.type('deformField1', '0')
-        browser.click('submit')
-        errorMsgLbl = browser.get_text('css=.has-error')
-        errorMsg = browser.get_text('css=.errorMsg')
-        self.assertEqual(errorMsgLbl,
-                         'There was a problem with your submission')
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
-                         '0 is less than minimum value 1')
-        label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, 'Submit')
+        browser.find_element_by_id('deformField1').send_keys('0')
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(browser.find_element_by_css_selector('.alert-danger').text, 'There was a problem with your submission')
+        self.assertEqual(browser.find_element_by_id('error-deformField1').text, '0 is less than minimum value 1')
+        self.assertEqual(browser.find_element_by_css_selector('label').text, 'A number between 1 and 10')
+        self.assertEqual(browser.find_element_by_id("deformsubmit").text, 'Submit')
 
     def test_submit_toolow_ru(self):
         browser.get("%s?_LOCALE_=ru" % self.url)
-        browser.type('deformField1', '0')
-        browser.click('submit')
-        errorMsgLbl = browser.get_text('css=.has-error')
-        errorMsg = browser.get_text('css=.errorMsg')
-        self.assertEqual(errorMsgLbl,
-                         u'Данные которые вы предоставили содержат ошибку')
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
-                         u'0 меньше чем 1')
-        label = browser.get_text('css=label')
-        self.assertEqual(label, u'Число между 1 и 10')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, u'отправить')
+        browser.find_element_by_id('deformField1').send_keys('0')
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(browser.find_element_by_css_selector('.alert-danger').text, u'Данные которые вы предоставили содержат ошибку')
+        self.assertEqual(browser.find_element_by_id('error-deformField1').text, u'0 меньше чем 1')
+        self.assertEqual(browser.find_element_by_css_selector('label').text, u'Число между 1 и 10')
+        self.assertEqual(browser.find_element_by_id("deformsubmit").text, u'отправить')
 
-    def test_submit_toohigh_en(self):
-        browser.get("%s?_LOCALE_en" % self.url)
-        browser.type('deformField1', '11')
-        browser.click('submit')
-        errorMsgLbl = browser.get_text('css=.alert-danger')
-        self.assertEqual(errorMsgLbl,
-                         'There was a problem with your submission, errors have been highlighted below:')
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
-                         '11 is greater than maximum value 10')
-        label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, 'Submit')
-
-    def test_submit_toohigh_ru(self):
-        browser.get("%s?_LOCALE_=ru" % self.url)
-        browser.type('deformField1', '11')
-        browser.click('submit')
-        errorMsgLbl = browser.get_text('css=.has-error')
-        self.assertEqual(errorMsgLbl,
-                         u'Данные которые вы предоставили содержат ошибку')
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
-                         u'11 больше чем 10')
-        label = browser.get_text('css=label')
-        self.assertEqual(label, u'Число между 1 и 10')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, u'отправить')
 
 class PasswordWidgetTests(Base, unittest.TestCase):
     url = test_url("/password/")
