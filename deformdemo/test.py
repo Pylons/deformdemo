@@ -1101,50 +1101,36 @@ class SequenceOfMappingsWithInitialItemTests(Base, unittest.TestCase):
 class SequenceOfAutocompletes(Base, unittest.TestCase):
     url = test_url('/sequence_of_autocompletes/')
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present("Texts"))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Text')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        
+        self.assertEqual(browser.find_element_by_id('captured').text, 'None')
+        self.assertTrue('Texts' in browser.page_source)
+        self.assertEqual(browser.find_element_by_id('deformField1-addtext').text, 'Add Text')
+
     def test_submit_none_added(self):
-        browser.get(self.url)
-        browser.click("submit")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Text')
-        self.assertEqual(browser.get_text('css=#captured'), "{'texts': []}")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(browser.find_element_by_id('deformField1-addtext').text, 'Add Text')
+        self.assertEqual(browser.find_element_by_id('captured').text, "{'texts': []}")
 
     def test_submit_two_unfilled(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.click("submit")
-        self.assertTrue(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(browser.find_element_by_id('error-deformField3').text, 'Required')
+        self.assertEqual(browser.find_element_by_id('error-deformField4').text, 'Required')
+        self.assertEqual(browser.find_element_by_id('captured').text, 'None')
 
     def test_submit_two_filled(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd')
-        added = 'dom=document.forms[0].text'
-        self.assertEqual(browser.get_attribute(added + '@class'),
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        self.assertEqual(browser.find_elements_by_xpath('//input[@name="text"]')[0].get_attribute('class'),
                          'form-control  tt-query')
-        browser.type(added, 'bar')
-        browser.click('deformField1-seqAdd')
-        added = 'dom=document.forms[0].text[1]'
-        self.assertEqual(browser.get_attribute(added + '@class'),
+        browser.find_elements_by_xpath('//input[@name="text"]')[0].send_keys('bar')
+
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        self.assertEqual(browser.find_elements_by_xpath('//input[@name="text"]')[1].get_attribute('class'),
                          'form-control  tt-query')
-        browser.type(added, 'baz')
-        browser.click("submit")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured,  
-            "{'texts': [u'bar', u'baz']}")
+        browser.find_elements_by_xpath('//input[@name="text"]')[1].send_keys('baz')
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(eval(browser.find_element_by_id('captured').text),
+                         {'texts': [u'bar', u'baz']})
 
 class SequenceOfDateInputs(Base, unittest.TestCase):
     url = test_url('/sequence_of_dateinputs/')
