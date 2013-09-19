@@ -1173,87 +1173,64 @@ class SequenceOfDateInputs(Base, unittest.TestCase):
         captured = browser.get_text('css=#captured')
         self.assertTrue(captured.startswith(u"{'dates': [datetime.date"))
 
-class SequenceOfConstrainedLength(Base, unittest.TestCase):
+class SequenceOfConstrainedLengthTests(Base, unittest.TestCase):
     url = test_url('/sequence_of_constrained_len/')
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present("At Least 2"))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Name')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('At Least 2' in browser.page_source)
+        self.assertEqual(browser.find_element_by_id('deformField1-addtext').text, 'Add Name')
+        self.assertEqual(browser.find_element_by_id('captured').text, 'None')
         # default 2 inputs rendered
-        self.assertEqual(browser.get_value('deformField3'), '')
-        self.assertEqual(browser.get_value('deformField4'), '')
+        self.assertEqual(browser.find_element_by_id('deformField3').get_attribute('value'), '')
+        self.assertEqual(browser.find_element_by_id('deformField4').get_attribute('value'), '')
 
     def test_add_and_remove(self):
-        browser.get(self.url)
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Name')
-        self.assertTrue(browser.is_visible('deformField1-seqAdd'))
-        browser.type('deformField3', 'hello1')
-        browser.type('deformField4', 'hello2')
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.type('dom=document.forms[0].elements[6]', 'hello3')
-        browser.type('dom=document.forms[0].elements[7]', 'hello4')
-        self.assertFalse(browser.is_visible('deformField1-seqAdd'))
-        browser.click('deformField3-close')
-        self.assertTrue(browser.is_visible('deformField1-seqAdd'))
-        browser.click('deformField1-seqAdd')
-        self.assertFalse(browser.is_visible('deformField1-seqAdd'))
-        browser.type('dom=document.forms[0].elements[7]', 'hello5')
-        browser.click('submit')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_value('deformField3'), 'hello2')
-        self.assertEqual(browser.get_value('deformField4'), 'hello3')
-        self.assertEqual(browser.get_value('deformField5'), 'hello4')
-        self.assertEqual(browser.get_value('deformField6'), 'hello5')
-        self.assertFalse(browser.is_visible('deformField1-seqAdd'))
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured,
-            "{'names': [u'hello2', u'hello3', u'hello4', u'hello5']}")
-        
+        self.assertEqual(browser.find_element_by_id('deformField1-addtext').text, 'Add Name')
+        browser.find_element_by_id('deformField3').send_keys('hello1')
+        browser.find_element_by_id('deformField4').send_keys('hello2')
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.find_elements_by_xpath('//input[@name="name"]')[2].send_keys('hello3')
+        browser.find_elements_by_xpath('//input[@name="name"]')[3].send_keys('hello4')
+
+        self.assertFalse(browser.find_element_by_id("deformField1-seqAdd").is_displayed())
+        browser.find_element_by_id("deformField3-close").click()
+        self.assertTrue(browser.find_element_by_id("deformField1-seqAdd").is_displayed())
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        self.assertFalse(browser.find_element_by_id("deformField1-seqAdd").is_displayed())
+        browser.find_elements_by_xpath('//input[@name="name"]')[3].send_keys('hello5')
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertFalse(browser.find_element_by_id("deformField1-seqAdd").is_displayed())
+        self.assertEqual(eval(browser.find_element_by_id('captured').text),
+                         {'names': [u'hello2', u'hello3', u'hello4', u'hello5']})
+
 class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_richtext/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present("Texts"))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Text')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        
+        self.assertTrue('Texts' in browser.page_source)
+        self.assertEqual(browser.find_element_by_id('deformField1-addtext').text, 'Add Text')
+        self.assertEqual(browser.find_element_by_id('captured').text, 'None')
+
     def test_submit_none_added(self):
-        browser.get(self.url)
-        browser.click("submit")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Text')
-        self.assertEqual(browser.get_text('css=#captured'), "{'texts': []}")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(browser.find_element_by_id('deformField1-addtext').text, 'Add Text')
+        self.assertEqual(browser.find_element_by_id('captured').text, "{'texts': []}")
 
     def test_submit_two_unfilled(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.click("submit")
-        self.assertTrue(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(browser.find_element_by_id('error-deformField3').text, 'Required')
+        self.assertEqual(browser.find_element_by_id('error-deformField4').text, 'Required')
+        self.assertEqual(browser.find_element_by_id('captured').text, 'None')
 
     def test_submit_one_filled(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd')
-        browser.wait_for_condition(\
-            "selenium.browserbot.getCurrentWindow().document"
-            ".getElementsByTagName('iframe')[0]", "10000")
-        browser.type('tinymce', 'yo')
-        browser.click("submit")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured, 
-            "{'texts': [u'<p>yo</p>']}")
+        browser.find_element_by_id("deformField1-seqAdd").click()
+        browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
+        browser.find_element_by_id('tinymce').send_keys('yo')
+        browser.switch_to_default_content()
+        browser.find_element_by_id("deformsubmit").click()
+        self.assertEqual(eval(browser.find_element_by_id('captured').text),
+                         {'texts': [u'<p>yo</p>']})
 
 class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
     url = test_url("/sequence_of_masked_textinputs/")
