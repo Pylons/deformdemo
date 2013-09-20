@@ -1479,6 +1479,7 @@ class SelectWidgetTests(Base, unittest.TestCase):
         self.assertTrue('Pepper' in browser.page_source)
         select = findid('deformField1')
         self.assertEqual(select.get_attribute('name'), 'pepper')
+        self.assertFalse(select.get_attribute('multiple'))
         options = select.find_elements_by_tag_name('option')
         self.assertTrue(options[0].is_selected())
         self.assertEqual(
@@ -1524,19 +1525,18 @@ class SelectWidgetMultipleTests(Base, unittest.TestCase):
     url = test_url('/select_with_multiple/')
 
     def test_submit_selected(self):
-        browser.get(self.url)
-
-        captured_default = "{'pepper': set([u'chipotle', u'habanero'])}"
-
-        browser.add_selection('deformField1', 'index=0')
-        browser.add_selection('deformField1', 'index=2')
+        select = findid('deformField1')
+        self.assertTrue(select.get_attribute('multiple'))
+        options = select.find_elements_by_tag_name('option')
+        options[0].click()
+        options[2].click()
 
         browser.click('submit')
+        findid('deformsubmit').click()
 
-        captured = browser.get_text('css=#captured')
-
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(captured, captured_default)
+        captured_default = "{'pepper': set([u'chipotle', u'habanero'])}"
+        self.assertEqual(findid('captured').text, captured_default)
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
 class SelectWidgetIntegerTests(Base, unittest.TestCase):
     url = test_url('/select_integer/')
