@@ -2099,33 +2099,27 @@ class WidgetAdapterTests(TextAreaCSVWidgetTests):
 class MultipleFormsTests(Base, unittest.TestCase):
     url = test_url("/multiple_forms/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'name1')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_attribute("deformField3@name"), 'name2')
-        self.assertEqual(browser.get_value('deformField3'), '')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
+        self.assertEqual(findid('deformField1').get_attribute('name'),
+                         'name1')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '')
+        self.assertEqual(findid('deformField3').get_attribute('name'),
+                         'name2')
+        self.assertEqual(findid('deformField3').get_attribute('value'),
+                         '')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_first(self):
-        browser.get(self.url)
-        browser.type('deformField1', 'hey')
-        browser.click('form1submit')
-        self.assertEqual(browser.get_value('deformField1'), 'hey')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured, 
-            u"{'name1': u'hey'}")
+        findid('deformField1').send_keys('hey')
+        findid("form1submit").click()
+        self.assertEqual(eval(findid('captured').text),
+                         {'name1': 'hey'})
 
     def test_submit_second(self):
-        browser.get(self.url)
-        browser.type('deformField3', 'hey')
-        browser.click('form2submit')
-        self.assertEqual(browser.get_value('deformField3'), 'hey')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured, 
-            u"{'name2': u'hey'}"
-            )
+        findid('deformField3').send_keys('hey')
+        findid("form2submit").click()
+        self.assertEqual(eval(findid('captured').text),
+                         {'name2': 'hey'})
 
 class RequireOneFieldOrAnotherTests(Base, unittest.TestCase):
     url = test_url("/require_one_or_another/")
