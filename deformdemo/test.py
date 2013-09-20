@@ -2339,25 +2339,23 @@ class TextInputMaskTests(Base, unittest.TestCase):
 class MultipleErrorMessagesInMappingTest(Base, unittest.TestCase):
     url = test_url("/multiple_error_messages_mapping/")
     def test_it(self):
-        browser.get(self.url)
-        browser.type('deformField1', 'whatever')
-        browser.click('submit')
-        self.assertEqual(browser.get_text('error-deformField1'), 'Error 1')
-        self.assertEqual(browser.get_text('error-deformField1-1'), 'Error 2')
-        self.assertEqual(browser.get_text('error-deformField1-2'), 'Error 3')
+        findid('deformField1').send_keys('whatever')
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField1').text, 'Error 1')
+        self.assertEqual(findid('error-deformField1-1').text, 'Error 2')
+        self.assertEqual(findid('error-deformField1-2').text, 'Error 3')
 
 class MultipleErrorMessagesInSequenceTest(Base, unittest.TestCase):
     url = test_url("/multiple_error_messages_seq/")
     def test_it(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd')
-        browser.type('dom=document.forms[0].field', 'whatever')
-        browser.click('submit')
-        self.assertEqual(browser.get_text('error-deformField3'), 'Error 1')
-        self.assertEqual(browser.get_text('error-deformField3-1'), 'Error 2')
-        self.assertEqual(browser.get_text('error-deformField3-2'), 'Error 3')
+        findid("deformField1-seqAdd").click()
+        findxpath("//input[@name='field']").send_keys('whatever')
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField3').text, 'Error 1')
+        self.assertEqual(findid('error-deformField3-1').text, 'Error 2')
+        self.assertEqual(findid('error-deformField3-2').text, 'Error 3')
 
-class CssClassesOnTheOutermostHTMLElement(Base, unittest.TestCase):
+class CssClassesOnTheOutermostHTMLElementTests(Base, unittest.TestCase):
     url = test_url("/custom_classes_on_outermost_html_element/")
     def test_it(self):
         findcss('form > fieldset > div.top_level_mapping_widget_custom_class')
