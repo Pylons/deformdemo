@@ -1802,22 +1802,16 @@ class TextAreaWidgetTests(Base, unittest.TestCase):
 
 class DelayedRichTextWidgetTests(Base, unittest.TestCase):
     url = test_url("/delayed_richtext/")
-
     def test_submit_filled(self):
-        browser.get(self.url)
-        browser.click('css=.tinymce-preload')
-        browser.wait_for_condition(\
-            "selenium.browserbot.getCurrentWindow().document"
-            ".getElementsByTagName('iframe')[0]", "10000")
-        browser.type('tinymce', 'hello')
-        browser.click('submit')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_value('deformField1'), '<p>hello</p>')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured,
-            "{'text': u'<p>hello</p>'}"
-            )
+        findcss('.tinymce-preload').click()
+        time.sleep(0.5)
+        browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
+        findid('tinymce').send_keys('hello')
+        browser.switch_to_default_content()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(eval(findid('captured').text),
+                         {'text': u'<p>hello</p>'})
 
 class RichTextWidgetTests(Base, unittest.TestCase):
     url = test_url("/richtext/")
