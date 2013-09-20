@@ -31,6 +31,9 @@ def findid(elid):
 def findcss(selector):
     return browser.find_element_by_css_selector(selector)
 
+def findcsses(selector):
+    return browser.find_elements_by_css_selector(selector)
+
 def findxpath(selector):
     return browser.find_element_by_xpath(selector)
 
@@ -1873,42 +1876,38 @@ class UnicodeEverywhereTests(Base, unittest.TestCase):
             )
             )
 
-class SequenceOfSequences(Base, unittest.TestCase):
+class SequenceOfSequencesTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_sequences/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertEqual(browser.get_text('deformField1-addtext'),
+        self.assertEqual(findid('deformField1-addtext').text,
                          'Add Names and Titles')
-        self.assertEqual(browser.get_text('deformField6-addtext'),
+        self.assertEqual(findid('deformField6-addtext').text,
                          'Add Name and Title')
-        self.assertEqual(browser.get_value('deformField21'), '')
-        self.assertEqual(browser.get_value('deformField22'), '')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findid('deformField21').text, '')
+        self.assertEqual(findid('deformField22').text, '')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_add_two(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField6-seqAdd')
-        browser.type('dom=document.forms[0].name[0]', 'name')
-        browser.type('dom=document.forms[0].title[0]', 'title')
-        browser.type('dom=document.forms[0].name[1]', 'name')
-        browser.type('dom=document.forms[0].title[1]', 'title')
-        browser.type('dom=document.forms[0].name[2]', 'name')
-        browser.type('dom=document.forms[0].title[2]', 'title')
-        browser.click("submit")
-        captured = eval(browser.get_text('css=#captured'))
-        self.assertEqual(captured,
+        findid("deformField1-seqAdd").click()
+        findid("deformField6-seqAdd").click()
+        findxpaths('//input[@name="name"]')[0].send_keys('name')
+        findxpaths('//input[@name="title"]')[0].send_keys('title')
+        findxpaths('//input[@name="name"]')[1].send_keys('name')
+        findxpaths('//input[@name="title"]')[1].send_keys('title')
+        findxpaths('//input[@name="name"]')[2].send_keys('name')
+        findxpaths('//input[@name="title"]')[2].send_keys('title')
+        findid('deformsubmit').click()
+        self.assertEqual(eval(findid('captured').text),
                          {'names_and_titles_sequence': [
                              [{'name': u'name', 'title': u'title'},
                               {'name': u'name', 'title': u'title'}],
-                             [{'name': u'name', 'title': u'title'}]]}
-                         )
+                             [{'name': u'name', 'title': u'title'}]]})
 
     def test_remove_from_nested_mapping_sequence(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd')
-        browser.click("document.getElementsByClassName('deformClosebutton')[2]")
-        self.assertFalse(browser.is_element_present('dom=document.forms[0].name[1]'))
+        findid("deformField1-seqAdd").click()
+        self.assertEqual(len(findxpaths('//input[@name="name"]')), 2)
+        findcsses('.deformClosebutton')[3].click()
+        self.assertEqual(len(findxpaths('//input[@name="name"]')), 1)
 
 class SequenceOrderable(Base, unittest.TestCase):
     url = test_url("/sequence_orderable/")
