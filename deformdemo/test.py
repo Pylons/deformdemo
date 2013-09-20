@@ -1436,7 +1436,7 @@ class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
 class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
     url = test_url("/sequence_of_masked_textinputs/")
     def test_render_default(self):
-        self.assertEqual(findcss('.panel-default .panel-heading').text, 'Texts')
+        self.assertTrue('Texts' in browser.page_source)
         self.assertEqual(findid('deformField1-addtext').text,'Add Text')
         self.assertEqual(findid('captured').text, 'None')
         
