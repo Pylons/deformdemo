@@ -1816,40 +1816,34 @@ class DelayedRichTextWidgetTests(Base, unittest.TestCase):
 class RichTextWidgetTests(Base, unittest.TestCase):
     url = test_url("/richtext/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present("Text"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'text')
-        self.assertEqual(browser.get_value("deformField1"), '')
-        self.assertEqual(browser.get_text('css=.required'), 'Text')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Text' in browser.page_source)
+        self.assertEqual(findid('deformField1').get_attribute('name'),
+                         'text')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '')
+        self.assertEqual(findcss('.required').text, 'Text')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        browser.get(self.url)
-        browser.click('submit')
-        self.assertTrue(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid('deformsubmit').click()
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_filled(self):
-        browser.get(self.url)
-        browser.type('tinymce', 'hello')
-        browser.click('submit')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_value('deformField1'), '<p>hello</p>')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured, 
-            "{'text': u'<p>hello</p>'}"
-            )
+        browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
+        findid('tinymce').send_keys('hello')
+        browser.switch_to_default_content()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(eval(findid('captured').text),
+                         {'text': u'<p>hello</p>'})
 
 class RichTextWidgetInternationalized(Base, unittest.TestCase):
     url = test_url("/richtext_i18n/?_LOCALE_=ru")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present("Text"))
-        self.assertTrue(browser.is_text_present(u"Формат"))
+        self.assertTrue('Text' in browser.page_source)
+        self.assertTrue(u"Формат" in browser.page_source)
 
 class UnicodeEverywhereTests(Base, unittest.TestCase):
     url = test_url("/unicodeeverywhere/")
