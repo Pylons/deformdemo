@@ -4,6 +4,7 @@ import unittest
 import re
 import os
 import time
+from decimal import Decimal
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
@@ -2045,56 +2046,35 @@ class TextAreaCSVWidgetTests(Base, unittest.TestCase):
         captured = browser.get_text('css=#captured')
         self.assertEqual(captured, "None")
 
+class WidgetAdapterTests(TextAreaCSVWidgetTests):
+    url = test_url("/widget_adapter/")
+
 class TextInputCSVWidgetTests(Base, unittest.TestCase):
     url = test_url("/textinputcsv/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present("Csv"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'csv')
-        self.assertEqual(browser.get_value("deformField1"),
+        self.assertTrue('Csv' in browser.page_source)
+        self.assertEqual(findid('deformField1').get_attribute('value'),
                          '1,hello,4.5')
-        self.assertEqual(browser.get_text('css=.required'), 'Csv')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findcss('.required').text, 'Csv')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_default(self):
-        from decimal import Decimal
-        browser.get(self.url)
-        browser.click('submit')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_value('deformField1'),
-                         '1,hello,4.5')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(
-            eval(captured),
-            ({'csv': (1, u'hello', Decimal("4.5"))}))
+        findid("deformsubmit").click()
+        self.assertEqual(eval(findid('captured').text),
+                         {'csv': (1, u'hello', Decimal("4.5"))})
 
     def test_submit_line_error(self):
-        browser.get(self.url)
-        browser.type('deformField1', '1,2,wrong')
-        browser.click('submit')
-        self.assertTrue(browser.is_element_present('css=.has-error'))
-        error_node = 'css=#error-deformField1'
-        self.assertSimilarRepr(
-            browser.get_text(error_node),
-            u'{\'2\': u\'"wrong" is not a number\'}'
-            )
-        self.assertEqual(browser.get_value('deformField1'), '1,2,wrong')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, "None")
+        findid('deformField1').clear()
+        findid('deformField1').send_keys('1,2,wrong')
+        findid("deformsubmit").click()
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertTrue('"wrong" is not a number' in findid('error-deformField1').text)
 
     def test_submit_empty(self):
-        browser.get(self.url)
-        browser.type('deformField1', '')
-        browser.click('submit')
-        self.assertTrue(browser.is_element_present('css=.has-error'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, "None")
-
-class WidgetAdapterTests(TextAreaCSVWidgetTests):
-    url = test_url("/widget_adapter/")
+        findid('deformField1').clear()
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
 class MultipleFormsTests(Base, unittest.TestCase):
     url = test_url("/multiple_forms/")
