@@ -1476,37 +1476,38 @@ class SelectWidgetTests(Base, unittest.TestCase):
         )
 
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present("Pepper"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'pepper')
-        self.assertEqual(browser.get_selected_index('deformField1'), '0')
-        options = browser.get_select_options('deformField1')
+        self.assertTrue('Pepper' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'pepper')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
         self.assertEqual(
-            options,
+            [o.text for o in options],
             [u'- Select -', u'Habanero', u'Jalapeno', u'Chipotle']) 
-        self.assertEqual(browser.get_text('css=.required'), 'Pepper')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findcss('.required').text, 'Pepper')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_default(self):
-        browser.get(self.url)
-        browser.click('submit')
-        self.assertTrue(browser.is_text_present("Pepper"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'pepper')
-        self.assertEqual(browser.get_selected_index('deformField1'), '0')
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        findid('deformsubmit').click()
+        self.assertTrue('Pepper' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'pepper')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_selected(self):
-        browser.get(self.url)
-        browser.select('deformField1', 'index=1')
-        browser.click('submit')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_selected_index('deformField1'), '1')
-        captured = browser.get_text('css=#captured')
-        self.assertTrue(captured in self.submit_selected_captured)
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        options[1].click()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[1].is_selected())
+        self.assertTrue(
+            findid('captured').text in self.submit_selected_captured
+            )
 
 class SelectWidgetWithSizeTests(SelectWidgetTests):
     url = test_url("/select_with_size/")
