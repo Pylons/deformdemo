@@ -4,6 +4,8 @@ import unittest
 import re
 import os
 
+from selenium.common.exceptions import NoSuchElementException
+
 # to run:
 # console 1: java -jar selenium-server.jar
 # console 2: start the deform demo server (pserve demo.ini)
@@ -91,7 +93,6 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_one_checked(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid("deformField1-0").click()
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
@@ -103,7 +104,6 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
             )
 
     def test_submit_three_checked(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid("deformField1-0").click()
         findid("deformField1-1").click()
         findid("deformField1-2").click()
@@ -140,7 +140,6 @@ class CheckboxWidgetTests(Base, unittest.TestCase):
 class CheckedInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/checkedinput/")
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         self.assertTrue('Email Address' in browser.page_source)
         self.assertEqual(findcss('.required').text, 'Email Address')
         self.assertEqual(findid('captured').text, 'None')
@@ -194,7 +193,6 @@ class CheckedInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid('deformField1').send_keys('user@example.com')
         findid('deformField1-confirm').send_keys('user@example.com')
         findid("deformsubmit").click()
@@ -214,7 +212,6 @@ class CheckedInputWidgetTests(Base, unittest.TestCase):
 class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
     url = test_url("/checkedinput_withmask/")
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         self.assertEqual(findcss('.required').text, 'Social Security Number')
         self.assertEqual(findid('captured').text, 'None')
         self.assertEqual(
@@ -250,7 +247,6 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
 class CheckedPasswordWidgetTests(Base, unittest.TestCase):
     url = test_url("/checkedpassword/")
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         self.assertTrue('Password' in browser.page_source)
         self.assertEqual(findcss('.required').text, 'Password')
         self.assertEqual(findid('captured').text, 'None')
@@ -318,7 +314,6 @@ class CheckedPasswordWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid('deformField1').send_keys('this123')
         findid('deformField1-confirm').send_keys('this123')
         findid("deformsubmit").click()
@@ -431,7 +426,6 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
 class DatePartsWidgetTests(Base, unittest.TestCase):
     url = test_url('/dateparts/')
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         self.assertTrue('Date' in browser.page_source)
         self.assertEqual(findcss('.required').text, 'Date')
         self.assertEqual(findid('captured').text, 'None')
@@ -493,7 +487,6 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
             )
 
     def test_submit_success(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid('deformField1').send_keys('2010')
         findid('deformField1-month').send_keys('1')
         findid('deformField1-day').send_keys('1')
@@ -517,7 +510,6 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
 class EditFormTests(Base, unittest.TestCase):
     url = test_url("/edit/")
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
@@ -568,7 +560,6 @@ class EditFormTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid('deformField3').send_keys('name')
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
@@ -595,7 +586,6 @@ class EditFormTests(Base, unittest.TestCase):
 class MappingWidgetTests(Base, unittest.TestCase):
     url = test_url("/mapping/")
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('captured').text, 'None')
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
@@ -682,7 +672,6 @@ class MappingWidgetTests(Base, unittest.TestCase):
 class FieldDefaultTests(Base, unittest.TestCase):
     url = test_url("/fielddefaults/")
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
@@ -710,7 +699,6 @@ class FieldDefaultTests(Base, unittest.TestCase):
         self.assertEqual(findid('error-deformField3').text, 'Required')
 
     def test_submit_success(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid('deformField1').clear()
         findid('deformField1').send_keys('abc')
         findid('deformField2').clear()
@@ -729,7 +717,6 @@ class FieldDefaultTests(Base, unittest.TestCase):
 class NonRequiredFieldTests(Base, unittest.TestCase):
     url = test_url("/nonrequiredfields/")
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
         self.assertEqual(findid('deformField2').get_attribute('value'), '')
@@ -744,7 +731,6 @@ class NonRequiredFieldTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success_required_filled_notrequired_empty(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid('deformField1').send_keys('abc')
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
@@ -755,7 +741,6 @@ class NonRequiredFieldTests(Base, unittest.TestCase):
             u"{'notrequired': u'', 'required': u'abc'}")
 
     def test_submit_success_required_and_notrequired_filled(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid('deformField1').send_keys('abc')
         findid('deformField2').send_keys('def')
         findid("deformsubmit").click()
@@ -769,13 +754,11 @@ class NonRequiredFieldTests(Base, unittest.TestCase):
 class HiddenFieldWidgetTests(Base, unittest.TestCase):
     url = test_url("/hidden_field/")
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('deformField1').get_attribute('value'), 'true')
         self.assertEqual(findid('captured').text, 'None')
 
     def test_render_submitted(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('deformField1').get_attribute('value'), 'true')
@@ -784,14 +767,12 @@ class HiddenFieldWidgetTests(Base, unittest.TestCase):
 class HiddenmissingTests(Base, unittest.TestCase):
     url = test_url("/hiddenmissing/")
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
         self.assertEqual(findid('deformField2').get_attribute('value'), '')
         self.assertEqual(findid('captured').text, 'None')
 
     def test_render_submitted(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid('deformField1').send_keys('yup')
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
@@ -804,7 +785,6 @@ class FileUploadTests(Base, unittest.TestCase):
     url = test_url("/file/")
 
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
         self.assertEqual(findid('captured').text, 'None')
@@ -816,8 +796,6 @@ class FileUploadTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_filled(self):
-        from selenium.common.exceptions import NoSuchElementException
-
         # submit one first
         path, filename = _getFile()
         findid('deformField1').send_keys(path)
@@ -846,7 +824,6 @@ class FileUploadTests(Base, unittest.TestCase):
 class InterFieldValidationTests(Base, unittest.TestCase):
     url=  test_url("/interfield/")
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
         self.assertEqual(findid('deformField2').get_attribute('value'), '')
@@ -862,7 +839,6 @@ class InterFieldValidationTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_one_empty(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid('deformField1').send_keys('abc')
         findid("deformsubmit").click()
         self.assertTrue(findcss('.has-error'))
@@ -873,7 +849,6 @@ class InterFieldValidationTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_first_doesnt_start_with_second(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid('deformField1').send_keys('abc')
         findid('deformField2').send_keys('def')
         findid("deformsubmit").click()
@@ -888,7 +863,6 @@ class InterFieldValidationTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid('deformField1').send_keys('abc')
         findid('deformField2').send_keys('abcdef')
         findid("deformsubmit").click()
@@ -910,7 +884,6 @@ class InternationalizationTests(Base, unittest.TestCase):
         pass  # each tests has a different url
 
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         browser.get(self.url)
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
@@ -918,7 +891,6 @@ class InternationalizationTests(Base, unittest.TestCase):
         self.assertEqual(findid("deformsubmit").text, 'Submit')
 
     def test_render_en(self):
-        from selenium.common.exceptions import NoSuchElementException
         browser.get("%s?_LOCALE_=en" % self.url)
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
@@ -926,7 +898,6 @@ class InternationalizationTests(Base, unittest.TestCase):
         self.assertEqual(findid("deformsubmit").text, 'Submit')
     
     def test_render_ru(self):
-        from selenium.common.exceptions import NoSuchElementException
         browser.get("%s?_LOCALE_=ru" % self.url)
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findcss('label').text, u'Число между 1 и 10')
@@ -984,7 +955,6 @@ class InternationalizationTests(Base, unittest.TestCase):
 class PasswordWidgetTests(Base, unittest.TestCase):
     url = test_url("/password/")
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         self.assertTrue('Password' in browser.page_source)
         self.assertEqual(findid('captured').text, 'None')
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
@@ -1000,7 +970,6 @@ class PasswordWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('error-deformField1').text, 'Required')
 
     def test_render_submit_success(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid('deformField1').send_keys('abcdef123')
         findid("deformsubmit").click()
         self.assertTrue('Password' in browser.page_source)
@@ -1071,7 +1040,6 @@ class SequenceOfRadioChoicesTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_none_added(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid("deformsubmit").click()
         self.assertEqual(
             findid('deformField1-addtext').text,
@@ -1081,7 +1049,6 @@ class SequenceOfRadioChoicesTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_two_filled(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid("deformField1-seqAdd").click()
         findid("deformField1-seqAdd").click()
         findxpaths('//input')[4].click()
@@ -1101,7 +1068,6 @@ class SequenceOfDefaultedSelectsTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_none_added(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid("deformsubmit").click()
         self.assertEqual(
             findid('deformField1-addtext').text,
@@ -1111,7 +1077,6 @@ class SequenceOfDefaultedSelectsTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_two_filled(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid("deformField1-seqAdd").click()
         findid("deformField1-seqAdd").click()
         findid("deformsubmit").click()
@@ -1124,9 +1089,11 @@ class SequenceOfDefaultedSelectsTests(Base, unittest.TestCase):
 class SequenceOfDefaultedSelectsWithInitialItemTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_defaulted_selects_with_initial_item/")
     def test_submit_none_added(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid("deformsubmit").click()
-        self.assertEqual(findid('deformField1-addtext').text, 'Add Pepper Chooser')
+        self.assertEqual(
+            findid('deformField1-addtext').text,
+            'Add Pepper Chooser'
+            )
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
             eval(findid('captured').text), # should be 1 value (min_len 1)
@@ -1134,7 +1101,6 @@ class SequenceOfDefaultedSelectsWithInitialItemTests(Base, unittest.TestCase):
             )
 
     def test_submit_one_added(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid("deformField1-seqAdd").click()
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
@@ -1150,7 +1116,6 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_none_added(self):
-        from selenium.common.exceptions import NoSuchElementException
         findid("deformsubmit").click()
         self.assertEqual(findid('deformField1-addtext').text, 'Add Upload')
         self.assertEqual(findid('captured').text, "{'uploads': []}")
@@ -1165,7 +1130,6 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_upload_one_success(self):
-        from selenium.common.exceptions import NoSuchElementException
         path, filename = _getFile()
         findid("deformField1-seqAdd").click()
         findxpath('//input[@name="upload"]').send_keys(path)
@@ -1179,7 +1143,6 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
         self.assertTrue(uid in findid('captured').text)
 
     def test_upload_multi_interaction(self):
-        from selenium.common.exceptions import NoSuchElementException
         path, filename = _getFile()
         findid("deformField1-seqAdd").click()
         findxpath('//input[@name="upload"]').send_keys(path)
@@ -1231,7 +1194,6 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
 class SequenceOfFileUploadsWithInitialItemTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_fileuploads_with_initial_item/")
     def test_render_default(self):
-        from selenium.common.exceptions import NoSuchElementException
         self.assertEqual(findid('deformField1-addtext').text, 'Add Upload')
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('captured').text, 'None')
@@ -1474,44 +1436,34 @@ class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
 class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
     url = test_url("/sequence_of_masked_textinputs/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present("Texts"))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Text')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findcss('.panel-default .panel-heading').text, 'Texts')
+        self.assertEqual(findid('deformField1-addtext').text,'Add Text')
+        self.assertEqual(findid('captured').text, 'None')
         
     def test_submit_none_added(self):
-        browser.get(self.url)
-        browser.click("submit")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Text')
-        self.assertEqual(browser.get_text('css=#captured'), "{'texts': []}")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
+        findid('deformsubmit').click()
+        self.assertEqual(findid('deformField1-addtext').text,'Add Text')
+        self.assertEqual(findid('captured').text, "{'texts': []}")
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_two_unfilled(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.click("submit")
-        self.assertTrue(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid('deformField1-seqAdd').click()
+        findid('deformField1-seqAdd').click()
+        findid('deformsubmit').click()
+        self.assertTrue(findcss(".has-error"))
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('error-deformField4').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_one_filled(self):
-        import time
         browser.get(self.url)
-        browser.click('deformField1-seqAdd')
-        added = 'dom=document.forms[0].text'
-        browser.focus(added)
-        for key in '140118866':
-            browser.key_press(added, key)
-            time.sleep(.005)
-        browser.click("submit")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        captured = browser.get_text('css=#captured')
+        findid('deformField1-seqAdd').click()
+        textbox = findxpaths('//input[@name="text"]')[0]
+        textbox.click()
+        textbox.send_keys('140118866')
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        captured = findid('captured').text
         self.assertSimilarRepr(
             captured,  "{'texts': [u'140-11-8866']}"
             )
