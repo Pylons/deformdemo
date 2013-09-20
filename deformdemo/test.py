@@ -2176,34 +2176,26 @@ class MultipleFormsTests(Base, unittest.TestCase):
 class RequireOneFieldOrAnotherTests(Base, unittest.TestCase):
     url = test_url("/require_one_or_another/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'one')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_attribute("deformField2@name"), 'two')
-        self.assertEqual(browser.get_value('deformField2'), '')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('deformField1').get_attribute('name'), 'one')
+        self.assertEqual(findid('deformField2').get_attribute('value'), '')
+        self.assertEqual(findid('deformField2').get_attribute('name'), 'two')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_none_filled(self):
-        browser.get(self.url)
-        browser.click('submit')
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField1').text,
                          'Required if two is not supplied')
-        self.assertEqual(browser.get_text('css=#error-deformField2'),
+        self.assertEqual(findid('error-deformField2').text,
                          'Required if one is not supplied')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, u"None")
-        self.assertTrue(browser.is_element_present('css=.has-error'))
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_one_filled(self):
-        browser.get(self.url)
-        browser.type('deformField1', 'one')
-        browser.click('submit')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured, 
-            u"{'one': u'one', 'two': u''}"
-            )
-        self.assertFalse(browser.is_element_present('css=.has-error'))
+        findid("deformField1").send_keys('one')
+        findid("deformsubmit").click()
+        self.assertEqual(eval(findid('captured').text),
+                         {'one': u'one', 'two': u''})
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
 class AjaxFormTests(Base, unittest.TestCase):
     url = test_url("/ajaxform/")
