@@ -2208,90 +2208,58 @@ class RequireOneFieldOrAnotherTests(Base, unittest.TestCase):
 class AjaxFormTests(Base, unittest.TestCase):
     url = test_url("/ajaxform/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField1'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField3'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField4'))
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'number')
-        self.assertEqual(browser.get_value('deformField3'), '')
-        self.assertEqual(browser.get_attribute('deformField3@name'), 'name')
-        self.assertEqual(browser.get_value('deformField4'), '')
-        self.assertEqual(browser.get_attribute('deformField4@name'), 'year')
-        self.assertEqual(browser.get_value('deformField4-month'), '')
-        self.assertEqual(browser.get_attribute('deformField4-month@name'),
-                         'month')
-        self.assertEqual(browser.get_value('deformField4-day'), '')
-        self.assertEqual(browser.get_attribute('deformField4-day@name'),
-                         'day')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('deformField3').get_attribute('value'), '')
+        self.assertEqual(findid('deformField4').get_attribute('value'), '')
+        self.assertEqual(findid('deformField4-month').get_attribute('value'), '')
+        self.assertEqual(findid('deformField4-day').get_attribute('value'), '')
 
     def test_submit_empty(self):
-        browser.get(self.url)
-        browser.click('submit')
-        browser.wait_for_condition(
-            'selenium.browserbot.getCurrentWindow().jQuery.active == 0',
-            "30000")
-        self.assertTrue(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#captured'),
-                         'None')
+        findid("deformsubmit").click()
+        self.assertEquals(findid('error-deformField1').text,
+                          'Required')
+        self.assertEquals(findid('error-deformField3').text,
+                          'Required')
+        self.assertEquals(findid('error-deformField4').text,
+                          'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_invalid(self):
-        browser.get(self.url)
-        browser.type('deformField1', 'notanumber')
-        browser.click('submit')
-        browser.wait_for_condition(
-            'selenium.browserbot.getCurrentWindow().jQuery.active == 0',
-            "30000")
-        self.assertTrue(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         '"notanumber" is not a number')
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#captured'),
-                         'None')
+        findid('deformField1').send_keys('notanumber')
+        findid("deformsubmit").click()
+        self.assertEquals(findid('error-deformField1').text,
+                          '"notanumber" is not a number')
+        self.assertEquals(findid('error-deformField3').text,
+                          'Required')
+        self.assertEquals(findid('error-deformField4').text,
+                          'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
-        browser.get(self.url)
-        browser.type('deformField1', '1')
-        browser.type('deformField3', 'name')
-        browser.type('deformField4', '2010')
-        browser.type('deformField4-month', '1')
-        browser.type('deformField4-day', '1')
-        browser.type('deformField5', 'text')
-        browser.click('submit')
-        browser.wait_for_condition(
-            'selenium.browserbot.getCurrentWindow().jQuery.active == 0',
-            "30000")
-        self.assertEqual(browser.get_text('css=#thanks'), 'Thanks!')
+        findid('deformField1').send_keys('1')
+        findid('deformField3').send_keys('name')
+        findid('deformField4').send_keys('2010')
+        findid('deformField4-month').send_keys('1')
+        findid('deformField4-day').send_keys('1')
+        browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
+        # TODO: there is a bug, first submit always fails: content of tinymce is not sent
+        # see http://stackoverflow.com/questions/4764244/tinymce-blank-content-on-ajax-form-submit/4874915#4874915
+        findid('tinymce').send_keys('yo')
+        browser.switch_to_default_content()
+        findid("deformsubmit").click()
+        self.assertEquals(findid('thanks').text, 'Thanks!')
 
 class RedirectingAjaxFormTests(AjaxFormTests):
     url = test_url("/ajaxform_redirect/")
     def test_submit_success(self):
-        import time
-        browser.get(self.url)
-        browser.type('deformField1', '1')
-        browser.type('deformField3', 'name')
-        browser.type('deformField4', '2010')
-        browser.type('deformField4-month', '1')
-        browser.type('deformField4-day', '1')
-        browser.click('submit')
-        time.sleep(1)
-        ## browser.wait_for_condition(
-        ##     'selenium.browserbot.getCurrentWindow().jQuery.active == 0',
-        ##     "30000")
-        location = browser.get_location()
-        self.assertTrue(location.endswith('thanks.html'))
+        findid('deformField1').send_keys('1')
+        findid('deformField3').send_keys('name')
+        findid('deformField4').send_keys('2010')
+        findid('deformField4-month').send_keys('1')
+        findid('deformField4-day').send_keys('1')
+        findid("deformsubmit").click()
+        self.assertTrue(browser.current_url.endswith('thanks.html'))
 
 class TextInputMaskTests(Base, unittest.TestCase):
     url = test_url("/text_input_masks/")
