@@ -1537,11 +1537,10 @@ class SelectWidgetMultipleTests(Base, unittest.TestCase):
         options[0].click()
         options[2].click()
 
-        browser.click('submit')
         findid('deformsubmit').click()
 
-        captured_default = "{'pepper': set([u'chipotle', u'habanero'])}"
-        self.assertEqual(findid('captured').text, captured_default)
+        captured_default = {'pepper': set([u'chipotle', u'habanero'])}
+        self.assertEqual(eval(findid('captured').text), captured_default)
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
 class SelectWidgetIntegerTests(Base, unittest.TestCase):
