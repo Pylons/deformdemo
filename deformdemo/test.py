@@ -1848,25 +1848,24 @@ class RichTextWidgetInternationalized(Base, unittest.TestCase):
 class UnicodeEverywhereTests(Base, unittest.TestCase):
     url = test_url("/unicodeeverywhere/")
     def test_render_default(self):
-        browser.get(self.url)
         description=(u"子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？ "
                      u"人不知而不慍，不亦君子乎？」")
 
-        self.assertTrue(browser.is_text_present(u"По оживлённым берегам"))
-        self.assertEqual(browser.get_attribute("item-deformField1@title"),
+        self.assertTrue(u"По оживлённым берегам" in browser.page_source)
+        self.assertEqual(findcss('.help-block').text,
                          description)
-        self.assertEqual(browser.get_attribute("css=label@title"),
-                         description)
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'field')
-        self.assertEqual(browser.get_value("deformField1"), u'☃')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findid('deformField1').get_attribute('name'),
+                         'field')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         u'☃')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit(self):
-        browser.get(self.url)
-        browser.click('submit')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_value('deformField1'), u'☃')
-        captured = browser.get_text('css=#captured')
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         u'☃')
+        captured = findid('captured').text
         self.assertTrue(
             captured in (
                 u"{'field': u'\\u2603'}", # py2
