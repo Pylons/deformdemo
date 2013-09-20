@@ -2296,45 +2296,34 @@ class RedirectingAjaxFormTests(AjaxFormTests):
 class TextInputMaskTests(Base, unittest.TestCase):
     url = test_url("/text_input_masks/")
     def test_render_default(self):
-        browser.get(self.url)
-        browser.focus('deformField1')
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'ssn')
-        self.assertEqual(browser.get_value('deformField1'), '___-__-____')
-        self.assertEqual(browser.get_attribute("deformField2@name"), 'date')
-        self.assertEqual(browser.get_value('deformField2'), '')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
+        findid('deformField1').send_keys('')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '___-__-____')
+        self.assertEqual(findid('deformField1').get_attribute('name'), 'ssn')
+        self.assertEqual(findid('deformField2').get_attribute('value'), '')
+        self.assertEqual(findid('deformField2').get_attribute('name'), 'date')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_type_bad_input(self):
-        import time
-        browser.get(self.url)
-        browser.focus('deformField1')
-        browser.key_press('deformField1', 'a')
-        time.sleep(.005)
-        browser.focus('deformField2')
-        browser.key_press('deformField2', 'a')
-        time.sleep(.005)
-        self.assertTrue(
-            browser.get_value('deformField1') in ('', '___-__-____'))
-        self.assertTrue(
-            browser.get_value('deformField2') in ('', '__/__/____'))
+        findid('deformField1').send_keys('')
+        findid('deformField1').send_keys('a')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '___-__-____')
+        findid('deformField2').send_keys('')
+        findid('deformField2').send_keys('a')
+
+        self.assertEqual(findid('deformField2').get_attribute('value'),
+                         '__/__/____')
 
     def test_submit_success(self):
-        import time
-        browser.get(self.url)
-        browser.focus('deformField1')
-        for key in '140118866':
-            browser.key_press('deformField1', key)
-            time.sleep(.005)
-        browser.focus('deformField2')
-        time.sleep(1)
-        for key in '10102010':
-            browser.key_press('deformField2', key)
-            time.sleep(.005)
-        browser.click('submit')
-        self.assertSimilarRepr(
-            browser.get_text('css=#captured'),
-            u"{'date': u'10/10/2010', 'ssn': u'140-11-8866'}"
-            )
+        findid('deformField1').send_keys('')
+        findid('deformField1').send_keys('140118866')
+        browser.execute_script(
+            'document.getElementById("deformField2").focus();')
+        findid('deformField2').send_keys('10102010')
+        findid("deformsubmit").click()
+        self.assertEqual(eval(findid('captured').text),
+                        {'date': u'10/10/2010', 'ssn': u'140-11-8866'})
 
 class MultipleErrorMessagesInMappingTest(Base, unittest.TestCase):
     url = test_url("/multiple_error_messages_mapping/")
