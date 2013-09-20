@@ -2360,17 +2360,9 @@ class MultipleErrorMessagesInSequenceTest(Base, unittest.TestCase):
 class CssClassesOnTheOutermostHTMLElement(Base, unittest.TestCase):
     url = test_url("/custom_classes_on_outermost_html_element/")
     def test_it(self):
-        browser.get(self.url)
-        self.assertTrue(
-            browser.is_element_present(
-                'css=form > fieldset > ul > li.field.top_level_mapping_widget_custom_class')
-            )
-        self.assertTrue(
-            browser.is_element_present('css=[title=SequenceWidget] > .deformSeq > ul > li.sequenced_widget_custom_class')
-            )
-        self.assertTrue(
-            browser.is_element_present('css=[title=MappingWidget] > fieldset > ul > li.mapped_widget_custom_class')
-            )
+        findcss('form > fieldset > div.top_level_mapping_widget_custom_class')
+        findcss('[title=MappingWidget] div.mapped_widget_custom_class')
+        findcss('[title=SequenceWidget] div.sequenced_widget_custom_class')
         
 
 if __name__ == '__main__':
