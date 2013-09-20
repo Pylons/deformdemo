@@ -1503,6 +1503,7 @@ class SelectWidgetTests(Base, unittest.TestCase):
         options[1].click()
         findid('deformsubmit').click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        select = findid('deformField1')
         options = select.find_elements_by_tag_name('option')
         self.assertTrue(options[1].is_selected())
         self.assertTrue(
