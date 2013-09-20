@@ -5,6 +5,7 @@ import re
 import os
 
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.keys import Keys
 
 # to run:
 # console 1: java -jar selenium-server.jar
@@ -1684,30 +1685,30 @@ class TextInputWidgetTests(Base, unittest.TestCase):
 class MoneyInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/money_input/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present("Greenbacks"))
-        self.assertEqual(browser.get_attribute("deformField1@name"),
+        findid('deformField1').send_keys('')
+        self.assertTrue('Greenbacks' in browser.page_source)
+        self.assertEqual(findid('deformField1').get_attribute('name'),
                          'greenbacks')
-        self.assertEqual(browser.get_attribute("deformField1@type"), 'text')
-        self.assertEqual(browser.get_value("deformField1"), '0.00')
-        self.assertEqual(browser.get_text('css=.required'), 'Greenbacks')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findid('deformField1').get_attribute('type'),
+                         'text')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '0.00')
+        self.assertEqual(findcss('.required').text, 'Greenbacks')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        browser.get(self.url)
-        browser.click('submit')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(captured, "{'greenbacks': Decimal('0.00')}")
+        findid('deformField1').send_keys('')
+        findid('deformsubmit').click()
+        self.assertEqual(findid('captured').text,
+                         "{'greenbacks': Decimal('0.00')}")
 
     def test_submit_filled(self):
-        browser.get(self.url)
-        browser.focus('deformField1')
-        browser.type('deformField1', '100')
-        browser.click('submit')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(captured, "{'greenbacks': Decimal('100')}")
-        self.assertEqual(browser.get_value('deformField1'), '100')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
+        findid('deformField1').send_keys(5 * Keys.ARROW_LEFT)
+        findid('deformField1').send_keys('10')
+        findid('deformsubmit').click()
+        self.assertEqual(findid('captured').text,
+                         "{'greenbacks': Decimal('100.00')}")
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
 class TextInputWithCssClassWidgetTests(Base, unittest.TestCase):
     url = test_url("/textinput_with_css_class/")
