@@ -1777,35 +1777,28 @@ class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
 class TextAreaWidgetTests(Base, unittest.TestCase):
     url = test_url("/textarea/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present("Text"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'text')
-        self.assertEqual(browser.get_attribute("deformField1@rows"), '10')
-        self.assertEqual(browser.get_attribute("deformField1@cols"), '60')
-        self.assertEqual(browser.get_value("deformField1"), '')
-        self.assertEqual(browser.get_text('css=.required'), 'Text')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Text' in browser.page_source)
+        self.assertEqual(findid('deformField1').get_attribute('name'),
+                         'text')
+        self.assertEqual(findid('deformField1').get_attribute('rows'),
+                         '10')
+        self.assertEqual(findid('deformField1').get_attribute('cols'),
+                         '60')
+        self.assertEqual(findcss('.required').text, 'Text')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        browser.get(self.url)
-        browser.click('submit')
-        self.assertTrue(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid('deformsubmit').click()
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertTrue(findcss('.has-error'))
 
     def test_submit_filled(self):
-        browser.get(self.url)
-        browser.type('deformField1', 'hello')
-        browser.click('submit')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_value('deformField1'), 'hello')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured,
-            "{'text': u'hello'}"
-            )
+        findid('deformField1').send_keys('hello')
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('captured').text,
+                         "{'text': u'hello'}")
 
 class DelayedRichTextWidgetTests(Base, unittest.TestCase):
     url = test_url("/delayed_richtext/")
