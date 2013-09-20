@@ -3,6 +3,7 @@
 import unittest
 import re
 import os
+import time
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.webdriver.common.keys import Keys
@@ -1747,45 +1748,31 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
 class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/autocomplete_remote_input/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present(
-                "Autocomplete Input Widget (with Remote Data Source)"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'text')
-        self.assertEqual(browser.get_attribute("deformField1@type"), 'text')
-        self.assertEqual(browser.get_value("deformField1"), '')
-        self.assertEqual(browser.get_text('css=.required'), 'Text')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Autocomplete Input Widget (with Remote Data Source)' in browser.page_source)
+        self.assertEqual(findid('deformField1').get_attribute('name'),
+                         'text')
+        self.assertEqual(findid('deformField1').get_attribute('type'),
+                         'text')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '')
+        self.assertEqual(findcss('.required').text, 'Text')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        browser.get(self.url)
-        browser.click('submit')
-        self.assertTrue(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid('deformsubmit').click()
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_filled(self):
-        browser.get(self.url)
-        browser.focus('deformField1')
-        browser.type('deformField1', 't')
-        import time
-        time.sleep(.5)
-        browser.key_press('deformField1', 't')
-        import time
-        time.sleep(.5)
-        import pdb;pdb.set_trace()
-        self.assertTrue(browser.is_text_present('two'))
-        self.assertTrue(browser.is_text_present('three'))
-        browser.mouse_over("css=.tt-suggestion")
-        browser.click("css=.tt-suggestion")
-        browser.click('submit')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_value('deformField1'), u'two')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured,
-            "{'text': u'two'}")
+        findid('deformField1').send_keys('t')
+        time.sleep(0.5)
+        self.assertTrue(findxpath('//p[text()="two"]').is_displayed())
+        self.assertTrue(findxpath('//p[text()="three"]').is_displayed())
+        findcss('.tt-suggestion').click()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('captured').text,
+                         "{'text': u'two'}")
 
 class TextAreaWidgetTests(Base, unittest.TestCase):
     url = test_url("/textarea/")
