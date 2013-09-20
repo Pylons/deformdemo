@@ -1578,57 +1578,76 @@ class SelectWidgetIntegerTests(Base, unittest.TestCase):
             captured, 
             "{'number': 0}")
         
-class SelectWidgetWithOptgroupTest(Base, unittest.TestCase):
+class SelectWidgetWithOptgroupTests(Base, unittest.TestCase):
     url = test_url("/select_with_optgroup/")
 
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present('Musician'))
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'musician')
-        self.assertEqual(browser.get_selected_index('deformField1'), '0')
-        options = browser.get_select_options('deformField1')
+        self.assertTrue('Musician' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'musician')
+        self.assertFalse(select.get_attribute('multiple'))
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
         self.assertEqual(
-            options,
+            [o.text for o in options],
             [u'Select your favorite musician',
-             u'Jimmy Page', u'Jimi Hendrix', u'Billy Cobham', u'John Bonham']) 
-        self.assertEqual(browser.get_text('css=.required'), 'Musician')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(int(browser.get_xpath_count('//optgroup')), 2)
-
+             u'Jimmy Page', u'Jimi Hendrix', u'Billy Cobham', u'John Bonham']
+            )
+        self.assertEqual(findcss('.required').text, 'Musician')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(len(findxpaths('//optgroup')), 2)
+        
     def test_submit_selected(self):
-        browser.get(self.url)
-        browser.select('deformField1', 'index=1')
-        browser.click('submit')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_selected_index('deformField1'), '1')
-        captured = browser.get_text('css=#captured')
-        # With or without "u"...
-        expected = ("{'musician': 'page'}", "{'musician': u'page'}")
-        self.assertTrue(captured in expected)
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        options[1].click()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[1].is_selected())
+        captured = findid('captured').text
+        self.assertSimilarRepr(
+            captured,
+            "{'musician': 'page'}",
+            )
 
-class SelectWidgetWithOptgroupAndLabelTest(SelectWidgetWithOptgroupTest):
+class SelectWidgetWithOptgroupAndLabelTests(SelectWidgetWithOptgroupTests):
     url = test_url("/select_with_optgroup_and_label_attributes/")
 
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present('Musician'))
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'musician')
-        self.assertEqual(browser.get_selected_index('deformField1'), '0')
-        # We cannot test what the options look like because it depends
-        # on the browser.
-        self.assertEqual(browser.get_text('css=.required'), 'Musician')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(int(browser.get_xpath_count('//optgroup')), 2)
-
+        self.assertTrue('Musician' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'musician')
+        self.assertFalse(select.get_attribute('multiple'))
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
+        self.assertEqual(
+            [o.text for o in options],
+            [u'Select your favorite musician',
+             u'Guitarists - Jimmy Page',
+             u'Guitarists - Jimi Hendrix',
+             u'Drummers - Billy Cobham',
+             u'Drummers - John Bonham']
+            )
+        self.assertEqual(findcss('.required').text, 'Musician')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(len(findxpaths('//optgroup')), 2)
+        
     def test_submit_selected(self):
-        browser.get(self.url)
-        browser.select('deformField1', 'index=1')
-        browser.click('submit')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_selected_index('deformField1'), '1')
-        captured = browser.get_text('css=#captured')
-        expected = ("{'musician': 'page'}", "{'musician': u'page'}")
-        self.assertTrue(captured in expected)
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        options[1].click()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[1].is_selected())
+        captured = findid('captured').text
+        self.assertSimilarRepr(
+            captured,
+            "{'musician': 'page'}",
+            )
 
 class TextInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/textinput/")
