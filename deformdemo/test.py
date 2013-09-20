@@ -1681,6 +1681,11 @@ class TextInputWidgetTests(Base, unittest.TestCase):
         self.assertSimilarRepr(
             captured, 
             "{'text': u'hello'}")
+
+class TextInputWithCssClassWidgetTests(Base, unittest.TestCase):
+    url = test_url("/textinput_with_css_class/")
+    def test_render_default(self):
+        findcss('.deformWidgetWithStyle')
         
 class MoneyInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/money_input/")
@@ -1709,14 +1714,6 @@ class MoneyInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text,
                          "{'greenbacks': Decimal('100.00')}")
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
-
-class TextInputWithCssClassWidgetTests(Base, unittest.TestCase):
-    url = test_url("/textinput_with_css_class/")
-    def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(
-            browser.is_element_present('css=.deformWidgetWithStyle')
-            )
 
 class AutocompleteInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/autocomplete_input/")
