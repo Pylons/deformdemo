@@ -7,6 +7,7 @@ import time
 from decimal import Decimal
 
 from selenium.common.exceptions import NoSuchElementException
+from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
 
 # to run:
@@ -1909,89 +1910,69 @@ class SequenceOfSequencesTests(Base, unittest.TestCase):
         findcsses('.deformClosebutton')[3].click()
         self.assertEqual(len(findxpaths('//input[@name="name"]')), 1)
 
-class SequenceOrderable(Base, unittest.TestCase):
+class SequenceOrderableTests(Base, unittest.TestCase):
     url = test_url("/sequence_orderable/")
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_element_present('css=.deformProto'))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Person')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue(findcss('.deformProto'))
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1-addtext').text,
+                         'Add Person')
 
     def test_submit_complex_interaction(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd') # add one
+        findid("deformField1-seqAdd").click()
+
         # A single item shouldn't have an active reorder button.
-        self.assertEqual(int(browser.get_xpath_count(
-            "//span[@class='deformOrderbutton close glyphicon "
-            "glyphicon-resize-vertical']")), 1)
-        order1_style = browser.get_attribute(
-            "document.getElementsByClassName('deformOrderbutton')[0]@style")
-        self.assertEqual(order1_style, 'display: none;')
-        browser.click('deformField1-seqAdd') # add a second
+        self.assertEqual(len(findcsses('.deformOrderbutton')), 1)
+        self.assertFalse(findcsses('.deformOrderbutton')[0].is_displayed())
+        
+        # add a second
+        findid("deformField1-seqAdd").click()
         # Now there should be 2 active reorder buttons.
-        self.assertEqual(int(browser.get_xpath_count(
-            "//span[@class='deformOrderbutton close glyphicon "
-            "glyphicon-resize-vertical']")), 2)
-        order1_style = browser.get_attribute(
-            "document.getElementsByClassName('deformOrderbutton')[0]@style")
-        self.assertEqual(order1_style, 'display: block;')
-        order2_style = browser.get_attribute(
-            "document.getElementsByClassName('deformOrderbutton')[1]@style")
-        self.assertEqual(order2_style, ';')
-        browser.click('deformField1-seqAdd') # add a third
+        self.assertEqual(len(findcsses('.deformOrderbutton')), 2)
+        self.assertTrue(findcsses('.deformOrderbutton')[0].is_displayed())
+        self.assertTrue(findcsses('.deformOrderbutton')[1].is_displayed())
 
-        browser.type("document.forms[0].name[0]", 'Name1')
-        browser.type("document.forms[0].age[0]", '11')
-        browser.type("document.forms[0].name[1]", 'Name2')
-        browser.type("document.forms[0].age[1]", '22')
-        browser.type("document.forms[0].name[2]", 'Name3')
-        browser.type("document.forms[0].age[2]", '33')
+        # add a third
+        findid("deformField1-seqAdd").click()
+        findxpaths('//input[@name="name"]')[0].send_keys('Name1')
+        findxpaths('//input[@name="age"]')[0].send_keys('11')
+        findxpaths('//input[@name="name"]')[1].send_keys('Name2')
+        findxpaths('//input[@name="age"]')[1].send_keys('22')
+        findxpaths('//input[@name="name"]')[2].send_keys('Name3')
+        findxpaths('//input[@name="age"]')[2].send_keys('33')
 
-        order1_id = browser.get_attribute(
-            "document.getElementsByClassName('deformOrderbutton')[0]@id")
-        order2_id = browser.get_attribute(
-            "document.getElementsByClassName('deformOrderbutton')[1]@id")
-        order3_id = browser.get_attribute(
-            "document.getElementsByClassName('deformOrderbutton')[2]@id")
-
-        # Determine the number of pixels between two order buttons.
-        # We'll use this value later in calls to drag_and_drop().
-        order1_top = int(browser.get_element_position_top(order1_id))
-        order2_top = int(browser.get_element_position_top(order2_id))
-        vertical_offset = order2_top - order1_top
+        order1_id = findcsses('.deformOrderbutton')[0].get_attribute('id')
+        order2_id = findcsses('.deformOrderbutton')[1].get_attribute('id')
+        order3_id = findcsses('.deformOrderbutton')[2].get_attribute('id')
+        seq_height = findcss('.deformSeqItem').size['height']
 
         # Move item 1 down one slot (actually a little more than 1 is
         # needed to trigger jQuery Sortable when dragging down, so use 1.5).
-        browser.drag_and_drop( order1_id,  "0,+%s" % (1.5 * vertical_offset))
+        actions = ActionChains(browser)
+        actions.drag_and_drop_by_offset(findid(order1_id), 0, seq_height * 1.5)
+        actions.perform()
 
         # Move item 3 up two
-        browser.drag_and_drop( order3_id,  "0,-%s" % (2 * vertical_offset))
+        actions = ActionChains(browser)
+        actions.drag_and_drop_by_offset(findid(order3_id), 0, -seq_height * 2.5)
+        actions.perform()
 
-        browser.click("submit")
+        findid('deformsubmit').click()
 
-        # Original 3 items should now be in reverse order: 3, 2, 1
-
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_value('document.forms[0].name[0]'),
+        # sequences should be in reversed order
+        self.assertEqual(findxpaths('//input[@name="name"]')[0].get_attribute('value'),
                          'Name3')
-        self.assertEqual(browser.get_value('document.forms[0].age[0]'),
-                         '33')
-        self.assertEqual(browser.get_value('document.forms[0].name[1]'),
+        self.assertEqual(findxpaths('//input[@name="name"]')[1].get_attribute('value'),
                          'Name2')
-        self.assertEqual(browser.get_value('document.forms[0].age[1]'),
-                         '22')
-        self.assertEqual(browser.get_value('document.forms[0].name[2]'),
+        self.assertEqual(findxpaths('//input[@name="name"]')[2].get_attribute('value'),
                          'Name1')
-        self.assertEqual(browser.get_value('document.forms[0].age[2]'),
-                         '11')
 
-        captured = browser.get_text('css=#captured')
-        captured = eval(captured)
-        self.assertEqual(captured, {'people': [
-            {'name': 'Name3', 'age': 33},
-            {'name': 'Name2', 'age': 22},
-            {'name': 'Name1', 'age': 11},
-        ]})
+        self.assertEqual(eval(findid('captured').text),
+                         {'people': [
+                         {'name': 'Name3', 'age': 33},
+                         {'name': 'Name2', 'age': 22},
+                         {'name': 'Name1', 'age': 11},
+                     ]})
 
 class TextAreaCSVWidgetTests(Base, unittest.TestCase):
     url = test_url("/textareacsv/")
