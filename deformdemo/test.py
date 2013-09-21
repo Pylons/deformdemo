@@ -49,7 +49,7 @@ def setUpModule():
     return browser
 
 def tearDownModule():
-    browser.close()
+    browser.quit()
 
 def _getFile(name='test.py'):
     path = os.path.join(os.path.abspath(os.path.dirname(__file__)), name)
