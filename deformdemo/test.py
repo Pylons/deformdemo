@@ -7,8 +7,10 @@ import time
 from decimal import Decimal
 
 from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import WebDriverException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.wait import WebDriverWait
 
 # to run:
 # console 1: java -jar selenium-server.jar
@@ -41,6 +43,15 @@ def findxpath(selector):
 
 def findxpaths(selector):
     return browser.find_elements_by_xpath(selector)
+
+def wait_for_ajax(source):
+    def compare_source(driver):
+        try:
+            return source != driver.page_source
+        except WebDriverException:
+            pass
+
+    WebDriverWait(browser, 5).until(compare_source)
 
 def setUpModule():
     from selenium.webdriver import Firefox
@@ -2095,28 +2106,28 @@ class AjaxFormTests(Base, unittest.TestCase):
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
         self.assertEqual(findid('deformField3').get_attribute('value'), '')
         self.assertEqual(findid('deformField4').get_attribute('value'), '')
-        self.assertEqual(findid('deformField4-month').get_attribute('value'), '')
+        self.assertEqual(
+            findid('deformField4-month').get_attribute('value'), '')
         self.assertEqual(findid('deformField4-day').get_attribute('value'), '')
 
     def test_submit_empty(self):
+        source = browser.page_source
         findid("deformsubmit").click()
-        self.assertEquals(findid('error-deformField1').text,
-                          'Required')
-        self.assertEquals(findid('error-deformField3').text,
-                          'Required')
-        self.assertEquals(findid('error-deformField4').text,
-                          'Required')
+        wait_for_ajax(source)
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('error-deformField4').text, 'Required')
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_invalid(self):
         findid('deformField1').send_keys('notanumber')
+        source = browser.page_source
         findid("deformsubmit").click()
-        self.assertEquals(findid('error-deformField1').text,
-                          '"notanumber" is not a number')
-        self.assertEquals(findid('error-deformField3').text,
-                          'Required')
-        self.assertEquals(findid('error-deformField4').text,
-                          'Required')
+        wait_for_ajax(source)
+        self.assertEqual(findid('error-deformField1').text,
+                         '"notanumber" is not a number')
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('error-deformField4').text, 'Required')
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
@@ -2126,11 +2137,11 @@ class AjaxFormTests(Base, unittest.TestCase):
         findid('deformField4-month').send_keys('1')
         findid('deformField4-day').send_keys('1')
         browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
-        # TODO: there is a bug, first submit always fails: content of tinymce is not sent
-        # see http://stackoverflow.com/questions/4764244/tinymce-blank-content-on-ajax-form-submit/4874915#4874915
         findid('tinymce').send_keys('yo')
         browser.switch_to_default_content()
+        source = browser.page_source
         findid("deformsubmit").click()
+        wait_for_ajax(source)
         self.assertEquals(findid('thanks').text, 'Thanks!')
 
 class RedirectingAjaxFormTests(AjaxFormTests):
@@ -2141,7 +2152,9 @@ class RedirectingAjaxFormTests(AjaxFormTests):
         findid('deformField4').send_keys('2010')
         findid('deformField4-month').send_keys('1')
         findid('deformField4-day').send_keys('1')
+        source = browser.page_source
         findid("deformsubmit").click()
+        wait_for_ajax(source)
         self.assertTrue(browser.current_url.endswith('thanks.html'))
 
 class TextInputMaskTests(Base, unittest.TestCase):
