@@ -1953,30 +1953,27 @@ class SequenceOrderableTests(Base, unittest.TestCase):
         findxpaths('//input[@name="age"]')[2].send_keys('33')
 
         order1_id = findcsses('.deformOrderbutton')[0].get_attribute('id')
-        order2_id = findcsses('.deformOrderbutton')[1].get_attribute('id')
         order3_id = findcsses('.deformOrderbutton')[2].get_attribute('id')
         seq_height = findcss('.deformSeqItem').size['height']
+
+        # Move item 3 up two
+        actions = ActionChains(browser)
+        actions.drag_and_drop_by_offset(
+            findid(order3_id), 0, -seq_height * 2.5).perform()
 
         # Move item 1 down one slot (actually a little more than 1 is
         # needed to trigger jQuery Sortable when dragging down, so use 1.5).
         actions = ActionChains(browser)
-        actions.drag_and_drop_by_offset(findid(order1_id), 0, seq_height * 1.5)
-        actions.perform()
-
-        # Move item 3 up two
-        actions = ActionChains(browser)
-        actions.drag_and_drop_by_offset(findid(order3_id), 0, -seq_height * 2.5)
-        actions.perform()
+        actions.drag_and_drop_by_offset(
+            findid(order1_id), 0, seq_height * 1.5).perform()
 
         findid('deformsubmit').click()
 
         # sequences should be in reversed order
-        self.assertEqual(findxpaths('//input[@name="name"]')[0].get_attribute('value'),
-                         'Name3')
-        self.assertEqual(findxpaths('//input[@name="name"]')[1].get_attribute('value'),
-                         'Name2')
-        self.assertEqual(findxpaths('//input[@name="name"]')[2].get_attribute('value'),
-                         'Name1')
+        inputs = findxpaths('//input[@name="name"]')
+        self.assertEqual(inputs[0].get_attribute('value'), 'Name3')
+        self.assertEqual(inputs[1].get_attribute('value'), 'Name2')
+        self.assertEqual(inputs[2].get_attribute('value'), 'Name1')
 
         self.assertEqual(eval(findid('captured').text),
                          {'people': [
