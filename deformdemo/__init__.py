@@ -197,7 +197,7 @@ class DeformDemo(object):
             text = colander.SchemaNode(
                 colander.String(),
                 validator=colander.Length(max=100),
-                widget=deform.widget.TextInputWidget(size=60),
+                widget=deform.widget.TextInputWidget(),
                 description='Enter some text')
 
         schema = Schema()
@@ -210,7 +210,7 @@ class DeformDemo(object):
     def textinput_with_css_class(self):
 
         css_widget = deform.widget.TextInputWidget(
-            size=60, css_class='deformWidgetWithStyle')
+            css_class='deformWidgetWithStyle')
 
         class Schema(colander.Schema):
             text = colander.SchemaNode(colander.String(),
@@ -228,7 +228,7 @@ class DeformDemo(object):
     def money_input(self):
 
         widget = deform.widget.MoneyInputWidget(
-            size=20, options={'allowZero': True})
+            options={'allowZero': True})
 
         class Schema(colander.Schema):
             greenbacks = colander.SchemaNode(
@@ -247,7 +247,6 @@ class DeformDemo(object):
 
         choices = ['bar', 'baz', 'two', 'three']
         widget = deform.widget.AutocompleteInputWidget(
-            size=60,
             values=choices,
             min_length=1)
 
@@ -268,7 +267,6 @@ class DeformDemo(object):
     def autocomplete_remote_input(self):
 
         widget = deform.widget.AutocompleteInputWidget(
-            size=60,
             min_length=1,
             values=self.request.route_path(
                 'deformdemo', traverse=('autocomplete_input_values',)
@@ -367,7 +365,7 @@ class DeformDemo(object):
             password = colander.SchemaNode(
                 colander.String(),
                 validator=colander.Length(min=5, max=100),
-                widget=deform.widget.PasswordWidget(size=20),
+                widget=deform.widget.PasswordWidget(),
                 description='Enter a password')
 
         schema = Schema()
@@ -454,7 +452,7 @@ class DeformDemo(object):
         widget = deform.widget.CheckedInputWidget(
             subject='Email',
             confirm_subject='Confirm Email',
-            size=40)
+            )
 
         class Schema(colander.Schema):
             email = colander.SchemaNode(
@@ -477,7 +475,7 @@ class DeformDemo(object):
             password = colander.SchemaNode(
                 colander.String(),
                 validator=colander.Length(min=5),
-                widget=deform.widget.CheckedPasswordWidget(size=20),
+                widget=deform.widget.CheckedPasswordWidget(),
                 description='Type your password and confirm it')
 
         schema = Schema()
@@ -493,8 +491,8 @@ class DeformDemo(object):
             subject='SSN',
             confirm_subject='Confirm SSN',
             mask='999-99-9999',
-            mask_placeholder='#',
-            size=40)
+            mask_placeholder='#'
+            )
 
         class Schema(colander.Schema):
             ssn = colander.SchemaNode(
@@ -642,7 +640,6 @@ class DeformDemo(object):
         choices = ['bar', 'baz', 'two', 'three']
 
         widget = deform.widget.AutocompleteInputWidget(
-            size=60,
             values=choices
             )
 
@@ -2008,7 +2005,7 @@ class DeformDemo(object):
             text = colander.SchemaNode(
                 colander.String(),
                 validator=colander.Length(max=100),
-                widget=deform.widget.TextInputWidget(size=60),
+                widget=deform.widget.TextInputWidget(),
                 description='Enter some text'
                 )
 
@@ -2057,6 +2054,70 @@ class DeformDemo(object):
             'readwrite': 'Read and Write',
             }
         schema = Values().bind()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form, appstruct=appstruct)
+
+    @view_config(renderer='templates/form.pt',
+                 name='readonly_fields')
+    @demonstrate('Read-Only Fields')
+    def readonly_fields(self):
+
+        class Schema(colander.Schema):
+            textinput = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.TextInputWidget(readonly=True),
+                missing=colander.null,
+                description='Text in a text input',
+                )
+            textarea = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.TextAreaWidget(readonly=True),
+                missing=colander.null,
+                description='Text in a textarea',
+                )
+            single_select = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectWidget(
+                    values=[
+                        ('a', 'The letter a'),
+                        ('b', 'The letter b'),
+                        ],
+                    readonly=True,
+                    ),
+                missing = colander.null,
+                description='A letter',
+                )
+            multi_select = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectWidget(
+                    values=[
+                        ('a', 'The letter a'),
+                        ('b', 'The letter b'),
+                        ],
+                    multiple=True,
+                    readonly=True,
+                    ),
+                missing = colander.null,
+                description='Some letters',
+                )
+            richtext = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.RichTextWidget(readonly=True),
+                description='Some text',
+                missing=colander.null,
+                )
+
+        appstruct = {
+            'textinput':'readonly text input',
+            'textarea':'readonly text area',
+            'single_select':'a',
+            'multi_select':('a', 'b'),
+            'richtext':'<p>Yo!</p>',
+            }
+
+        schema = Schema()
+        
         form = deform.Form(schema, buttons=('submit',))
 
         return self.render_form(form, appstruct=appstruct)
