@@ -48,9 +48,11 @@
       <div class="container">
         <div class="navbar navbar-default" role="navigation">
           <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-info-sign"></span> Deform 2 Demo</a>
-          <p class="navbar-text pull-right">
+          <p class="navbar-text pull-right"
+             tal:condition="form|None">
           Form Layout
-            <span class="btn-group">
+            <span class="btn-group"
+                  tal:define="bs_form_style bs_form_style|None">
               <a tal:define="active not bs_form_style"
                  class="btn btn-default ${active and 'active' or ''}"
                  href="${request.path_url}?bs_form_style=">
