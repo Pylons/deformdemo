@@ -3,6 +3,7 @@
 """ A Pyramid app that demonstrates various Deform widgets and
 capabilities and which provides a functional test suite  """
 
+import decimal
 import inspect
 import sys
 import csv
@@ -426,6 +427,28 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='radiochoice_inline')
+    @demonstrate('Radio Choice Widget (inline)')
+    def radiochoice_inline(self):
+
+        choices = (('habanero', 'Habanero'), ('jalapeno', 'Jalapeno'),
+                   ('chipotle', 'Chipotle'))
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.String(),
+                validator=colander.OneOf([x[0] for x in choices]),
+                widget=deform.widget.RadioChoiceWidget(values=choices,
+                                                       inline=True),
+                title='Choose your pepper',
+                description='Select a Pepper')
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form)
+
+    
     @view_config(renderer='templates/form.pt', name='radiochoice_int')
     @demonstrate('Radio Choice Widget (with int values)')
     def radiochoice_int(self):
@@ -1519,6 +1542,27 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='checkboxchoice_inline')
+    @demonstrate('Checkbox Choice Widget (inline)')
+    def checkboxchoice_inline(self):
+
+        choices = (('habanero', 'Habanero'),
+                   ('jalapeno', 'Jalapeno'),
+                   ('chipotle', 'Chipotle'))
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.Set(),
+                widget=deform.widget.CheckboxChoiceWidget(
+                    values=choices, inline=True),
+                validator=colander.Length(min=1),
+                )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='checkboxchoice2')
     @demonstrate('Checkbox Choice Widget (with required field)')
     def checkboxchoice2(self):
@@ -2062,6 +2106,7 @@ class DeformDemo(object):
                  name='readonly_fields')
     @demonstrate('Read-Only Fields')
     def readonly_fields(self):
+        import datetime
 
         class Schema(colander.Schema):
             textinput = colander.SchemaNode(
@@ -2107,6 +2152,19 @@ class DeformDemo(object):
                 description='Some text',
                 missing=colander.null,
                 )
+            money = colander.SchemaNode(
+                colander.Decimal(),
+                widget = deform.widget.MoneyWidget(readonly=True),
+                description='Some money',
+                missing=colander.null
+                )
+            date = colander.SchemaNode(
+                colander.Date(),
+                widget = deform.widget.DateWidget(readonly=True),
+                description='Some date',
+                missing=colander.null
+                )
+                
 
         appstruct = {
             'textinput':'readonly text input',
@@ -2114,6 +2172,8 @@ class DeformDemo(object):
             'single_select':'a',
             'multi_select':('a', 'b'),
             'richtext':'<p>Yo!</p>',
+            'money':decimal.Decimal(1),
+            'date':datetime.date(2010, 5, 5),
             }
 
         schema = Schema()

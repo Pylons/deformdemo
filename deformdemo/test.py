@@ -136,6 +136,53 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
             u"{'pepper': {'chipotle', 'habanero', 'jalapeno'}}",
             )
 
+class CheckboxChoiceWidgetInlineTests(Base, unittest.TestCase):
+    url = test_url("/checkboxchoice_inline/")
+    def test_render_default(self):
+        self.assertTrue('Pepper' in browser.page_source)
+        self.assertFalse(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
+        self.assertEqual(findcss('.required').text, 'Pepper')
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_unchecked(self):
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        error_node = 'error-deformField1'
+        self.assertEqual(findid(error_node).text,
+                         'Shorter than minimum length 1')
+        self.assertFalse(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_one_checked(self):
+        findid("deformField1-0").click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertTrue(findid('deformField1-0').is_selected())
+        captured = findid('captured').text
+        self.assertSimilarRepr(
+            captured,
+            u"{'pepper': {'habanero'}}",
+            )
+
+    def test_submit_three_checked(self):
+        findid("deformField1-0").click()
+        findid("deformField1-1").click()
+        findid("deformField1-2").click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertTrue(findid('deformField1-0').is_selected())
+        self.assertTrue(findid('deformField1-1').is_selected())
+        self.assertTrue(findid('deformField1-2').is_selected())
+        captured = findid('captured').text
+        self.assertSimilarRepr(
+            captured,
+            u"{'pepper': {'chipotle', 'habanero', 'jalapeno'}}",
+            )
+        
 class CheckboxWidgetTests(Base, unittest.TestCase):
     url = test_url("/checkbox/")
     def test_render_default(self):
@@ -1028,6 +1075,34 @@ class RadioChoiceWidgetTests(Base, unittest.TestCase):
             findid('captured').text,
             "{'pepper': u'habanero'}")
 
+class RadioChoiceWidgetInlineTests(Base, unittest.TestCase):
+    url = test_url("/radiochoice_inline/")
+    def test_render_default(self):
+        self.assertTrue('Password' in browser.page_source)
+        self.assertFalse(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
+        self.assertEqual(findcss('.required').text, 'Choose your pepper')
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_unchecked(self):
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertFalse(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_one_checked(self):
+        findid('deformField1-0').click()
+        findid("deformsubmit").click()
+        self.assertTrue(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
+        self.assertSimilarRepr(
+            findid('captured').text,
+            "{'pepper': u'habanero'}")
+        
 class RadioChoiceWidgetIntTests(RadioChoiceWidgetTests):
     url = test_url("/radiochoice_int/")
     def test_submit_one_checked(self):
