@@ -693,11 +693,11 @@ class MappingWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('deformField4').get_attribute('value'), 'year')
         self.assertEqual(
             findid('deformField4-month').get_attribute('value'),
-            'month'
+            'mo'
             )
         self.assertEqual(
             findid('deformField4-day').get_attribute('value'),
-            'day'
+            'da'
             )
         self.assertEqual(findid('captured').text, 'None')
 
@@ -1740,6 +1740,100 @@ class SelectWidgetWithOptgroupAndLabelTests(SelectWidgetWithOptgroupTests):
             captured,
             "{'musician': 'page'}",
             )
+
+class Select2WidgetTests(Base, unittest.TestCase):
+    url = test_url("/select2/")
+    submit_selected_captured = (
+        "{'pepper': u'habanero'}",
+        "{'pepper': 'habanero'}",
+        )
+
+    def test_render_default(self):
+        self.assertTrue('Pepper' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'pepper')
+        self.assertFalse(select.get_attribute('multiple'))
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
+        self.assertEqual(
+            [o.text for o in options],
+            [u'- Select -', u'Habanero', u'Jalapeno', u'Chipotle']) 
+        self.assertEqual(findcss('.required').text, 'Pepper')
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_default(self):
+        findid('deformsubmit').click()
+        self.assertTrue('Pepper' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'pepper')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_selected(self):
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        options[1].click()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[1].is_selected())
+        self.assertTrue(
+            findid('captured').text in self.submit_selected_captured
+            )
+
+class Select2WidgetMultipleTests(Base, unittest.TestCase):
+    url = test_url('/select2_with_multiple/')
+
+    def test_submit_selected(self):
+        select = findid('deformField1')
+        self.assertTrue(select.get_attribute('multiple'))
+        options = select.find_elements_by_tag_name('option')
+        options[0].click()
+        options[2].click()
+
+        findid('deformsubmit').click()
+
+        captured_default = {'pepper': set([u'chipotle', u'habanero'])}
+        self.assertEqual(eval(findid('captured').text), captured_default)
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+
+class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
+    url = test_url("/select2_with_optgroup/")
+
+    def test_render_default(self):
+        self.assertTrue('Musician' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'musician')
+        self.assertFalse(select.get_attribute('multiple'))
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
+        self.assertEqual(
+            [o.text for o in options],
+            [u'Select your favorite musician',
+             u'Jimmy Page', u'Jimi Hendrix', u'Billy Cobham', u'John Bonham']
+            )
+        self.assertEqual(findcss('.required').text, 'Musician')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(len(findxpaths('//optgroup')), 2)
+        
+    def test_submit_selected(self):
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        options[1].click()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[1].is_selected())
+        captured = findid('captured').text
+        self.assertSimilarRepr(
+            captured,
+            "{'musician': 'page'}",
+            )
+
 
 class TextInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/textinput/")
