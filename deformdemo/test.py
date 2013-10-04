@@ -216,6 +216,16 @@ class CheckboxWidgetTests(Base, unittest.TestCase):
         self.assertTrue(findid('deformField1').is_selected())
         self.assertEqual(findid('captured').text, "{'want': True}")
     
+class CheckboxReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/checkbox_readonly/")
+    def test_render_default(self):
+        self.assertTrue('I Want It!' in browser.page_source)
+        self.assertEqual(
+            findid('deformField1').text,
+            'True'
+            )
+        self.assertEqual(findid('captured').text, 'None')
+        
 class CheckedInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/checkedinput/")
     def test_render_default(self):
