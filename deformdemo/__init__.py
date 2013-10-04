@@ -507,6 +507,30 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='checkedinput_readonly')
+    @demonstrate('Checked Input Widget (read-only)')
+    def checkedinput_readonly(self):
+
+        widget = deform.widget.CheckedInputWidget(
+            subject='Email',
+            confirm_subject='Confirm Email',
+            readonly=True,
+            )
+
+        class Schema(colander.Schema):
+            email = colander.SchemaNode(
+                colander.String(),
+                title='Email Address',
+                description='Type your email address and confirm it',
+                validator=colander.Email(),
+                widget=widget
+                )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form, appstruct={'email':'ww@graymatter.com'})
+    
     @view_config(renderer='templates/form.pt', name='checkedpassword')
     @demonstrate('Checked Password Widget')
     def checkedpassword(self):

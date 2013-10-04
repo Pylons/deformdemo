@@ -333,6 +333,18 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         self.assertEqual(findid('captured').text, "{'ssn': u'140-11-8866'}")
 
+
+class CheckedInputReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/checkedinput_readonly/")
+    def test_render_default(self):
+        self.assertTrue('Email Address' in browser.page_source)
+        self.assertEqual(findcss('.required').text, 'Email Address')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(
+            findid('deformField1').text,
+            'ww@graymatter.com'
+            )
+        
 class CheckedPasswordWidgetTests(Base, unittest.TestCase):
     url = test_url("/checkedpassword/")
     def test_render_default(self):
