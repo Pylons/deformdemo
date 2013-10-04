@@ -1050,9 +1050,8 @@ class DeformDemo(object):
 
         schema = Schema()
         form = deform.Form(schema, buttons=('submit',))
-        when = datetime.date(2010, 5, 5)
 
-        return self.render_form(form, appstruct={'date': when})
+        return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='timeinput')
     @demonstrate('Time Input')

@@ -396,46 +396,50 @@ class CheckedPasswordWidgetTests(Base, unittest.TestCase):
 class DateInputWidgetTests(Base, unittest.TestCase):
     url = test_url('/dateinput/')
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present("Date"))
-        self.assertEqual(browser.get_text('css=.required'), 'Date')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '2010-05-05')
-        self.assertFalse(browser.is_element_present('css=.has-error'))
+        self.assertTrue('Date' in browser.page_source)
+        self.assertEqual(findcss('.required').text, 'Date')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'), '')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_empty(self):
-        browser.get(self.url)
-        browser.type('deformField1', '')
-        browser.click("submit")
-        self.assertTrue(browser.get_text('css=.has-error'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertTrue(browser.is_element_present('css=.has-error'))
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_tooearly(self):
-        browser.get(self.url)
-        browser.focus('css=#deformField1')
-        browser.click('css=#deformField1')
-        browser.click('link=4')
-        browser.click("submit")
-        self.assertTrue(browser.get_text('css=.has-error'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
-                         '2010-05-04 is earlier than earliest date 2010-05-05')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertTrue(browser.is_element_present('css=.has-error'))
+        import datetime
+        findid('deformField1').click()
+        def diff_month(d1, d2):
+            return (d1.year - d2.year)*12 + d1.month - d2.month
+        tooearly = datetime.date(2010, 01, 01)
+        today = datetime.date.today()
+        num_months = diff_month(today, tooearly)
+        [ findcss('.picker__nav--prev').click() for x in range(num_months) ]
+        findcss(".picker__day").click()
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertTrue('is earlier than' in findid('error-deformField1').text)
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
-        browser.get(self.url)
-        browser.focus('css=#deformField1')
-        browser.click('css=#deformField1')
-        browser.click('link=6')
-        browser.click("submit")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_text('css=#captured'),
-                         "{'date': datetime.date(2010, 5, 6)}")
-        self.assertEqual(browser.get_value('deformField1'), '2010-05-06')
+        import datetime
+        today = datetime.date.today()
+        findid('deformField1').click()
+        findcss(".picker__button--today").click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertRaises(NoSuchElementException, findid, 'error-deformField1')
+        expected = '%d, %d, %d' % (today.year, today.month, today.day)
+        expected = "{'date': datetime.date(%s)}" % expected
+        self.assertSimilarRepr(
+            findid('captured').text,
+            expected
+            )
+
 
 class DateTimeInputWidgetTests(Base, unittest.TestCase):
     url = test_url('/datetimeinput/')
