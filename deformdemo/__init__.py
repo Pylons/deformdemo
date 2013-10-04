@@ -468,6 +468,27 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='radiochoice_inline')
+    @demonstrate(u'Radio Choice Widget (Inline)')
+    def radiochoice_inline(self):
+
+        choices = (('habanero', 'Habanero'), ('jalapeno', 'Jalapeno'),
+                   ('chipotle', 'Chipotle'))
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.String(),
+                validator=colander.OneOf([x[0] for x in choices]),
+                widget=deform.widget.RadioChoiceWidget(values=choices,
+                                                       inline=True),
+                title='Choose your pepper',
+                description='Select a Pepper')
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='checkedinput')
     @demonstrate('Checked Input Widget')
     def checkedinput(self):
@@ -1585,6 +1606,27 @@ class DeformDemo(object):
 
         schema = Schema()
         schema = schema.bind()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form)
+
+    @view_config(renderer='templates/form.pt', name='checkboxchoice_inline')
+    @demonstrate('Checkbox Choice Widget (Inline)')
+    def checkboxchoice_inline(self):
+
+        choices = (('habanero', 'Habanero'),
+                   ('jalapeno', 'Jalapeno'),
+                   ('chipotle', 'Chipotle'))
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.Set(),
+                widget=deform.widget.CheckboxChoiceWidget(values=choices,
+                                                          inline=True),
+                validator=colander.Length(min=1),
+                )
+
+        schema = Schema()
         form = deform.Form(schema, buttons=('submit',))
 
         return self.render_form(form)
