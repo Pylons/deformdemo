@@ -1431,44 +1431,38 @@ class SequenceOfAutocompletes(Base, unittest.TestCase):
 class SequenceOfDateInputs(Base, unittest.TestCase):
     url = test_url('/sequence_of_dateinputs/')
     def test_render_default(self):
-        browser.get(self.url)
-        self.assertTrue(browser.is_text_present("Dates"))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Date')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        
+        self.assertTrue('Dates' in browser.page_source)
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Date')
+        self.assertEqual(findid('captured').text, 'None')
+
     def test_submit_none_added(self):
-        browser.get(self.url)
-        browser.click("submit")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Date')
-        self.assertEqual(browser.get_text('css=#captured'), "{'dates': []}")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
+        findid("deformsubmit").click()
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Date')
+        self.assertSimilarRepr(
+            findid('captured').text,
+            "{'dates': []}"
+            )
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_two_unfilled(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.click("submit")
-        self.assertTrue(browser.is_element_present('css=.has-error'))
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
-
+        findid("deformField1-seqAdd").click()
+        findid("deformField1-seqAdd").click()
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('error-deformField4').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
+        
     def test_submit_one_filled(self):
-        browser.get(self.url)
-        browser.click('deformField1-seqAdd')
-        added = 'dom=document.forms[0].date'
-        browser.focus(added)
-        browser.click(added)
-        browser.click('link=6')
-        browser.click("submit")
-        self.assertFalse(browser.is_element_present('css=.has-error'))
-        captured = browser.get_text('css=#captured')
-        self.assertTrue(captured.startswith(u"{'dates': [datetime.date"))
-
+        findid("deformField1-seqAdd").click()
+        findcss('input[type="text"]').click()
+        findcss(".picker__button--today").click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertTrue(
+            findid('captured').text.startswith("{'dates': [datetime.date")
+            )
+        
 class SequenceOfConstrainedLengthTests(Base, unittest.TestCase):
     url = test_url('/sequence_of_constrained_len/')
     def test_render_default(self):
@@ -1936,7 +1930,8 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
 class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/autocomplete_remote_input/")
     def test_render_default(self):
-        self.assertTrue('Autocomplete Input Widget (with Remote Data Source)' in browser.page_source)
+        self.assertTrue('Autocomplete Input Widget (with Remote Data Source)'
+                        in browser.page_source)
         self.assertEqual(findid('deformField1').get_attribute('name'),
                          'text')
         self.assertEqual(findid('deformField1').get_attribute('type'),
@@ -2182,7 +2177,10 @@ class TextAreaCSVWidgetTests(Base, unittest.TestCase):
         findid('deformField1').send_keys('1,2,3\nwrong')
         findid("deformsubmit").click()
         self.assertEqual(findid('captured').text, 'None')
-        self.assertTrue('has an incorrect number of elements (expected 3, was 1)' in findid('error-deformField1').text)
+        self.assertTrue(
+            'has an incorrect number of elements (expected 3, was 1)' in
+            findid('error-deformField1').text
+            )
 
     def test_submit_empty(self):
         findid('deformField1').clear()
@@ -2212,7 +2210,9 @@ class TextInputCSVWidgetTests(Base, unittest.TestCase):
         findid('deformField1').send_keys('1,2,wrong')
         findid("deformsubmit").click()
         self.assertEqual(findid('captured').text, 'None')
-        self.assertTrue('"wrong" is not a number' in findid('error-deformField1').text)
+        self.assertTrue(
+            '"wrong" is not a number' in findid('error-deformField1').text
+            )
 
     def test_submit_empty(self):
         findid('deformField1').clear()
