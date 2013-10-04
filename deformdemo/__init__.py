@@ -1540,7 +1540,7 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=('submit',))
 
         return self.render_form(form)
-
+    
     @view_config(renderer='templates/form.pt', name='checkboxchoice_inline')
     @demonstrate('Checkbox Choice Widget (inline)')
     def checkboxchoice_inline(self):
@@ -1589,6 +1589,31 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='checkboxchoice_readonly')
+    @demonstrate('Checkbox Choice Widget (readonly)')
+    def checkboxchoice_readonly(self):
+
+        choices = (('habanero', 'Habanero'),
+                   ('jalapeno', 'Jalapeno'),
+                   ('chipotle', 'Chipotle'))
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.Set(),
+                widget=deform.widget.CheckboxChoiceWidget(
+                    values=choices,
+                    readonly=True,
+                    ),
+                )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(
+            form,
+            appstruct={'pepper':['chipotle', 'jalapeno']}
+            )
+    
     @view_config(renderer='templates/form.pt', name='i18n')
     @demonstrate('Internationalization')
     def i18n(self):

@@ -183,6 +183,20 @@ class CheckboxChoiceWidgetInlineTests(Base, unittest.TestCase):
             u"{'pepper': {'chipotle', 'habanero', 'jalapeno'}}",
             )
         
+class CheckboxChoiceReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/checkboxchoice_readonly/")
+    def test_render_default(self):
+        self.assertTrue('Pepper' in browser.page_source)
+        self.assertEqual(
+            findid('deformField1-1').text,
+            'Jalapeno'
+            )
+        self.assertEqual(
+            findid('deformField1-2').text,
+            'Chipotle'
+            )
+        self.assertEqual(findid('captured').text, 'None')
+
 class CheckboxWidgetTests(Base, unittest.TestCase):
     url = test_url("/checkbox/")
     def test_render_default(self):
