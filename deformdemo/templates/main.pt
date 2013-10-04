@@ -52,20 +52,20 @@
              tal:condition="form|None">
           Form Layout
             <span class="btn-group"
-                  tal:define="bs_form_style bs_form_style|None">
-              <a tal:define="active not bs_form_style"
+                  tal:define="form_class form_class|None">
+              <a tal:define="active not form_class"
                  class="btn btn-default ${active and 'active' or ''}"
-                 href="${request.path_url}?bs_form_style=">
+                 href="${request.path_url}?form_class=">
                 Default
               </a>
-              <a tal:define="active bs_form_style == 'form-horizontal'"
+              <a tal:define="active form_class == 'form-horizontal'"
                  class="btn btn-default ${active and 'active' or ''}"
-                 href="${request.path_url}?bs_form_style=form-horizontal">
+                 href="${request.path_url}?form_class=form-horizontal">
                 Horizontal
               </a>
-              <a tal:define="active bs_form_style == 'form-inline'"
+              <a tal:define="active form_class == 'form-inline'"
                  class="btn btn-default ${active and 'active' or ''}"
-                 href="${request.path_url}?bs_form_style=form-inline">
+                 href="${request.path_url}?form_class=form-inline">
                 Inline
               </a>
             </span>

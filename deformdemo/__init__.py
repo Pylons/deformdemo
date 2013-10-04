@@ -73,18 +73,19 @@ class DeformDemo(object):
         self.request = request
         self.macros = get_renderer('templates/main.pt').implementation().macros
 
-        if 'bs_form_style' in self.request.GET:
+        if 'form_class' in self.request.GET:
             session = self.request.session
-            bs_form_style = self.request.GET['bs_form_style']
-            if bs_form_style not in ('form-horizontal', 'form-inline'):
-                bs_form_style = None
-            session['bootstrap_form_style'] = bs_form_style
+            form_class = self.request.GET['form_class']
+            if form_class not in ('form-horizontal', 'form-inline'):
+                form_class = None
+            session['form_class'] = form_class
 
     def render_form(self, form, appstruct=colander.null, submitted='submit',
                     success=None, readonly=False, is_i18n=False):
 
-        session = self.request.session
-        form.bootstrap_form_style = session.get('bootstrap_form_style')
+        form_class = self.request.session.get('form_class')
+        if form_class:
+            form.widget = deform.widget.FormWidget(css_class=form_class)
 
         captured = None
 
@@ -128,7 +129,7 @@ class DeformDemo(object):
             'end':end,
             'is_i18n':is_i18n,
             'locale': locale_name,
-            'bs_form_style': form.bootstrap_form_style,
+            'form_class': form.widget.css_class,
             'demos':self.get_demos(),
             'title':self.get_title(),
             'css_links':reqts['css'],
