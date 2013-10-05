@@ -1259,10 +1259,26 @@ class DeformDemo(object):
 
         schema = Schema()
         form = deform.Form(schema, buttons=('submit',))
-        when = datetime.datetime(2010, 5, 6, 12)
 
-        return self.render_form(form, appstruct={'date_time': when})
+        return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='datetimeinput_readonly')
+    @demonstrate('DateTime Input Widget (read-only)')
+    def datetimeinput_readonly(self):
+        import datetime
+        then = datetime.datetime(2011, 05, 05, 01, 02)
+
+        class Schema(colander.Schema):
+            date_time = colander.SchemaNode(
+                colander.DateTime(),
+                widget=deform.widget.DateTimeInputWidget(readonly=True)
+                )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form, appstruct={'date_time':then})
+    
     @view_config(renderer='templates/form.pt', name='edit')
     @demonstrate('Edit Form')
     def edit(self):
