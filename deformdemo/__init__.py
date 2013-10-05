@@ -913,9 +913,13 @@ class DeformDemo(object):
     def readonly_sequence_of_mappings(self):
 
         class Person(colander.Schema):
-            name = colander.SchemaNode(colander.String())
-            age = colander.SchemaNode(colander.Integer(),
-                                      validator=colander.Range(0, 200))
+            name = colander.SchemaNode(
+                colander.String()
+                )
+            age = colander.SchemaNode(
+                colander.Integer(),
+                validator=colander.Range(0, 200)
+                )
 
         class People(colander.SequenceSchema):
             person = Person()
@@ -932,7 +936,8 @@ class DeformDemo(object):
                        [{'name': 'name1', 'age': 23},
                         {'name': 'name2', 'age': 25}]
                        },
-            readonly=True)
+            readonly=True
+            )
 
     @view_config(renderer='templates/form.pt', name='sequence_of_sequences')
     @demonstrate('Sequence of Sequence Widgets')

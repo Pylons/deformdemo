@@ -1188,10 +1188,10 @@ class RadioChoiceWidgetIntTests(RadioChoiceWidgetTests):
 class ReadOnlySequenceOfMappingTests(Base, unittest.TestCase):
     url = test_url("/readonly_sequence_of_mappings/")
     def test_render_default(self):
-        self.assertEqual(findid('deformField6').get_attribute('value'), 'name1')
-        self.assertEqual(findid('deformField7').get_attribute('value'), '23')
-        self.assertEqual(findid('deformField9').get_attribute('value'), 'name2')
-        self.assertEqual(findid('deformField10').get_attribute('value'), '25')
+        self.assertEqual(findid('deformField6').text, 'name1')
+        self.assertEqual(findid('deformField7').text, '23')
+        self.assertEqual(findid('deformField9').text, 'name2')
+        self.assertEqual(findid('deformField10').text, '25')
 
 class SequenceOfRadioChoicesTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_radiochoices/")
