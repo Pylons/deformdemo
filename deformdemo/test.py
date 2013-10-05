@@ -1812,6 +1812,18 @@ class SelectWidgetWithOptgroupAndLabelTests(SelectWidgetWithOptgroupTests):
             "{'musician': 'page'}",
             )
 
+class SelectReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/select_readonly/")
+
+    def test_render_default(self):
+        musician = findid('deformField1-2-0')
+        self.assertEqual(musician.text, 'Billy Cobham')
+        multi1 = findid('deformField2-1-0')
+        self.assertEqual(multi1.text, 'Jimmy Page')
+        multi2 = findid('deformField2-2-0')
+        self.assertEqual(multi2.text, 'Billy Cobham')
+        self.assertEqual(findid('captured').text, 'None')
+
 class Select2WidgetTests(Base, unittest.TestCase):
     url = test_url("/select2/")
     submit_selected_captured = (

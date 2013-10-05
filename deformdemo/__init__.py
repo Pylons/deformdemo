@@ -224,6 +224,21 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='textinput_readonly')
+    @demonstrate('Text Input Widget (read-only)')
+    def textinput_readonly(self):
+
+        class Schema(colander.Schema):
+            text = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.TextInputWidget(readonly=True),
+                )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form, appstruct={'text':'text'})
+
     @view_config(renderer='templates/form.pt', name='money_input')
     @demonstrate('Money Input')
     def money_input(self):
@@ -1607,6 +1622,47 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='select_readonly')
+    @demonstrate('Select Widget (Read-Only)')
+    def select_readonly(self):
+        from deform.widget import OptGroup
+
+        choices = (
+               ('', 'Select your favorite musician'),
+               OptGroup('Guitarists',
+                        ('page', 'Jimmy Page'),
+                        ('hendrix', 'Jimi Hendrix')),
+               OptGroup('Drummers',
+                       ('cobham', 'Billy Cobham'),
+                       ('bonham', 'John Bonham')))
+
+        class Schema(colander.Schema):
+            musician = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectWidget(
+                    values=choices,
+                    readonly=True
+                    )
+                )
+            multiple_musicians = colander.SchemaNode(
+                colander.Set(),
+                widget=deform.widget.SelectWidget(
+                    values=choices,
+                    multiple=True,
+                    readonly=True,
+                    )
+                )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        appstruct = {
+            'musician':'cobham',
+            'multiple_musicians':['cobham', 'page'],
+            }
+
+        return self.render_form(form, appstruct=appstruct)
+    
     @view_config(renderer='templates/form.pt', name='select2')
     @demonstrate('Select2 Widget')
     def select2(self):
