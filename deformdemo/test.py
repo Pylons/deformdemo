@@ -912,7 +912,10 @@ class FileUploadTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
-        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findcss('input[type=file]').get_attribute('value'),
+                         '')
+        self.assertEqual(findcss('.upload-filename').get_attribute('value'),
+                         '')
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
@@ -924,26 +927,32 @@ class FileUploadTests(Base, unittest.TestCase):
     def test_submit_filled(self):
         # submit one first
         path, filename = _getFile()
-        findid('deformField1').send_keys(path)
+        findcss('input[type=file]').send_keys(path)
+        self.assertEqual(findcss('.upload-filename').get_attribute('value'),
+                         filename)
         findid("deformsubmit").click()
 
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
-        self.assertEqual(findid('deformField1').get_attribute('value'), '')
-        self.assertEqual(findid('deformField1-filename').text, filename)
+        self.assertEqual(findcss('input[type=file]').get_attribute('value'),
+                         '')
+        self.assertEqual(findcss('.upload-filename').get_attribute('value'),
+                         filename)
         self.assertTrue(filename in findid('captured').text)
-        uid = findid('deformField1-uid').get_attribute('value')
+        uid = findcss('[name=uid]').get_attribute('value')
         self.assertTrue(uid in findid('captured').text)
 
         # resubmit without entering a new filename should not change the file
         findid("deformsubmit").click()
-        self.assertEqual(findid('deformField1-filename').text, filename)
-        self.assertEqual(findid('deformField1-uid').get_attribute('value'), uid)
+        self.assertEqual(findcss('.upload-filename').get_attribute('value'),
+                         filename)
+        self.assertEqual(findcss('[name=uid]').get_attribute('value'), uid)
 
         # resubmit after entering a new filename should change the file
         path2, filename2 = _getFile('selenium.py')
-        findid('deformField1').send_keys(path2)
+        findcss('input[type=file]').send_keys(path2)
         findid("deformsubmit").click()
-        self.assertEqual(findid('deformField1-filename').text, filename2)
+        self.assertEqual(findcss('.upload-filename').get_attribute('value'),
+                         filename2)
         self.assertTrue('filename' in findid('captured').text)
         self.assertTrue(uid in findid('captured').text)
 
@@ -1306,9 +1315,11 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
 
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
-        self.assertEqual(findid('deformField3').get_attribute('value'), '')
-        self.assertEqual(findid('deformField3-filename').text, filename)
-        uid = findid('deformField3-uid').get_attribute('value')
+        self.assertEqual(findcss('input[type=file]').get_attribute('value'),
+                         '')
+        self.assertEqual(findcss('.upload-filename').get_attribute('value'),
+                         filename)
+        uid = findcss('[name=uid]').get_attribute('value')
         self.assertTrue(filename in findid('captured').text)
         self.assertTrue(uid in findid('captured').text)
 
@@ -1320,9 +1331,11 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
 
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
-        self.assertEqual(findid('deformField3').get_attribute('value'), '')
-        self.assertEqual(findid('deformField3-filename').text, filename)
-        uid = findid('deformField3-uid').get_attribute('value')
+        self.assertEqual(findcss('input[type=file]').get_attribute('value'),
+                         '')
+        self.assertEqual(findcss('.upload-filename').get_attribute('value'),
+                         filename)
+        uid = findcss('[name=uid]').get_attribute('value')
         self.assertTrue(filename in findid('captured').text)
         self.assertTrue(uid in findid('captured').text)
 
@@ -1333,9 +1346,10 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
 
         # resubmit after entering a new filename should change the file
         path2, filename2 = _getFile('selenium.py')
-        findid('deformField3').send_keys(path2)
+        findcss('input[type=file]').send_keys(path2)
         findid("deformsubmit").click()
-        self.assertEqual(findid('deformField3-filename').text, filename2)
+        self.assertEqual(findcss('.upload-filename').get_attribute('value'),
+                         filename2)
         self.assertTrue(filename2 in findid('captured').text)
 
         # add a new file
@@ -1343,23 +1357,22 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
         findid("deformField1-seqAdd").click()
         findxpaths('//input[@name="upload"]')[1].send_keys(path)
         findid("deformsubmit").click()
-        self.assertEqual(findid('deformField3-filename').text, filename2)
-        self.assertEqual(findid('deformField4-filename').text, filename)
+        upload_filenames = findcsses('.upload-filename')
+        self.assertEqual(upload_filenames[0].get_attribute('value'), filename2)
+        self.assertEqual(upload_filenames[1].get_attribute('value'), filename)
 
         # resubmit should not change either file
         findid("deformsubmit").click()
-        self.assertEqual(findid('deformField3-filename').text, filename2)
-        self.assertEqual(findid('deformField4-filename').text, filename)
+        upload_filenames = findcsses('.upload-filename')
+        self.assertEqual(upload_filenames[0].get_attribute('value'), filename2)
+        self.assertEqual(upload_filenames[1].get_attribute('value'), filename)
 
         # remove a file
         findid("deformField4-close").click()
         findid("deformsubmit").click()
-        self.assertEqual(findid('deformField3-filename').text, filename2)
-        self.assertRaises(
-            NoSuchElementException,
-            findid,
-            'deformField4-filename'
-            )
+        upload_filenames = findcsses('.upload-filename')
+        self.assertEqual(upload_filenames[0].get_attribute('value'), filename2)
+        self.assertEqual(len(upload_filenames), 1)
 
 class SequenceOfFileUploadsWithInitialItemTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_fileuploads_with_initial_item/")
@@ -1377,17 +1390,24 @@ class SequenceOfFileUploadsWithInitialItemTests(Base, unittest.TestCase):
         path, filename = _getFile()
         findid("deformField1-seqAdd").click()
         findxpaths('//input[@name="upload"]')[0].send_keys(path)
+        upload_filenames = [elem.get_attribute('value')
+                            for elem in findcsses('.upload-filename')]
+        self.assertEqual(upload_filenames[0], filename)
+        self.assertEqual(upload_filenames[1], '')
         findxpaths('//input[@name="upload"]')[1].send_keys(path)
         findid("deformsubmit").click()
 
         # first element present
-        self.assertEqual(findid('deformField3-filename').text, filename)
-        uid = findid('deformField3-uid').get_attribute('value')
+        upload_filenames = [elem.get_attribute('value')
+                            for elem in findcsses('.upload-filename')]
+        uid_elems = findcsses('[name=uid]')
+        self.assertEqual(upload_filenames[0], filename)
+        uid = uid_elems[0].get_attribute('value')
         self.assertTrue(uid in findid('captured').text)
 
         # second element present
-        self.assertEqual(findid('deformField4-filename').text, filename)
-        uid = findid('deformField4-uid').get_attribute('value')
+        self.assertEqual(upload_filenames[1], filename)
+        uid = uid_elems[1].get_attribute('value')
         self.assertTrue(uid in findid('captured').text)
 
 class SequenceOfMappingsTests(Base, unittest.TestCase):
