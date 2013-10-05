@@ -308,6 +308,22 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='textarea_readonly')
+    @demonstrate('Text Area Widget (read-only)')
+    def textarea_readonly(self):
+
+        class Schema(colander.Schema):
+            text = colander.SchemaNode(
+                colander.String(),
+                validator=colander.Length(max=100),
+                widget=deform.widget.TextAreaWidget(readonly=True),
+                )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form, appstruct={'text':'text'})
+    
     @view_config(renderer='templates/form.pt', name='richtext')
     @demonstrate('Rich Text Widget')
     def richtext(self):

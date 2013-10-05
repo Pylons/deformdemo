@@ -2056,6 +2056,15 @@ class TextAreaWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text,
                          "{'text': u'hello'}")
 
+class TextAreaReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/textarea_readonly/")
+    def test_render_default(self):
+        self.assertEqual(findid('deformField1').text,
+                         'text')
+        self.assertEqual(findcss('.required').text, 'Text')
+        self.assertEqual(findid('captured').text, 'None')
+
+        
 class DelayedRichTextWidgetTests(Base, unittest.TestCase):
     url = test_url("/delayed_richtext/")
     def test_submit_filled(self):
