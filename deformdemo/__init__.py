@@ -500,7 +500,8 @@ class DeformDemo(object):
                 title='Email Address',
                 description='Type your email address and confirm it',
                 validator=colander.Email(),
-                widget=widget)
+                widget=widget
+                )
 
         schema = Schema()
         form = deform.Form(schema, buttons=('submit',))
@@ -547,6 +548,23 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='checkedpassword_readonly')
+    @demonstrate('Checked Password Widget')
+    def checkedpassword_readonly(self):
+
+        class Schema(colander.Schema):
+            password = colander.SchemaNode(
+                colander.String(),
+                validator=colander.Length(min=5),
+                widget=deform.widget.CheckedPasswordWidget(readonly=True),
+                description='Type your password and confirm it'
+                )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form, appstruct={'password':'foo'})
+    
     @view_config(renderer='templates/form.pt', name='checkedinput_withmask')
     @demonstrate('Checked Input Widget (with Input Mask)')
     def checkedinput_withmask(self):

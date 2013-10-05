@@ -429,6 +429,18 @@ class CheckedPasswordWidgetTests(Base, unittest.TestCase):
             )
         self.assertEqual(findid('captured').text, "{'password': u'this123'}")
 
+class CheckedPasswordReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/checkedpassword_readonly/")
+    def test_render_default(self):
+        self.assertTrue('Password' in browser.page_source)
+        self.assertEqual(findcss('.required').text, 'Password')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(
+            findid('deformField1').text,
+            'Password not displayed.'
+            )
+
+        
 class DateInputWidgetTests(Base, unittest.TestCase):
     url = test_url('/dateinput/')
     def test_render_default(self):
