@@ -549,7 +549,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='checkedpassword_readonly')
-    @demonstrate('Checked Password Widget')
+    @demonstrate('Checked Password Widget (read-only)')
     def checkedpassword_readonly(self):
 
         class Schema(colander.Schema):
@@ -1093,6 +1093,25 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='dateparts_readonly')
+    @demonstrate('Date Parts Widget (read-only)')
+    def dateparts_readonly(self):
+        import datetime
+
+        class Schema(colander.Schema):
+            date = colander.SchemaNode(
+                colander.Date(),
+                widget=deform.widget.DatePartsWidget(readonly=True),
+                )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(
+            form,
+            appstruct={'date':datetime.date(2010, 5, 5)}
+            )
+    
     @view_config(renderer='templates/form.pt', name='dateinput')
     @demonstrate('Date Input Widget')
     def dateinput(self):

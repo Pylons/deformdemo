@@ -624,6 +624,15 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
             '01'
             )
 
+class DatePartsReadonlyTests(Base, unittest.TestCase):
+    url = test_url('/dateparts_readonly/')
+    def test_render_default(self):
+        self.assertTrue('Date' in browser.page_source)
+        self.assertEqual(findcss('.required').text, 'Date')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1').text, '2010/05/05')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        
 class EditFormTests(Base, unittest.TestCase):
     url = test_url("/edit/")
     def test_render_default(self):
