@@ -1185,6 +1185,13 @@ class RadioChoiceWidgetIntTests(RadioChoiceWidgetTests):
             findid('captured').text,
             "{'pepper': 0}")
 
+class RadioChoiceReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/radiochoice_readonly/")
+    def test_render_default(self):
+        self.assertEqual(findid('deformField1-1').text, 'Jalapeno')
+        self.assertEqual(findcss('.required').text, 'Pepper')
+        self.assertEqual(findid('captured').text, 'None')
+
 class ReadOnlySequenceOfMappingTests(Base, unittest.TestCase):
     url = test_url("/readonly_sequence_of_mappings/")
     def test_render_default(self):
