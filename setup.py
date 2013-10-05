@@ -30,7 +30,7 @@ except:
 PY3 = sys.version_info[0] == 3
 
 requires = [
-    'deform<=1.99',
+    'deform<=1.99', # this demo only works with deform < 2
     'pyramid',
     'pyramid_chameleon',
     'pygments',
