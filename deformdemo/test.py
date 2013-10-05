@@ -2101,6 +2101,13 @@ class RichTextWidgetInternationalized(Base, unittest.TestCase):
         self.assertTrue('Text' in browser.page_source)
         self.assertTrue(u"Формат" in browser.page_source)
 
+class RichTextReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/richtext_readonly/")
+    def test_render_default(self):
+        self.assertEqual(findid('deformField1').text, '<p>Hi!</p>')
+        self.assertEqual(findcss('.required').text, 'Text')
+        self.assertEqual(findid('captured').text, 'None')
+
 class UnicodeEverywhereTests(Base, unittest.TestCase):
     url = test_url("/unicodeeverywhere/")
     def test_render_default(self):

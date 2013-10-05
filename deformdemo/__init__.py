@@ -358,6 +358,21 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='richtext_readonly')
+    @demonstrate('Rich Text Widget')
+    def richtext_readonly(self):
+
+        class Schema(colander.Schema):
+            text = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.RichTextWidget(readonly=True),
+                )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form, appstruct={'text':'<p>Hi!</p>'})
+    
     @view_config(renderer='templates/form.pt', name='password')
     @demonstrate('Password Widget')
     def password(self):
