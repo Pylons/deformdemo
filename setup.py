@@ -29,10 +29,13 @@ except:
 
 PY3 = sys.version_info[0] == 3
 
-requires = ['deform>=0.9.6dev',
-            'pyramid',
-            'pygments',
-            'waitress']
+requires = [
+    'deform<=1.99',
+    'pyramid',
+    'pyramid_chameleon',
+    'pygments',
+    'waitress'
+    ]
 
 testing_extras = ['webtest',]
 

@@ -1793,6 +1793,7 @@ def main(global_config, **settings):
     renderer = settings['deformdemo.renderer']
     session_factory = UnencryptedCookieSessionFactoryConfig('seekrit!')
     config = Configurator(settings=settings, session_factory=session_factory)
+    config.include('pyramid_chameleon')
     renderer = config.maybe_dotted(renderer)
     deform.Form.set_default_renderer(renderer)
     config.add_static_view('static', 'deform:static')
