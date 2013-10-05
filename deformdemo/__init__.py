@@ -390,7 +390,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='richtext_readonly')
-    @demonstrate('Rich Text Widget')
+    @demonstrate('Rich Text Widget (read-only)')
     def richtext_readonly(self):
 
         class Schema(colander.Schema):
@@ -454,7 +454,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='checkbox_readonly')
-    @demonstrate('Checkbox Widget (readonly)')
+    @demonstrate('Checkbox Widget (read-only)')
     def checkbox_readonly(self):
 
         class Schema(colander.Schema):
@@ -1623,7 +1623,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='select_readonly')
-    @demonstrate('Select Widget (Read-Only)')
+    @demonstrate('Select Widget (read-only)')
     def select_readonly(self):
         from deform.widget import OptGroup
 
@@ -1800,7 +1800,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='checkboxchoice_readonly')
-    @demonstrate('Checkbox Choice Widget (readonly)')
+    @demonstrate('Checkbox Choice Widget (read-only)')
     def checkboxchoice_readonly(self):
 
         choices = (('habanero', 'Habanero'),
