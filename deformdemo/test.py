@@ -947,6 +947,15 @@ class FileUploadTests(Base, unittest.TestCase):
         self.assertTrue('filename' in findid('captured').text)
         self.assertTrue(uid in findid('captured').text)
 
+class FileUploadReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/file_readonly/")
+
+    def test_render_default(self):
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').text, 'leavesofgrass.png')
+        self.assertEqual(findid('captured').text, 'None')
+
+        
 class InterFieldValidationTests(Base, unittest.TestCase):
     url=  test_url("/interfield/")
     def test_render_default(self):

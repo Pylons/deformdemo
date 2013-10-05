@@ -1073,6 +1073,27 @@ class DeformDemo(object):
 
         return self.render_form(form, success=tmpstore.clear)
 
+    @view_config(renderer='templates/form.pt', name='file_readonly')
+    @demonstrate('File Upload Widget (read-only)')
+    def file_readonly(self):
+
+        class Schema(colander.Schema):
+            upload = colander.SchemaNode(
+                deform.FileData(),
+                widget=deform.widget.FileUploadWidget(tmpstore, readonly=True)
+                )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        appstruct = {'upload':{'uid':'123', 'filename':'leavesofgrass.png'}}
+
+        return self.render_form(
+            form,
+            appstruct=appstruct,
+            success=tmpstore.clear
+            )
+    
     @view_config(renderer='templates/form.pt', name='dateparts')
     @demonstrate('Date Parts Widget')
     def dateparts(self):
