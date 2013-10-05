@@ -11,7 +11,7 @@ Running the Demo
 
 - Create a virtualenv::
 
-    $ virtualenv2.6 --no-site-packages /path/to/my/venv
+    $ virtualenv2.7 --no-site-packages /path/to/my/venv
 
   Hereafter ``/path/to/my/venv`` will be referred to as $VENV in steps
   below.
@@ -24,16 +24,16 @@ Running the Demo
 
     $ cd deformdemo
 
-- Run ``setup.py develop`` using the virtualenv's ``python`` command::
+- Run ``setup.py dev`` using the virtualenv's ``python`` command::
 
-    $ $VENV/bin/python setup.py develop
+    $ $VENV/bin/python setup.py dev
 
 - While your working directory is still ``deformdemo``, start the demo
   application::
 
     $ $VENV/bin/pserve demo.ini
 
-- Visit http://localhost:8521 in a browser to see the demo.
+- Visit http://localhost:8522 in a browser to see the demo.
 
 Running the Demo's Selenium Tests
 ---------------------------------
@@ -68,7 +68,7 @@ wise to run these tests before submitting a patch.  Here's how:
 
 - Run the tests::
 
-   $ $VENV/bin/python deformdemo/test.py
+   $ $VENV/bin/nosetests
 
   ``$VENV`` is defined as it was in "Running the Demo" above.
 

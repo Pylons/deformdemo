@@ -29,8 +29,9 @@ except:
 
 PY3 = sys.version_info[0] == 3
 
-requires = ['deform>=0.9.6dev',
-            'pyramid',
+requires = ['deform>=2.0dev',
+            'pyramid>=1.5a1', # route_name argument to resource_url
+            'pyramid_chameleon',
             'pygments',
             'waitress']
 
@@ -61,6 +62,9 @@ setupkw = dict(
     zip_safe=False,
     tests_require=testing_extras,
     install_requires=requires,
+    extras_require = {
+        'testing': ['nose', 'selenium'],
+    },
     entry_points = """\
     [paste.app_factory]
     demo = deformdemo:main

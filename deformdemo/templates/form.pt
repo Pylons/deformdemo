@@ -1,14 +1,44 @@
 <!DOCTYPE html>
 <div metal:use-macro="view.macros['master']">
   <div metal:fill-slot="main">
-    <h1>${title}</h1>
-    <div id="form" tal:content="structure form"/>
-    <h1>Captured</h1>
-    <div id="captured" tal:content="captured"/>
-    <h1>Code <a href="/allcode?start=${start}&amp;end=${end}#line-${start}"
-               ><small>(show in context)</small></a>
-    </h1>
-    <span tal:replace="structure code"/>
+    <div class="btn-group" tal:condition="is_i18n|False">
+        <a tal:attributes="class locale == 'en' and 'active btn btn-default' or 'btn btn-default'" href="${request.path_url}?_LOCALE_=en">English</a>
+        <a tal:attributes="class locale == 'nl' and 'active btn btn-default' or 'btn btn-default'" href="${request.path_url}?_LOCALE_=nl">Nederlands</a>
+        <a tal:attributes="class locale == 'ru' and 'active btn btn-default' or 'btn btn-default'" href="${request.path_url}?_LOCALE_=ru">Russian</a>
+        <a tal:attributes="class locale == 'es' and 'active btn btn-default' or 'btn btn-default'" href="${request.path_url}?_LOCALE_=es">Español</a>
+        <br />
+        <br />
+    </div>
+
+
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">Demo: ${title}</h3>
+      </div>
+      <div class="panel-body">
+        <div id="form" tal:content="structure form"/>
+      </div>
+    </div>
+
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title">Captured submission</h3>
+      </div>
+      <div class="panel-body">
+        <pre style="border: none; background-color: #FFF" class="highlight" id="captured" tal:content="structure captured"/>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Code <a href="${request.resource_url(request.root, 'allcode', query={'start':start, 'end':end}, anchor='line-%s' % start)}"><small>
+        (click to show in context)</small></a>
+        </h3>
+      </div>
+      <div class="panel-body highlight">
+        <pre style="border: none; background-color: #FFF" tal:content="structure code"/>
+      </div>
+    </div>
   </div>
 </div>
 

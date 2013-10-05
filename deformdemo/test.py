@@ -2,10 +2,19 @@
 
 import unittest
 import re
+import os
+import time
+from decimal import Decimal
+
+from selenium.common.exceptions import NoSuchElementException
+from selenium.common.exceptions import WebDriverException
+from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.common.keys import Keys
+from selenium.webdriver.support.wait import WebDriverWait
 
 # to run:
 # console 1: java -jar selenium-server.jar
-# console 2: start the deform demo server (paster serve demo.ini)
+# console 2: start the deform demo server (pserve demo.ini)
 # console 3: python2.X test.py
 
 # Note that this test file does not run under Python 3, but it can be used
@@ -17,2360 +26,2159 @@ import re
 
 browser = None
 
+BASE_PATH = os.environ.get('BASE_PATH', '')
+URL = os.environ.get('URL', 'http://localhost:8522')
+
+def findid(elid):
+    return browser.find_element_by_id(elid)
+
+def findcss(selector):
+    return browser.find_element_by_css_selector(selector)
+
+def findcsses(selector):
+    return browser.find_elements_by_css_selector(selector)
+
+def findxpath(selector):
+    return browser.find_element_by_xpath(selector)
+
+def findxpaths(selector):
+    return browser.find_elements_by_xpath(selector)
+
+def wait_for_ajax(source):
+    def compare_source(driver):
+        try:
+            return source != driver.page_source
+        except WebDriverException:
+            pass
+
+    WebDriverWait(browser, 5).until(compare_source)
+
 def setUpModule():
-    from selenium import selenium
+    from selenium.webdriver import Firefox
     global browser
-    browser = selenium("localhost", 4444, "*chrome", "http://localhost:8521/")
-    browser.start()
+    browser = Firefox()
     return browser
 
 def tearDownModule():
-    browser.stop()
+    browser.quit()
 
 def _getFile(name='test.py'):
-    import os
     path = os.path.join(os.path.abspath(os.path.dirname(__file__)), name)
     filename = os.path.split(path)[-1]
     return path, filename
 
+# appease nosetests by giving a default argument, it thinks this is a test
+def test_url(url=''): 
+    return URL + BASE_PATH + url
+
 class Base(object):
     urepl = re.compile('\\bu(\'.*?\'|".*?")')
+    setrepl = re.compile('set\(\[(.*)\]\)')
+
+    def setUp(self):
+        browser.get(self.url)
 
     def assertSimilarRepr(self, a, b):
-        # ignore u'' in reprs
-        ar = self.urepl.sub(r'\1', a)
-        br = self.urepl.sub(r'\1', b)
-        self.assertEqual(ar, br)
+        # ignore u'' and and \n in reprs, normalize set syntax between py2 and
+        # py3
+        ar = a.replace('\n', '')
+        ar = self.urepl.sub(r'\1', ar)
+        ar = self.setrepl.sub(r'{\1}', ar)
+        br = b.replace('\n', '')
+        br = self.urepl.sub(r'\1', br)
+        br = self.setrepl.sub(r'{\1}', br)
+        self.assertEqual(ar.replace(' ', ''), br.replace(' ', ''))
 
 class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
-    url = "/checkboxchoice/"
+    url = test_url("/checkboxchoice/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Pepper"))
-        self.assertFalse(browser.is_checked("deformField1"))
-        self.assertFalse(browser.is_checked("deformField1-1"))
-        self.assertFalse(browser.is_checked("deformField1-2"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Pepper' in browser.page_source)
+        self.assertFalse(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
+        self.assertEqual(findcss('.required').text, 'Pepper')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_unchecked(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        error_node = 'error-deformField1'
+        self.assertEqual(findid(error_node).text,
                          'Shorter than minimum length 1')
-        self.assertFalse(browser.is_checked("deformField1"))
-        self.assertFalse(browser.is_checked("deformField1-1"))
-        self.assertFalse(browser.is_checked("deformField1-2"))
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertFalse(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_one_checked(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("deformField1")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_checked("deformField1"))
-        captured = browser.get_text('css=#captured')
-        self.assertTrue(captured in (
-            "{'pepper': set([u'habanero'])}", # py2
-            "{'pepper': {'habanero'}}"        # py3
-            ))
+        findid("deformField1-0").click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertTrue(findid('deformField1-0').is_selected())
+        captured = findid('captured').text
+        self.assertSimilarRepr(
+            captured,
+            u"{'pepper': {'habanero'}}",
+            )
 
     def test_submit_three_checked(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("deformField1")
-        browser.click("deformField1-1")
-        browser.click("deformField1-2")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_checked("deformField1"))
-        self.assertTrue(browser.is_checked("deformField1-1"))
-        self.assertTrue(browser.is_checked("deformField1-2"))
-        captured = browser.get_text('css=#captured')
-        self.assertTrue(captured in (
-            u"{'pepper': set([u'habanero', u'chipotle', u'jalapeno'])}", # py2
-            u"{'pepper': {'habanero', 'chipotle', 'jalapeno'}}",         # py3
-            ))
+        findid("deformField1-0").click()
+        findid("deformField1-1").click()
+        findid("deformField1-2").click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertTrue(findid('deformField1-0').is_selected())
+        self.assertTrue(findid('deformField1-1').is_selected())
+        self.assertTrue(findid('deformField1-2').is_selected())
+        captured = findid('captured').text
+        self.assertSimilarRepr(
+            captured,
+            u"{'pepper': {'chipotle', 'habanero', 'jalapeno'}}",
+            )
 
-class CheckboxWidgetTests(Base, unittest.TestCase):
-    url = "/checkbox/"
+class CheckboxChoiceWidgetInlineTests(Base, unittest.TestCase):
+    url = test_url("/checkboxchoice_inline/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("I Want It!"))
-        self.assertFalse(browser.is_checked("deformField1"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Pepper' in browser.page_source)
+        self.assertFalse(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
+        self.assertEqual(findcss('.required').text, 'Pepper')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_unchecked(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_checked("deformField1"))
-        self.assertEqual(browser.get_text('css=#captured'), "{'want': False}")
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        error_node = 'error-deformField1'
+        self.assertEqual(findid(error_node).text,
+                         'Shorter than minimum length 1')
+        self.assertFalse(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_one_checked(self):
+        findid("deformField1-0").click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertTrue(findid('deformField1-0').is_selected())
+        captured = findid('captured').text
+        self.assertSimilarRepr(
+            captured,
+            u"{'pepper': {'habanero'}}",
+            )
+
+    def test_submit_three_checked(self):
+        findid("deformField1-0").click()
+        findid("deformField1-1").click()
+        findid("deformField1-2").click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertTrue(findid('deformField1-0').is_selected())
+        self.assertTrue(findid('deformField1-1').is_selected())
+        self.assertTrue(findid('deformField1-2').is_selected())
+        captured = findid('captured').text
+        self.assertSimilarRepr(
+            captured,
+            u"{'pepper': {'chipotle', 'habanero', 'jalapeno'}}",
+            )
+        
+class CheckboxChoiceReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/checkboxchoice_readonly/")
+    def test_render_default(self):
+        self.assertTrue('Pepper' in browser.page_source)
+        self.assertEqual(
+            findid('deformField1-1').text,
+            'Jalapeno'
+            )
+        self.assertEqual(
+            findid('deformField1-2').text,
+            'Chipotle'
+            )
+        self.assertEqual(findid('captured').text, 'None')
+
+class CheckboxWidgetTests(Base, unittest.TestCase):
+    url = test_url("/checkbox/")
+    def test_render_default(self):
+        self.assertTrue('I Want It!' in browser.page_source)
+        self.assertFalse(findid('deformField1').is_selected())
+        self.assertEqual(findcss('.required').text, 'I Want It!')
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_unchecked(self):
+        findid("deformsubmit").click()
+        self.assertFalse(findid('deformField1').is_selected())
+        self.assertEqual(findid('captured').text, "{'want': False}")
 
     def test_submit_checked(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("deformField1")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_checked("deformField1"))
-        self.assertEqual(browser.get_text('css=#captured'), "{'want': True}")
+        findid("deformField1").click()
+        findid("deformsubmit").click()
+        self.assertTrue(findid('deformField1').is_selected())
+        self.assertEqual(findid('captured').text, "{'want': True}")
     
-class CheckedInputWidgetTests(Base, unittest.TestCase):
-    url = "/checkedinput/"
+class CheckboxReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/checkbox_readonly/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Email Address"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_value('deformField1-confirm'), '')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertTrue('I Want It!' in browser.page_source)
+        self.assertEqual(
+            findid('deformField1').text,
+            'True'
+            )
+        self.assertEqual(findid('captured').text, 'None')
+        
+class CheckedInputWidgetTests(Base, unittest.TestCase):
+    url = test_url("/checkedinput/")
+    def test_render_default(self):
+        self.assertTrue('Email Address' in browser.page_source)
+        self.assertEqual(findcss('.required').text, 'Email Address')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(
+            findid('deformField1-confirm').get_attribute('value'),
+            '')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_value('deformField1-confirm'), '')
-        self.assertEqual(browser.get_text('css=#captured'), "None")
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(
+            findid('deformField1-confirm').get_attribute('value'),
+            '')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_invalid(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'this')
-        browser.type('deformField1-confirm', 'this')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Invalid email address')
-        self.assertEqual(browser.get_value('deformField1'), 'this')
-        self.assertEqual(browser.get_value('deformField1-confirm'), 'this')
-        self.assertEqual(browser.get_text('css=#captured'), "None")
+        findid('deformField1').send_keys('this')
+        findid('deformField1-confirm').send_keys('this')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField1').text,
+                         'Invalid email address')
+        self.assertEqual(findid('deformField1').get_attribute('value'), 'this')
+        self.assertEqual(
+            findid('deformField1-confirm').get_attribute('value'),
+            'this'
+            )
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_mismatch(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'this@example.com')
-        browser.type('deformField1-confirm', 'that@example.com')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Fields did not match')
-        self.assertEqual(browser.get_value('deformField1'), 'this@example.com')
-        self.assertEqual(browser.get_value('deformField1-confirm'),
-                         'that@example.com')
-        self.assertEqual(browser.get_text('css=#captured'), "None")
+        findid('deformField1').send_keys('this@example.com')
+        findid('deformField1-confirm').send_keys('that@example.com')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(
+            findid('error-deformField1').text,
+            'Fields did not match'
+            )
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'),
+            'this@example.com'
+            )
+        self.assertEqual(
+            findid('deformField1-confirm').get_attribute('value'),
+            'that@example.com'
+            )
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'user@example.com')
-        browser.type('deformField1-confirm', 'user@example.com')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), 'user@example.com')
-        self.assertEqual(browser.get_value('deformField1-confirm'),
-                         'user@example.com')
-        self.assertSimilarRepr(browser.get_text('css=#captured'),
-                               "{'email': u'user@example.com'}")
+        findid('deformField1').send_keys('user@example.com')
+        findid('deformField1-confirm').send_keys('user@example.com')
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'),
+            'user@example.com')
+        self.assertEqual(
+            findid('deformField1-confirm').get_attribute('value'),
+            'user@example.com'
+            )
+        self.assertEqual(
+            findid('captured').text,
+            "{'email': u'user@example.com'}"
+            )
 
 class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
-    url = "/checkedinput_withmask/"
+    url = test_url("/checkedinput_withmask/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '###-##-####')
-        self.assertEqual(browser.get_value('deformField1-confirm'), '')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertEqual(findcss('.required').text, 'Social Security Number')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'),
+            '###-##-####'
+            )
+        self.assertEqual(
+            findid('deformField1-confirm').get_attribute('value'),
+            ''
+            )
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_type_bad_input(self):
-        import time
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.focus('deformField1')
-        browser.key_press('deformField1', 'a')
-        time.sleep(.005)
-        browser.focus('deformField1-confirm')
-        browser.key_press('deformField1-confirm', 'a')
-        time.sleep(.005)
+        findid('deformField1').send_keys('a')
+        findid('deformField1-confirm').send_keys('a')
         self.assertTrue(
-            browser.get_value('deformField1') in ('', '###-##-####'))
+            findid('deformField1').get_attribute('value') in
+            ('', '###-##-####')
+            )
         self.assertTrue(
-            browser.get_value('deformField1-confirm') in ('', '###-##-####'))
+            findid('deformField1-confirm').get_attribute('value') in
+            ('', '###-##-####')
+            )
 
     def test_submit_success(self):
-        import time
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.focus('deformField1')
-        for key in '140118866':
-            browser.key_press('deformField1', key)
-            time.sleep(.005)
-        browser.focus('deformField1-confirm')
-        for key in '140118866':
-            browser.key_press('deformField1-confirm', key)
-            time.sleep(.005)
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertSimilarRepr(browser.get_text('css=#captured'),
-                            u"{'ssn': u'140-11-8866'}")
-        
+        findid('deformField1').send_keys('140118866')
+        browser.execute_script(
+            'document.getElementById("deformField1-confirm").focus();')
+        findid('deformField1-confirm').send_keys('140118866')
+        findid("deformsubmit").click()
+        self.assertEqual(findid('captured').text, "{'ssn': u'140-11-8866'}")
 
-class CheckedPasswordWidgetTests(Base, unittest.TestCase):
-    url = "/checkedpassword/"
+
+class CheckedInputReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/checkedinput_readonly/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Password"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_value('deformField1-confirm'), '')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertTrue('Email Address' in browser.page_source)
+        self.assertEqual(findcss('.required').text, 'Email Address')
+        self.assertEqual(findid('captured').text, 'None')
         self.assertEqual(
-            browser.get_attribute('css=#deformField1@type'),
-            'password')
+            findid('deformField1').text,
+            'ww@graymatter.com'
+            )
+        
+class CheckedPasswordWidgetTests(Base, unittest.TestCase):
+    url = test_url("/checkedpassword/")
+    def test_render_default(self):
+        self.assertTrue('Password' in browser.page_source)
+        self.assertEqual(findcss('.required').text, 'Password')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
         self.assertEqual(
-            browser.get_attribute('css=#deformField1-confirm@type'),
-            'password')
+            findid('deformField1-confirm').get_attribute('value'),
+            ''
+            )
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(
+            findid('deformField1').get_attribute('type'),
+            'password'
+            )
+        self.assertEqual(
+            findid('deformField1-confirm').get_attribute('type'),
+            'password'
+            )
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_value('deformField1-confirm'), '')
-        self.assertEqual(browser.get_text('css=#captured'), "None")
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
         self.assertEqual(
-            browser.get_attribute('css=#deformField1@type'),
-            'password')
-        self.assertEqual(
-            browser.get_attribute('css=#deformField1-confirm@type'),
-            'password')
+            findid('deformField1-confirm').get_attribute('value'),
+            ''
+            )
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_tooshort(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'this')
-        browser.type('deformField1-confirm', 'this')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
-                         'Shorter than minimum length 5')
-        self.assertEqual(browser.get_value('deformField1'), 'this')
-        self.assertEqual(browser.get_value('deformField1-confirm'), 'this')
-        self.assertEqual(browser.get_text('css=#captured'), "None")
+        findid('deformField1').send_keys('this')
+        findid('deformField1-confirm').send_keys('this')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
         self.assertEqual(
-            browser.get_attribute('css=#deformField1@type'),
-            'password')
+            findid('error-deformField1').text,
+            'Shorter than minimum length 5'
+            )
         self.assertEqual(
-            browser.get_attribute('css=#deformField1-confirm@type'),
-            'password')
+            findid('deformField1').get_attribute('value'),
+            'this'
+            )
+        self.assertEqual(
+            findid('deformField1-confirm').get_attribute('value'),
+            'this'
+            )
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_mismatch(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'this123')
-        browser.type('deformField1-confirm', 'that123')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
-                         'Password did not match confirm')
-        self.assertEqual(browser.get_value('deformField1'), 'this123')
-        self.assertEqual(browser.get_value('deformField1-confirm'),
-                         'that123')
-        self.assertEqual(browser.get_text('css=#captured'), "None")
+        findid('deformField1').send_keys('this123')
+        findid('deformField1-confirm').send_keys('that123')
+        findid("deformsubmit").click()
         self.assertEqual(
-            browser.get_attribute('css=#deformField1@type'),
-            'password')
+            findid('error-deformField1').text,
+            'Password did not match confirm'
+            )
         self.assertEqual(
-            browser.get_attribute('css=#deformField1-confirm@type'),
-            'password')
+            findid('deformField1').get_attribute('value'),
+            'this123'
+            )
+        self.assertEqual(
+            findid('deformField1-confirm').get_attribute('value'),
+            'that123'
+            )
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'this123')
-        browser.type('deformField1-confirm', 'this123')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), 'this123')
-        self.assertEqual(browser.get_value('deformField1-confirm'), 'this123')
-        self.assertSimilarRepr(browser.get_text('css=#captured'),
-                               "{'password': u'this123'}")
+        findid('deformField1').send_keys('this123')
+        findid('deformField1-confirm').send_keys('this123')
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
-            browser.get_attribute('css=#deformField1@type'),
-            'password')
+            findid('deformField1').get_attribute('value'),
+            'this123'
+            )
         self.assertEqual(
-            browser.get_attribute('css=#deformField1-confirm@type'),
-            'password')
+            findid('deformField1-confirm').get_attribute('value'),
+            'this123'
+            )
+        self.assertEqual(findid('captured').text, "{'password': u'this123'}")
 
-class DateInputWidgetTests(Base, unittest.TestCase):
-    url = '/dateinput/'
+class CheckedPasswordReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/checkedpassword_readonly/")
     def test_render_default(self):
-        browser.open(self.url)
-        self.assertTrue(browser.is_text_present("Date"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '2010-05-05')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertTrue('Password' in browser.page_source)
+        self.assertEqual(findcss('.required').text, 'Password')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(
+            findid('deformField1').text,
+            'Password not displayed.'
+            )
+
+        
+class DateInputWidgetTests(Base, unittest.TestCase):
+    url = test_url('/dateinput/')
+    def test_render_default(self):
+        self.assertTrue('Date' in browser.page_source)
+        self.assertEqual(findcss('.required').text, 'Date')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'), '')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_tooearly(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.focus('css=#deformField1')
-        browser.click('css=#deformField1')
-        browser.click('link=4')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
-                         '2010-05-04 is earlier than earliest date 2010-05-05')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
+        import datetime
+        findid('deformField1').click()
+        def diff_month(d1, d2):
+            return (d1.year - d2.year)*12 + d1.month - d2.month
+        tooearly = datetime.date(2010, 01, 01)
+        today = datetime.date.today()
+        num_months = diff_month(today, tooearly)
+        [ findcss('.picker__nav--prev').click() for x in range(num_months) ]
+        findcss(".picker__day").click()
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertTrue('is earlier than' in findid('error-deformField1').text)
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.focus('css=#deformField1')
-        browser.click('css=#deformField1')
-        browser.click('link=6')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#captured'),
-                         "{'date': datetime.date(2010, 5, 6)}")
-        self.assertEqual(browser.get_value('deformField1'), '2010-05-06')
+        import datetime
+        today = datetime.date.today()
+        findid('deformField1').click()
+        findcss(".picker__button--today").click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertRaises(NoSuchElementException, findid, 'error-deformField1')
+        expected = '%d, %d, %d' % (today.year, today.month, today.day)
+        expected = "{'date': datetime.date(%s)}" % expected
+        self.assertSimilarRepr(
+            findid('captured').text,
+            expected
+            )
+
 
 class DateTimeInputWidgetTests(Base, unittest.TestCase):
-    url = '/datetimeinput/'
+    url = test_url('/datetimeinput/')
     def test_render_default(self):
-        browser.open(self.url)
-        self.assertTrue(browser.is_text_present("Date Time"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '2010-05-06 12:00:00')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertEqual(findcss('.required').text, 'Date Time')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(
+            findid('deformField1-date').get_attribute('value'), '')
+        self.assertEqual(
+            findid('deformField1-time').get_attribute('value'), '')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
-    def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
+    def test_submit_both_empty(self):
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
+    def test_submit_time_empty(self):
+        findid('deformField1-date').click()
+        findcss(".picker__button--today").click()
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField1').text, 'Incomplete time')
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_date_empty(self):
+        findid('deformField1-time').click()
+        findxpath('//li[@data-pick="0"]').click()
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField1').text, 'Incomplete date')
+        self.assertEqual(findid('captured').text, 'None')
+        
     def test_submit_tooearly(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.focus('css=#deformField1')
-        browser.click('css=#deformField1')
-        browser.click('link=5')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
-                         '2010-05-05 12:00:00+00:00 is earlier than earliest datetime 2010-05-05 12:30:00+00:00')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
+        import datetime
+        findid('deformField1-time').click()
+        findxpath('//li[@data-pick="0"]').click()
+        findid('deformField1-date').click()
+        def diff_month(d1, d2):
+            return (d1.year - d2.year)*12 + d1.month - d2.month
+        tooearly = datetime.date(2010, 01, 01)
+        today = datetime.date.today()
+        num_months = diff_month(today, tooearly)
+        [ findcss('.picker__nav--prev').click() for x in range(num_months) ]
+        findcss(".picker__day").click()
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertTrue('is earlier than' in findid('error-deformField1').text)
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.focus('css=#deformField1')
-        browser.click('css=#deformField1')
-        browser.click('link=7')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.get_text('css=#captured').startswith(
-            "{'date_time': datetime.datetime(2010, 5, 7, 12, 0, tzinfo"))
-        self.assertEqual(browser.get_value('deformField1'), '2010-05-07 12:00:00')
+        import datetime
+        now = datetime.datetime.utcnow()
+        findid('deformField1-time').click()
+        findxpath('//li[@data-pick="60"]').click()
+        findid('deformField1-date').click()
+        findcss(".picker__button--today").click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertRaises(NoSuchElementException, findid, 'error-deformField1')
+        expected = '%d, %d, %d, %d, %d' % (
+            now.year, now.month, now.day, 1, 0
+            )
+        expected = "{'date_time': datetime.datetime(%s" % expected
+        captured = findid('captured').text
+        if captured.startswith('u'):
+            captured = captured[1:]
+        self.assertTrue(
+            captured.startswith(expected),
+            (captured, expected)
+            )
+
+class DateTimeInputReadonlyTests(Base, unittest.TestCase):
+    url = test_url('/datetimeinput_readonly/')
+    def test_render_default(self):
+        self.assertEqual(findcss('.required').text, 'Date Time')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1').text, '2011-05-05 01:02:00')
+
 
 class DatePartsWidgetTests(Base, unittest.TestCase):
-    url = '/dateparts/'
+    url = test_url('/dateparts/')
     def test_render_default(self):
-        browser.open(self.url)
-        self.assertTrue(browser.is_text_present("Date"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_value('deformField1-month'), '')
-        self.assertEqual(browser.get_value('deformField1-day'), '')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertTrue('Date' in browser.page_source)
+        self.assertEqual(findcss('.required').text, 'Date')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('deformField1-month').get_attribute('value'),'')
+        self.assertEqual(findid('deformField1-day').get_attribute('value'), '')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_value('deformField1-month'), '')
-        self.assertEqual(browser.get_value('deformField1-day'), '')
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('deformField1-month').get_attribute('value'),'')
+        self.assertEqual(findid('deformField1-day').get_attribute('value'), '')
+        self.assertTrue(findcss('.has-error'))
 
     def test_submit_only_year(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '2010')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Incomplete date')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '2010')
-        self.assertEqual(browser.get_value('deformField1-month'), '')
-        self.assertEqual(browser.get_value('deformField1-day'), '')
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
+        findid('deformField1').send_keys('2010')
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField1').text, 'Incomplete date')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '2010')
+        self.assertEqual(findid('deformField1-month').get_attribute('value'),'')
+        self.assertEqual(findid('deformField1-day').get_attribute('value'), '')
+        self.assertTrue(findcss('.has-error'))
 
     def test_submit_only_year_and_month(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '2010')
-        browser.type('deformField1-month', '1')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Incomplete date')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '2010')
-        self.assertEqual(browser.get_value('deformField1-month'), '1')
-        self.assertEqual(browser.get_value('deformField1-day'), '')
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
+        findid('deformField1').send_keys('2010')
+        findid('deformField1-month').send_keys('1')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField1').text, 'Incomplete date')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '2010')
+        self.assertEqual(
+            findid('deformField1-month').get_attribute('value'),
+            '1'
+            )
+        self.assertEqual(findid('deformField1-day').get_attribute('value'), '')
 
     def test_submit_tooearly(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '2008')
-        browser.type('deformField1-month', '1')
-        browser.type('deformField1-day', '1')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
+        findid('deformField1').send_keys('2008')
+        findid('deformField1-month').send_keys('1')
+        findid('deformField1-day').send_keys('1')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField1').text,
                          '2008-01-01 is earlier than earliest date 2010-01-01')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '2008')
-        self.assertEqual(browser.get_value('deformField1-month'), '1')
-        self.assertEqual(browser.get_value('deformField1-day'), '1')
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '2008')
+        self.assertEqual(
+            findid('deformField1-month').get_attribute('value'),
+            '1'
+            )
+        self.assertEqual(
+            findid('deformField1-day').get_attribute('value'),
+            '1'
+            )
 
     def test_submit_success(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '2010')
-        browser.type('deformField1-month', '1')
-        browser.type('deformField1-day', '1')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#captured'),
+        findid('deformField1').send_keys('2010')
+        findid('deformField1-month').send_keys('1')
+        findid('deformField1-day').send_keys('1')
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('captured').text,
                          "{'date': datetime.date(2010, 1, 1)}")
-        self.assertEqual(browser.get_value('deformField1'), '2010')
-        self.assertEqual(browser.get_value('deformField1-month'), '01')
-        self.assertEqual(browser.get_value('deformField1-day'), '01')
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'),
+            '2010'
+            )
+        self.assertEqual(
+            findid('deformField1-month').get_attribute('value'),
+            '01'
+            )
+        self.assertEqual(
+            findid('deformField1-day').get_attribute('value'),
+            '01'
+            )
 
-class EditFormTests(Base, unittest.TestCase):
-    url = "/edit/"
+class DatePartsReadonlyTests(Base, unittest.TestCase):
+    url = test_url('/dateparts_readonly/')
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField1'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField3'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField4'))
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '42')
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'number')
-        self.assertEqual(browser.get_value('deformField3'), '')
-        self.assertEqual(browser.get_attribute('deformField3@name'), 'name')
-        self.assertEqual(browser.get_value('deformField4'), '2010')
-        self.assertEqual(browser.get_attribute('deformField4@name'), 'year')
-        self.assertEqual(browser.get_value('deformField4-month'), '04')
-        self.assertEqual(browser.get_attribute('deformField4-month@name'),
-                         'month')
-        self.assertEqual(browser.get_value('deformField4-day'), '09')
-        self.assertEqual(browser.get_attribute('deformField4-day@name'),
-                         'day')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Date' in browser.page_source)
+        self.assertEqual(findcss('.required').text, 'Date')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1').text, '2010/05/05')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        
+class EditFormTests(Base, unittest.TestCase):
+    url = test_url("/edit/")
+    def test_render_default(self):
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'),
+            '42'
+            )
+        self.assertEqual(
+            findid('deformField1').get_attribute('name'),
+            'number'
+            )
+        self.assertEqual(
+            findid('deformField3').get_attribute('value'),
+            ''
+            )
+        self.assertEqual(
+            findid('deformField3').get_attribute('name'),
+            'name'
+            )
+        self.assertEqual(
+            findid('deformField4').get_attribute('value'),
+            '2010'
+            )
+        self.assertEqual(
+            findid('deformField4').get_attribute('name'),
+            'year'
+            )
+        self.assertEqual(
+            findid('deformField4-month').get_attribute('value'),
+            '04'
+            )
+        self.assertEqual(
+            findid('deformField4-month').get_attribute('name'),
+            'month'
+            )
+        self.assertEqual(
+            findid('deformField4-day').get_attribute('value'),
+            '09'
+            )
+        self.assertEqual(
+            findid('deformField4-day').get_attribute('name'),
+            'day'
+            )
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField3', 'name')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertFalse(browser.is_element_present('css=#error-deformField1'))
-        self.assertFalse(browser.is_element_present('css=#error-deformField3'))
-        self.assertFalse(browser.is_element_present('css=#error-deformField4'))
-        self.assertEqual(browser.get_value('deformField1'), '42')
-        self.assertEqual(browser.get_value('deformField3'), 'name')
-        self.assertEqual(browser.get_value('deformField4'), '2010')
-        self.assertEqual(browser.get_value('deformField4-month'), '04')
-        self.assertEqual(browser.get_value('deformField4-day'), '09')
+        findid('deformField3').send_keys('name')
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'),
+            '42'
+            )
+        self.assertEqual(findid('deformField3').get_attribute('value'), 'name')
+        self.assertEqual(findid('deformField4').get_attribute('value'), '2010')
+        self.assertEqual(
+            findid('deformField4-month').get_attribute('value'),
+            '04'
+            )
+        self.assertEqual(
+            findid('deformField4-day').get_attribute('value'),
+            '09'
+            )
         self.assertSimilarRepr(
-            browser.get_text('css=#captured'),
-            (u"{'number': 42, 'mapping': {'date': datetime.date(2010, 4, 9), "
-             "'name': u'name'}}"))
+            findid('captured').text,
+            (u"{'mapping': {'date': datetime.date(2010, 4, 9), "
+             "'name': u'name'}, 'number': 42}")
+            )
 
 class MappingWidgetTests(Base, unittest.TestCase):
-    url = "/mapping/"
+    url = test_url("/mapping/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField1'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField3'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField4'))
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'number')
-        self.assertEqual(browser.get_value('deformField3'), '')
-        self.assertEqual(browser.get_attribute('deformField3@name'), 'name')
-        self.assertEqual(browser.get_value('deformField4'), '')
-        self.assertEqual(browser.get_attribute('deformField4@name'), 'year')
-        self.assertEqual(browser.get_value('deformField4-month'), '')
-        self.assertEqual(browser.get_attribute('deformField4-month@name'),
-                         'month')
-        self.assertEqual(browser.get_value('deformField4-day'), '')
-        self.assertEqual(browser.get_attribute('deformField4-day@name'),
-                         'day')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('deformField3').get_attribute('value'), '')
+        self.assertEqual(findid('deformField4').get_attribute('value'), '')
+        self.assertEqual(findid('deformField4-month').get_attribute('value'),'')
+        self.assertEqual(findid('deformField4-day').get_attribute('value'), '')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#captured'),
-                         'None')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('error-deformField4').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_invalid_number(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'notanumber')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         '"notanumber" is not a number')
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#captured'),
-                         'None')
+        findid('deformField1').send_keys('notanumber')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(
+            findid('error-deformField1').text,
+            '"notanumber" is not a number'
+            )
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('error-deformField4').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_invalid_date(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '1')
-        browser.type('deformField3', 'name')
-        browser.type('deformField4', 'year')
-        browser.type('deformField4-month', 'month')
-        browser.type('deformField4-day', 'day')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertFalse(browser.is_element_present('css=#error-deformField1'))
-        self.assertFalse(browser.is_element_present('css=#error-deformField3'))
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Invalid date')
-        self.assertEqual(browser.get_value('deformField1'), '1')
-        self.assertEqual(browser.get_value('deformField3'), 'name')
-        self.assertEqual(browser.get_value('deformField4'), 'year')
-        self.assertEqual(browser.get_value('deformField4-month'), 'month')
-        self.assertEqual(browser.get_value('deformField4-day'), 'day')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        findid('deformField1').send_keys('1')
+        findid('deformField3').send_keys('name')
+        findid('deformField4').send_keys('year')
+        findid('deformField4-month').send_keys('month')
+        findid('deformField4-day').send_keys('day')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField4').text, 'Invalid date')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '1')
+        self.assertEqual(findid('deformField3').get_attribute('value'), 'name')
+        self.assertEqual(findid('deformField4').get_attribute('value'), 'year')
+        self.assertEqual(
+            findid('deformField4-month').get_attribute('value'),
+            'mo'
+            )
+        self.assertEqual(
+            findid('deformField4-day').get_attribute('value'),
+            'da'
+            )
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '1')
-        browser.type('deformField3', 'name')
-        browser.type('deformField4', '2010')
-        browser.type('deformField4-month', '1')
-        browser.type('deformField4-day', '1')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertFalse(browser.is_element_present('css=#error-deformField1'))
-        self.assertFalse(browser.is_element_present('css=#error-deformField3'))
-        self.assertFalse(browser.is_element_present('css=#error-deformField4'))
-        self.assertEqual(browser.get_value('deformField1'), '1')
-        self.assertEqual(browser.get_value('deformField3'), 'name')
-        self.assertEqual(browser.get_value('deformField4'), '2010')
-        self.assertEqual(browser.get_value('deformField4-month'), '01')
-        self.assertEqual(browser.get_value('deformField4-day'), '01')
+        findid('deformField1').send_keys('1')
+        findid('deformField3').send_keys('name')
+        findid('deformField4').send_keys('2010')
+        findid('deformField4-month').send_keys('1')
+        findid('deformField4-day').send_keys('1')
+        findid("deformsubmit").click()
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'),
+            '1'
+            )
+        self.assertEqual(
+            findid('deformField3').get_attribute('value'),
+            'name'
+            )
+        self.assertEqual(
+            findid('deformField4').get_attribute('value'),
+            '2010'
+            )
+        self.assertEqual(
+            findid('deformField4-month').get_attribute('value'),
+            '01'
+            )
+        self.assertEqual(
+            findid('deformField4-day').get_attribute('value'),
+            '01'
+            )
         self.assertSimilarRepr(
-            browser.get_text('css=#captured'),
-            (u"{'number': 1, 'mapping': {'date': datetime.date(2010, 1, 1), "
-             "'name': u'name'}}"))
+            findid('captured').text,
+            (u"{'mapping': {'date': datetime.date(2010, 1, 1), "
+             "'name': u'name'}, 'number': 1}")
+            )
 
 class FieldDefaultTests(Base, unittest.TestCase):
-    url = "/fielddefaults/"
+    url = test_url("/fielddefaults/")
     def test_render_default(self):
-        browser.open(self.url)
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField1'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField2'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField3'))
-        self.assertEqual(browser.get_value('deformField1'), 'Grandaddy')
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'artist')
-        self.assertEqual(browser.get_value('deformField2'),
-                         'Just Like the Fambly Cat')
-        self.assertEqual(browser.get_attribute('deformField2@name'), 'album')
-        self.assertEqual(browser.get_value('deformField3'), '')
-        self.assertEqual(browser.get_attribute('deformField3@name'), 'song')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'),
+            'Grandaddy'
+            )
+        self.assertEqual(
+            findid('deformField2').get_attribute('value'),
+            'Just Like the Fambly Cat'
+            )
+        self.assertEqual(findid('deformField3').get_attribute('value'), '')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), 'Grandaddy')
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'artist')
-        self.assertEqual(browser.get_value('deformField2'),
-                         'Just Like the Fambly Cat')
-        self.assertEqual(browser.get_attribute('deformField2@name'), 'album')
-        self.assertEqual(browser.get_value('deformField3'), '')
-        self.assertEqual(browser.get_attribute('deformField3@name'), 'song')
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'),
+            'Grandaddy'
+            )
+        self.assertEqual(
+            findid('deformField2').get_attribute('value'),
+            'Just Like the Fambly Cat'
+            )
+        self.assertEqual(findid('deformField3').get_attribute('value'), '')
+        self.assertEqual(findid('error-deformField3').text, 'Required')
 
     def test_submit_success(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'abc')
-        browser.type('deformField2', 'def')
-        browser.type('deformField3', 'ghi')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), 'abc')
-        self.assertEqual(browser.get_value('deformField2'), 'def')
-        self.assertEqual(browser.get_value('deformField3'), 'ghi')
+        findid('deformField1').clear()
+        findid('deformField1').send_keys('abc')
+        findid('deformField2').clear()
+        findid('deformField2').send_keys('def')
+        findid('deformField3').clear()
+        findid('deformField3').send_keys('ghi')
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'), 'abc')
+        self.assertEqual(findid('deformField2').get_attribute('value'), 'def')
+        self.assertEqual(findid('deformField3').get_attribute('value'), 'ghi')
         self.assertSimilarRepr(
-            browser.get_text('css=#captured'),
-            u"{'album': u'def', 'song': u'ghi', 'artist': u'abc'}")
+            findid('captured').text,
+            u"{'album': u'def', 'artist': u'abc', 'song': u'ghi'}")
 
 class NonRequiredFieldTests(Base, unittest.TestCase):
-    url = "/nonrequiredfields/"
+    url = test_url("/nonrequiredfields/")
     def test_render_default(self):
-        browser.open(self.url)
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField1'))
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'required')
-        self.assertEqual(browser.get_value('deformField2'), '')
-        self.assertEqual(browser.get_attribute('deformField2@name'),
-                         'notrequired')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('deformField2').get_attribute('value'), '')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_value('deformField2'), '')
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('deformField2').get_attribute('value'), '')
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success_required_filled_notrequired_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'abc')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), 'abc')
-        self.assertEqual(browser.get_value('deformField2'), '')
+        findid('deformField1').send_keys('abc')
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'), 'abc')
+        self.assertEqual(findid('deformField2').get_attribute('value'), '')
         self.assertSimilarRepr(
-            browser.get_text('css=#captured'),
-            u"{'required': u'abc', 'notrequired': u''}")
+            findid('captured').text,
+            u"{'notrequired': u'', 'required': u'abc'}")
 
     def test_submit_success_required_and_notrequired_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'abc')
-        browser.type('deformField2', 'def')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), 'abc')
-        self.assertEqual(browser.get_value('deformField2'), 'def')
+        findid('deformField1').send_keys('abc')
+        findid('deformField2').send_keys('def')
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'), 'abc')
+        self.assertEqual(findid('deformField2').get_attribute('value'), 'def')
         self.assertSimilarRepr(
-            browser.get_text('css=#captured'),
-            u"{'required': u'abc', 'notrequired': u'def'}")
+            findid('captured').text,
+            u"{'notrequired': u'def', 'required': u'abc'}")
 
 class HiddenFieldWidgetTests(Base, unittest.TestCase):
-    url = "/hidden_field/"
+    url = test_url("/hidden_field/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'sneaky')
-        self.assertEqual(browser.get_value('deformField1'), 'true')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-    
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'), 'true')
+        self.assertEqual(findid('captured').text, 'None')
+
     def test_render_submitted(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'sneaky')
-        self.assertEqual(browser.get_value('deformField1'), 'true')
-        self.assertEqual(browser.get_text('css=#captured'), "{'sneaky': True}")
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'), 'true')
+        self.assertEqual(findid('captured').text, "{'sneaky': True}")
 
 class HiddenmissingTests(Base, unittest.TestCase):
-    url = "/hiddenmissing/"
+    url = test_url("/hiddenmissing/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'title')
-        self.assertEqual(browser.get_attribute('deformField2@name'), 'number')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_value('deformField2'), '')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-    
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('deformField2').get_attribute('value'), '')
+        self.assertEqual(findid('captured').text, 'None')
+
     def test_render_submitted(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'yup')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'title')
-        self.assertEqual(browser.get_value('deformField1'), 'yup')
+        findid('deformField1').send_keys('yup')
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'), 'yup')
         self.assertSimilarRepr(
-            browser.get_text('css=#captured'),
+            findid('captured').text,
             "{'number': <colander.null>, 'title': u'yup'}")
 
 class FileUploadTests(Base, unittest.TestCase):
-    url = "/file/"
+    url = test_url("/file/")
 
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField1'))
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'upload')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'upload')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_filled(self):
         # submit one first
         path, filename = _getFile()
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', path)
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
+        findid('deformField1').send_keys(path)
+        findid("deformsubmit").click()
 
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'upload')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_text('css=#deformField1-filename'),
-                         filename)
-        uid = browser.get_value('css=#deformField1-uid')
-        captured = browser.get_text('css=#captured')
-        self.assertTrue("'filename': u'%s" % filename in captured)
-        self.assertTrue(uid in captured)
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('deformField1-filename').text, filename)
+        self.assertTrue(filename in findid('captured').text)
+        uid = findid('deformField1-uid').get_attribute('value')
+        self.assertTrue(uid in findid('captured').text)
 
         # resubmit without entering a new filename should not change the file
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-
-        self.assertEqual(browser.get_value('css=#deformField1-uid'), uid)
-        self.assertEqual(browser.get_text('css=#deformField1-filename'),
-                         filename)
+        findid("deformsubmit").click()
+        self.assertEqual(findid('deformField1-filename').text, filename)
+        self.assertEqual(findid('deformField1-uid').get_attribute('value'), uid)
 
         # resubmit after entering a new filename should change the file
         path2, filename2 = _getFile('selenium.py')
-        browser.type('deformField1', path2)
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('css=#deformField1-filename'),
-                         filename2)
-        captured = browser.get_text('css=#captured')
-        self.assertTrue("'filename': u'%s" % filename2 in captured)
-        self.assertEqual(browser.get_value('css=#deformField1-uid'), uid)
+        findid('deformField1').send_keys(path2)
+        findid("deformsubmit").click()
+        self.assertEqual(findid('deformField1-filename').text, filename2)
+        self.assertTrue('filename' in findid('captured').text)
+        self.assertTrue(uid in findid('captured').text)
 
-class InterFieldValidationTests(Base, unittest.TestCase):
-    url=  "/interfield/"
+class FileUploadReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/file_readonly/")
+
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField1'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField2'))
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'name')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_attribute('deformField2@name'), 'title')
-        self.assertEqual(browser.get_value('deformField2'), '')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-    
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').text, 'leavesofgrass.png')
+        self.assertEqual(findid('captured').text, 'None')
+
+        
+class InterFieldValidationTests(Base, unittest.TestCase):
+    url=  test_url("/interfield/")
+    def test_render_default(self):
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('deformField2').get_attribute('value'), '')
+        self.assertEqual(findid('captured').text, 'None')
+
     def test_submit_both_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        error_node2 = 'css=#error-deformField2'
-        self.assertEqual(browser.get_text(error_node2), 'Required')
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'name')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_attribute('deformField2@name'), 'title')
-        self.assertEqual(browser.get_value('deformField2'), '')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('error-deformField2').text, 'Required')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('deformField2').get_attribute('value'), '')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_one_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'abc')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertFalse(browser.is_element_present('css=#error-deformField1'))
-        error_node2 = 'css=#error-deformField2'
-        self.assertEqual(browser.get_text(error_node2), 'Required')
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'name')
-        self.assertEqual(browser.get_value('deformField1'), 'abc')
-        self.assertEqual(browser.get_attribute('deformField2@name'), 'title')
-        self.assertEqual(browser.get_value('deformField2'), '')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        findid('deformField1').send_keys('abc')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertRaises(NoSuchElementException, findid, 'error-deformField1')
+        self.assertEqual(findid('error-deformField2').text, 'Required')
+        self.assertEqual(findid('deformField1').get_attribute('value'), 'abc')
+        self.assertEqual(findid('deformField2').get_attribute('value'), '')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_first_doesnt_start_with_second(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'abc')
-        browser.type('deformField2', 'def')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertFalse(browser.is_element_present('css=#error-deformField1'))
-        error_node2 = 'css=#error-deformField2'
-        self.assertEqual(browser.get_text(error_node2),
-                         'Must start with name abc')
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'name')
-        self.assertEqual(browser.get_value('deformField1'), 'abc')
-        self.assertEqual(browser.get_attribute('deformField2@name'), 'title')
-        self.assertEqual(browser.get_value('deformField2'), 'def')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        findid('deformField1').send_keys('abc')
+        findid('deformField2').send_keys('def')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertRaises(NoSuchElementException, findid, 'error-deformField1')
+        self.assertEqual(
+            findid('error-deformField2').text,
+            'Must start with name abc'
+            )
+        self.assertEqual(findid('deformField1').get_attribute('value'), 'abc')
+        self.assertEqual(findid('deformField2').get_attribute('value'), 'def')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'abc')
-        browser.type('deformField2', 'abcdef')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertFalse(browser.is_element_present('css=#error-deformField1'))
-        self.assertFalse(browser.is_element_present('css=#error-deformField2'))
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'name')
-        self.assertEqual(browser.get_value('deformField1'), 'abc')
-        self.assertEqual(browser.get_attribute('deformField2@name'), 'title')
-        self.assertEqual(browser.get_value('deformField2'), 'abcdef')
-        self.assertEqual(eval(browser.get_text('css=#captured')),
+        findid('deformField1').send_keys('abc')
+        findid('deformField2').send_keys('abcdef')
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertRaises(NoSuchElementException, findid, 'error-deformField1')
+        self.assertRaises(NoSuchElementException, findid, 'error-deformField1')
+        self.assertEqual(findid('deformField1').get_attribute('value'), 'abc')
+        self.assertEqual(
+            findid('deformField2').get_attribute('value'),
+            'abcdef'
+            )
+        self.assertEqual(eval(findid('captured').text),
                          {'name': 'abc', 'title': 'abcdef'})
 
 class InternationalizationTests(Base, unittest.TestCase):
-    url = "/i18n/"
+    url = test_url("/i18n/")
+
+    def setUp(self):
+        pass  # each tests has a different url
+
     def test_render_default(self):
-        browser.open(self.url)
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField1'))
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'number')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10*')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, 'Submit')
+        browser.get(self.url)
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findcss('label').text, 'A number between 1 and 10')
+        self.assertEqual(findid("deformsubmit").text, 'Submit')
 
     def test_render_en(self):
-        browser.open("%s?_LOCALE_=en" % self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField1'))
-        label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10*')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, 'Submit')
+        browser.get("%s?_LOCALE_=en" % self.url)
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findcss('label').text, 'A number between 1 and 10')
+        self.assertEqual(findid("deformsubmit").text, 'Submit')
     
     def test_render_ru(self):
-        browser.open("%s?_LOCALE_=ru" % self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField1'))
-        label = browser.get_text('css=label')
-        self.assertEqual(label, u'Число между 1 и 10*')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, u'отправить')
+        browser.get("%s?_LOCALE_=ru" % self.url)
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findcss('label').text, u'Число между 1 и 10')
+        self.assertEqual(findid("deformsubmit").text, u'отправить')
     
     def test_submit_empty_en(self):
-        browser.open("%s?_LOCALE_=en" % self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        errorMsgLbl = browser.get_text('css=.errorMsgLbl')
-        errorMsg = browser.get_text('css=.errorMsg')
-        self.assertEqual(errorMsgLbl,
-                         'There was a problem with your submission')
-        self.assertEqual(errorMsg, 'Errors have been highlighted below')
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10*')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, 'Submit')
+        browser.get("%s?_LOCALE_=en" % self.url)
+        findid("deformsubmit").click()
+        self.assertEqual(
+            findcss('.alert-danger').text,
+            'There was a problem with your submission'
+            )
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findcss('label').text, 'A number between 1 and 10')
+        self.assertEqual(findid("deformsubmit").text, 'Submit')
 
     def test_submit_empty_ru(self):
-        browser.open("%s?_LOCALE_=ru" % self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        errorMsgLbl = browser.get_text('css=.errorMsgLbl')
-        errorMsg = browser.get_text('css=.errorMsg')
-        self.assertEqual(errorMsgLbl,
-                         u'Данные которые вы предоставили содержат ошибку')
-        self.assertEqual(errorMsg,
-                         u'Ниже вы найдёте подробное описание ошибок')
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), u'Требуется')
-        label = browser.get_text('css=label')
-        self.assertEqual(label, u'Число между 1 и 10*')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, u'отправить')
+        browser.get("%s?_LOCALE_=ru" % self.url)
+        findid("deformsubmit").click()
+        self.assertEqual(
+            findcss('.alert-danger').text,
+            u'Данные которые вы предоставили содержат ошибку')
+        self.assertEqual(findid('error-deformField1').text, u'Требуется')
+        self.assertEqual(findcss('label').text, u'Число между 1 и 10')
+        self.assertEqual(findid("deformsubmit").text, u'отправить')
 
     def test_submit_toolow_en(self):
-        browser.open("%s?_LOCALE_=en" % self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '0')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        errorMsgLbl = browser.get_text('css=.errorMsgLbl')
-        errorMsg = browser.get_text('css=.errorMsg')
-        self.assertEqual(errorMsgLbl,
-                         'There was a problem with your submission')
-        self.assertEqual(errorMsg, 'Errors have been highlighted below')
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
-                         '0 is less than minimum value 1')
-        label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10*')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, 'Submit')
+        browser.get("%s?_LOCALE_=en" % self.url)
+        findid('deformField1').send_keys('0')
+        findid("deformsubmit").click()
+        self.assertEqual(
+            findcss('.alert-danger').text,
+            'There was a problem with your submission'
+            )
+        self.assertEqual(
+            findid('error-deformField1').text,
+            '0 is less than minimum value 1'
+            )
+        self.assertEqual(findcss('label').text, 'A number between 1 and 10')
+        self.assertEqual(findid("deformsubmit").text, 'Submit')
 
     def test_submit_toolow_ru(self):
-        browser.open("%s?_LOCALE_=ru" % self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '0')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        errorMsgLbl = browser.get_text('css=.errorMsgLbl')
-        errorMsg = browser.get_text('css=.errorMsg')
-        self.assertEqual(errorMsgLbl,
-                         u'Данные которые вы предоставили содержат ошибку')
-        self.assertEqual(errorMsg,
-                         u'Ниже вы найдёте подробное описание ошибок')
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
-                         u'0 меньше чем 1')
-        label = browser.get_text('css=label')
-        self.assertEqual(label, u'Число между 1 и 10*')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, u'отправить')
+        browser.get("%s?_LOCALE_=ru" % self.url)
+        findid('deformField1').send_keys('0')
+        findid("deformsubmit").click()
+        self.assertEqual(
+            findcss('.alert-danger').text,
+            u'Данные которые вы предоставили содержат ошибку'
+            )
+        self.assertEqual(findid('error-deformField1').text, u'0 меньше чем 1')
+        self.assertEqual(findcss('label').text, u'Число между 1 и 10')
+        self.assertEqual(findid("deformsubmit").text, u'отправить')
 
-    def test_submit_toohigh_en(self):
-        browser.open("%s?_LOCALE_en" % self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '11')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        errorMsgLbl = browser.get_text('css=.errorMsgLbl')
-        errorMsg = browser.get_text('css=.errorMsg')
-        self.assertEqual(errorMsgLbl,
-                         'There was a problem with your submission')
-        self.assertEqual(errorMsg, 'Errors have been highlighted below')
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
-                         '11 is greater than maximum value 10')
-        label = browser.get_text('css=label')
-        self.assertEqual(label, 'A number between 1 and 10*')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, 'Submit')
-
-    def test_submit_toohigh_ru(self):
-        browser.open("%s?_LOCALE_=ru" % self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '11')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        errorMsgLbl = browser.get_text('css=.errorMsgLbl')
-        errorMsg = browser.get_text('css=.errorMsg')
-        self.assertEqual(errorMsgLbl,
-                         u'Данные которые вы предоставили содержат ошибку')
-        self.assertEqual(errorMsg,
-                         u'Ниже вы найдёте подробное описание ошибок')
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node),
-                         u'11 больше чем 10')
-        label = browser.get_text('css=label')
-        self.assertEqual(label, u'Число между 1 и 10*')
-        button = browser.get_text('css=button')
-        self.assertEqual(button, u'отправить')
 
 class PasswordWidgetTests(Base, unittest.TestCase):
-    url = "/password/"
+    url = test_url("/password/")
     def test_render_default(self):
-        browser.open(self.url)
-        self.assertTrue(browser.is_text_present("Password"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_attribute('css=#deformField1@type'),
-                         'password')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-                         
+        self.assertTrue('Password' in browser.page_source)
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findcss('.required').text, 'Password')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+
     def test_render_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Password"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_attribute('css=#deformField1@type'),
-                         'password')
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
+        findid("deformsubmit").click()
+        self.assertTrue('Password' in browser.page_source)
+        self.assertEqual(findcss('.required').text, 'Password')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('error-deformField1').text, 'Required')
 
     def test_render_submit_success(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'abcdef123')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Password"))
+        findid('deformField1').send_keys('abcdef123')
+        findid("deformsubmit").click()
+        self.assertTrue('Password' in browser.page_source)
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'),
+            'abcdef123'
+            )
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertSimilarRepr(
-            browser.get_text('css=#captured'),
+            findid('captured').text,
             "{'password': u'abcdef123'}")
-        self.assertEqual(browser.get_value('deformField1'), 'abcdef123')
-        self.assertEqual(browser.get_attribute('css=#deformField1@type'),
-                         'password')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
 
 class RadioChoiceWidgetTests(Base, unittest.TestCase):
-    url = "/radiochoice/"
+    url = test_url("/radiochoice/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Pepper"))
-        self.assertFalse(browser.is_checked("deformField1"))
-        self.assertFalse(browser.is_checked("deformField1-1"))
-        self.assertFalse(browser.is_checked("deformField1-2"))
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Password' in browser.page_source)
+        self.assertFalse(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
+        self.assertEqual(findcss('.required').text, 'Choose your pepper')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_unchecked(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.get_text('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        self.assertFalse(browser.is_checked("deformField1"))
-        self.assertFalse(browser.is_checked("deformField1-1"))
-        self.assertFalse(browser.is_checked("deformField1-2"))
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertFalse(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_one_checked(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("deformField1")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_checked("deformField1"))
+        findid('deformField1-0').click()
+        findid("deformsubmit").click()
+        self.assertTrue(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
         self.assertSimilarRepr(
-            browser.get_text('css=#captured'),
+            findid('captured').text,
             "{'pepper': u'habanero'}")
 
-class RadioChoiceWidgetIntTests(RadioChoiceWidgetTests):
-    url = "/radiochoice_int/"
+class RadioChoiceWidgetInlineTests(Base, unittest.TestCase):
+    url = test_url("/radiochoice_inline/")
+    def test_render_default(self):
+        self.assertTrue('Password' in browser.page_source)
+        self.assertFalse(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
+        self.assertEqual(findcss('.required').text, 'Choose your pepper')
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_unchecked(self):
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertFalse(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
+        self.assertEqual(findid('captured').text, 'None')
+
     def test_submit_one_checked(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("deformField1")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_checked("deformField1"))
+        findid('deformField1-0').click()
+        findid("deformsubmit").click()
+        self.assertTrue(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
         self.assertSimilarRepr(
-            browser.get_text('css=#captured'),
+            findid('captured').text,
+            "{'pepper': u'habanero'}")
+        
+class RadioChoiceWidgetIntTests(RadioChoiceWidgetTests):
+    url = test_url("/radiochoice_int/")
+    def test_submit_one_checked(self):
+        findid('deformField1-0').click()
+        findid("deformsubmit").click()
+        self.assertTrue(findid('deformField1-0').is_selected())
+        self.assertFalse(findid('deformField1-1').is_selected())
+        self.assertFalse(findid('deformField1-2').is_selected())
+        self.assertSimilarRepr(
+            findid('captured').text,
             "{'pepper': 0}")
 
-class ReadOnlySequenceOfMappingTests(Base, unittest.TestCase):
-    url = "/readonly_sequence_of_mappings/"
+class RadioChoiceReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/radiochoice_readonly/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField6'), 'name1')
-        self.assertEqual(browser.get_text('deformField7'), '23')
-        self.assertEqual(browser.get_text('deformField9'), 'name2')
-        self.assertEqual(browser.get_text('deformField10'), '25')
+        self.assertEqual(findid('deformField1-1').text, 'Jalapeno')
+        self.assertEqual(findcss('.required').text, 'Pepper')
+        self.assertEqual(findid('captured').text, 'None')
 
-class SequenceOfRadioChoices(Base, unittest.TestCase):
-    url = "/sequence_of_radiochoices/"
+class ReadOnlySequenceOfMappingTests(Base, unittest.TestCase):
+    url = test_url("/readonly_sequence_of_mappings/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Pepper Chooser')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findid('deformField6').text, 'name1')
+        self.assertEqual(findid('deformField7').text, '23')
+        self.assertEqual(findid('deformField9').text, 'name2')
+        self.assertEqual(findid('deformField10').text, '25')
+
+class SequenceOfRadioChoicesTests(Base, unittest.TestCase):
+    url = test_url("/sequence_of_radiochoices/")
+    def test_render_default(self):
+        self.assertEqual(
+            findid('deformField1-addtext').text,
+            'Add Pepper Chooser'
+            )
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_none_added(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Pepper Chooser')
-        self.assertEqual(browser.get_text('css=#captured'), "{'peppers': []}")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        findid("deformsubmit").click()
+        self.assertEqual(
+            findid('deformField1-addtext').text,
+            'Add Pepper Chooser'
+            )
+        self.assertEqual(findid('captured').text, "{'peppers': []}")
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_two_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.click('dom=document.forms[0].elements[5]')
-        browser.click('dom=document.forms[0].elements[11]')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(eval(captured),
+        findid("deformField1-seqAdd").click()
+        findid("deformField1-seqAdd").click()
+        findxpaths('//input')[4].click()
+        findxpaths('//input')[10].click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(eval(findid('captured').text),
                          {'peppers': ['habanero', 'jalapeno']})
 
-class SequenceOfDefaultedSelects(Base, unittest.TestCase):
-    url = "/sequence_of_defaulted_selects/"
+class SequenceOfDefaultedSelectsTests(Base, unittest.TestCase):
+    url = test_url("/sequence_of_defaulted_selects/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Pepper Chooser')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(
+            findid('deformField1-addtext').text,
+            'Add Pepper Chooser'
+            )
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_none_added(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Pepper Chooser')
-        self.assertEqual(browser.get_text('css=#captured'), "{'peppers': []}")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        findid("deformsubmit").click()
+        self.assertEqual(
+            findid('deformField1-addtext').text,
+            'Add Pepper Chooser'
+            )
+        self.assertEqual(findid('captured').text, "{'peppers': []}")
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_two_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(eval(captured), # should be 2 values, both defaults
-                         {'peppers': ['jalapeno', 'jalapeno']})
+        findid("deformField1-seqAdd").click()
+        findid("deformField1-seqAdd").click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(
+            eval(findid('captured').text), # should be 2 values, both defaults
+            {'peppers': ['jalapeno', 'jalapeno']}
+            )
 
-class SequenceOfDefaultedSelectsWithInitialItem(Base, unittest.TestCase):
-    url = "/sequence_of_defaulted_selects_with_initial_item/"
+class SequenceOfDefaultedSelectsWithInitialItemTests(Base, unittest.TestCase):
+    url = test_url("/sequence_of_defaulted_selects_with_initial_item/")
     def test_submit_none_added(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Pepper Chooser')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(eval(captured), # should be 1 value (min_len 1)
-                         {'peppers': ['jalapeno']})
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        findid("deformsubmit").click()
+        self.assertEqual(
+            findid('deformField1-addtext').text,
+            'Add Pepper Chooser'
+            )
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(
+            eval(findid('captured').text), # should be 1 value (min_len 1)
+            {'peppers': ['jalapeno']}
+            )
 
     def test_submit_one_added(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(eval(captured), # should be 2 values, both defaults
-                         {'peppers': ['jalapeno', 'jalapeno']})
+        findid("deformField1-seqAdd").click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(
+            eval(findid('captured').text), # should be 2 values, both defaults
+            {'peppers': ['jalapeno', 'jalapeno']}
+            )
 
-class SequenceOfFileUploads(Base, unittest.TestCase):
-    url = "/sequence_of_fileuploads/"
+class SequenceOfFileUploadsTests(Base, unittest.TestCase):
+    url = test_url("/sequence_of_fileuploads/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'), 'Add Upload')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Upload')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_none_added(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'), 'Add Upload')
-        self.assertEqual(browser.get_text('css=#captured'), "{'uploads': []}")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        findid("deformsubmit").click()
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Upload')
+        self.assertEqual(findid('captured').text, "{'uploads': []}")
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_two_unfilled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid("deformField1-seqAdd").click()
+        findid("deformField1-seqAdd").click()
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('error-deformField4').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_upload_one_success(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
         path, filename = _getFile()
-        browser.type("dom=document.forms[0].upload", path)
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
+        findid("deformField1-seqAdd").click()
+        findxpath('//input[@name="upload"]').send_keys(path)
+        findid("deformsubmit").click()
 
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_attribute('deformField3@name'), 'upload')
-        self.assertEqual(browser.get_value('deformField3'), '')
-        self.assertEqual(browser.get_text('css=#deformField3-filename'),
-                         filename)
-        uid = browser.get_value('css=#deformField3-uid')
-        captured = browser.get_text('css=#captured')
-        self.assertTrue("'filename': u'%s" % filename in captured)
-        self.assertTrue(uid in captured)
-    
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField3').get_attribute('value'), '')
+        self.assertEqual(findid('deformField3-filename').text, filename)
+        uid = findid('deformField3-uid').get_attribute('value')
+        self.assertTrue(filename in findid('captured').text)
+        self.assertTrue(uid in findid('captured').text)
+
     def test_upload_multi_interaction(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
         path, filename = _getFile()
-        browser.type("dom=document.forms[0].upload", path)
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
+        findid("deformField1-seqAdd").click()
+        findxpath('//input[@name="upload"]').send_keys(path)
+        findid("deformsubmit").click()
 
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_attribute('deformField3@name'), 'upload')
-        self.assertEqual(browser.get_value('deformField3'), '')
-        self.assertEqual(browser.get_text('css=#deformField3-filename'),
-                         filename)
-        uid = browser.get_value('css=#deformField3-uid')
-        captured = browser.get_text('css=#captured')
-        self.assertTrue("'filename': u'%s" % filename in captured)
-        self.assertTrue(uid in captured)
-    
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+
+        self.assertEqual(findid('deformField3').get_attribute('value'), '')
+        self.assertEqual(findid('deformField3-filename').text, filename)
+        uid = findid('deformField3-uid').get_attribute('value')
+        self.assertTrue(filename in findid('captured').text)
+        self.assertTrue(uid in findid('captured').text)
+
         # resubmit without entering a new filename should not change the file
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_value('css=#deformField3-uid'), uid)
-        self.assertEqual(browser.get_text('css=#deformField3-filename'),
-                         filename)
+        findid("deformsubmit").click()
+        self.assertTrue(filename in findid('captured').text)
+        self.assertTrue(uid in findid('captured').text)
 
         # resubmit after entering a new filename should change the file
         path2, filename2 = _getFile('selenium.py')
-        browser.type('deformField3', path2)
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('css=#deformField3-filename'),
-                         filename2)
-        captured = browser.get_text('css=#captured')
-        self.assertTrue("'filename': u'%s" % filename2 in captured)
-        self.assertEqual(browser.get_value('css=#deformField3-uid'), uid)
+        findid('deformField3').send_keys(path2)
+        findid("deformsubmit").click()
+        self.assertEqual(findid('deformField3-filename').text, filename2)
+        self.assertTrue(filename2 in findid('captured').text)
 
         # add a new file
-        browser.click('deformField1-seqAdd')
         path, filename = _getFile()
-        browser.type("dom=document.forms[0].upload[1]", path)
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('css=#deformField3-filename'),
-                         filename2)
-        self.assertEqual(browser.get_text('css=#deformField4-filename'),
-                         filename)
-        captured = browser.get_text('css=#captured')
-        uid2 = browser.get_value('css=#deformField4-uid')
-        self.assertTrue("'filename': u'%s" % filename2 in captured)
-        self.assertTrue("'filename': u'%s" % filename in captured)
-        self.assertEqual(browser.get_value('css=#deformField3-uid'), uid)
-        
+        findid("deformField1-seqAdd").click()
+        findxpaths('//input[@name="upload"]')[1].send_keys(path)
+        findid("deformsubmit").click()
+        self.assertEqual(findid('deformField3-filename').text, filename2)
+        self.assertEqual(findid('deformField4-filename').text, filename)
+
         # resubmit should not change either file
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_value('css=#deformField3-uid'), uid)
-        self.assertEqual(browser.get_text('css=#deformField3-filename'),
-                         filename2)
-        self.assertEqual(browser.get_value('css=#deformField4-uid'), uid2)
-        self.assertEqual(browser.get_text('css=#deformField4-filename'),
-                         filename)
+        findid("deformsubmit").click()
+        self.assertEqual(findid('deformField3-filename').text, filename2)
+        self.assertEqual(findid('deformField4-filename').text, filename)
 
         # remove a file
-        browser.click('deformField4-close')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_value('css=#deformField3-uid'), uid)
-        self.assertEqual(browser.get_text('css=#deformField3-filename'),
-                         filename2)
-        self.assertFalse(browser.is_element_present('css=#deformField4-uid'))
-        captured = browser.get_text('css=#captured')
-        self.assertFalse("'filename': u'%s" % filename in captured)
+        findid("deformField4-close").click()
+        findid("deformsubmit").click()
+        self.assertEqual(findid('deformField3-filename').text, filename2)
+        self.assertRaises(
+            NoSuchElementException,
+            findid,
+            'deformField4-filename'
+            )
 
-class SequenceOfFileUploadsWithInitialItem(Base, unittest.TestCase):
-    url = "/sequence_of_fileuploads_with_initial_item/"
+class SequenceOfFileUploadsWithInitialItemTests(Base, unittest.TestCase):
+    url = test_url("/sequence_of_fileuploads_with_initial_item/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'), 'Add Upload')
-        self.assertEqual(browser.get_attribute('deformField3@name'),
-                         'upload')
-        self.assertEqual(browser.get_attribute('deformField3@type'),
-                         'file')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Upload')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_none_added(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_upload_one_success(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
         path, filename = _getFile()
-        browser.type("dom=document.forms[0].upload[0]", path)
-        browser.type("dom=document.forms[0].upload[1]", path)
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        findid("deformField1-seqAdd").click()
+        findxpaths('//input[@name="upload"]')[0].send_keys(path)
+        findxpaths('//input[@name="upload"]')[1].send_keys(path)
+        findid("deformsubmit").click()
 
         # first element present
-        self.assertEqual(browser.get_attribute('deformField3@name'), 'upload')
-        self.assertEqual(browser.get_value('deformField3'), '')
-        self.assertEqual(browser.get_text('css=#deformField3-filename'),
-                         filename)
-        uid = browser.get_value('css=#deformField3-uid')
+        self.assertEqual(findid('deformField3-filename').text, filename)
+        uid = findid('deformField3-uid').get_attribute('value')
+        self.assertTrue(uid in findid('captured').text)
 
         # second element present
-        self.assertEqual(browser.get_attribute('deformField4@name'), 'upload')
-        self.assertEqual(browser.get_value('deformField4'), '')
-        self.assertEqual(browser.get_text('css=#deformField4-filename'),
-                         filename)
-        uid = browser.get_value('css=#deformField3-uid')
+        self.assertEqual(findid('deformField4-filename').text, filename)
+        uid = findid('deformField4-uid').get_attribute('value')
+        self.assertTrue(uid in findid('captured').text)
 
-        # got some files
-        captured = browser.get_text('css=#captured')
-        self.assertTrue("'filename': u'%s" % filename in captured)
-        self.assertTrue(uid in captured)
-
-class SequenceOfMappings(Base, unittest.TestCase):
-    url = "/sequence_of_mappings/"
+class SequenceOfMappingsTests(Base, unittest.TestCase):
+    url = test_url("/sequence_of_mappings/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.deformProto'))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Person')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Person')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertTrue(findcss('.deformProto'))
 
     def test_submit_none_added(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Person')
-        self.assertEqual(browser.get_text('css=#captured'), "{'people': []}")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        findid("deformsubmit").click()
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Person')
+        self.assertEqual(findid('captured').text, "{'people': []}")
 
     def test_submit_two_unfilled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField6'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField7'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField9'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField10'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid("deformField1-seqAdd").click()
+        findid("deformField1-seqAdd").click()
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField6').text, 'Required')
+        self.assertEqual(findid('error-deformField7').text, 'Required')
+        self.assertEqual(findid('error-deformField9').text, 'Required')
+        self.assertEqual(findid('error-deformField10').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_complex_interaction(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd') # add one
-        browser.type("name", 'name')
-        browser.type("age", '23')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_attribute('deformField6@name'), 'name')
-        self.assertEqual(browser.get_value('deformField6'), 'name')
-        self.assertEqual(browser.get_attribute('deformField7@name'), 'age')
-        self.assertEqual(browser.get_value('deformField7'), '23')
-        captured = browser.get_text('css=#captured')
-        captured = eval(captured)
-        self.assertEqual(captured,
+        findid("deformField1-seqAdd").click()
+        findid('deformField1').send_keys('abcdef123')
+        findxpath('//input[@name="name"]').send_keys('name')
+        findxpath('//input[@name="age"]').send_keys('23')
+        findid("deformsubmit").click()
+        self.assertEqual(eval(findid('captured').text),
                          {'people': [{'name': 'name', 'age': 23}]})
 
-        browser.click('deformField1-seqAdd') # add another
-        name1 = 'dom=document.forms[0].name[0]'
-        age1 = 'dom=document.forms[0].age[0]'
-        name2 = 'dom=document.forms[0].name[1]'
-        age2 = 'dom=document.forms[0].age[1]'
-        browser.type(name1, 'name-changed')
-        browser.type(age1, '24')
-        browser.type(name2, 'name2')
-        browser.type(age2, '26')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_attribute('deformField6@name'), 'name')
-        self.assertEqual(browser.get_value('deformField6'), 'name-changed')
-        self.assertEqual(browser.get_attribute('deformField7@name'), 'age')
-        self.assertEqual(browser.get_value('deformField7'), '24')
-        self.assertEqual(browser.get_attribute('deformField9@name'), 'name')
-        self.assertEqual(browser.get_value('deformField9'), 'name2')
-        self.assertEqual(browser.get_attribute('deformField10@name'), 'age')
-        self.assertEqual(browser.get_value('deformField10'), '26')
-        captured = browser.get_text('css=#captured')
-        captured = eval(captured)
-
-        self.assertEqual(
-            captured,
+        findid("deformField1-seqAdd").click()
+        findxpaths('//input[@name="name"]')[0].clear()
+        findxpaths('//input[@name="name"]')[0].send_keys('name-changed')
+        findxpaths('//input[@name="name"]')[1].send_keys('name2')
+        findxpaths('//input[@name="age"]')[0].clear()
+        findxpaths('//input[@name="age"]')[0].send_keys('24')
+        findxpaths('//input[@name="age"]')[1].send_keys('26')
+        findid("deformsubmit").click()
+        self.assertEqual(eval(findid('captured').text),
             {'people': [{'name': 'name-changed', 'age': 24},
                         {'name': 'name2', 'age': 26}]})
 
-        browser.click('deformField5-close') # remove the first mapping
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_attribute('deformField6@name'), 'name')
-        self.assertEqual(browser.get_value('deformField6'), 'name2')
-        self.assertEqual(browser.get_attribute('deformField7@name'), 'age')
-        self.assertEqual(browser.get_value('deformField7'), '26')
-
-        captured = browser.get_text('css=#captured')
-        captured = eval(captured)
-
-        self.assertEqual(
-            captured,
+        findid("deformField5-close").click() # remove the first mapping
+        findid("deformsubmit").click()
+        self.assertEqual(eval(findid('captured').text),
             {'people': [{'name': 'name2', 'age': 26}]})
 
 
-class SequenceOfMappingsWithInitialItem(Base, unittest.TestCase):
-    url = "/sequence_of_mappings_with_initial_item/"
+class SequenceOfMappingsWithInitialItemTests(Base, unittest.TestCase):
+    url = test_url("/sequence_of_mappings_with_initial_item/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.deformProto'))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Person')
-        self.assertEqual(browser.get_attribute('css=#deformField6@name'),
-                         'name')
-        self.assertEqual(browser.get_attribute('css=#deformField7@name'),
-                         'age')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue(findcss('.deformProto'))
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Person')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_none_added(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Person')
-        self.assertEqual(browser.get_text('css=#error-deformField6'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField7'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#captured'), "None")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField6').text, 'Required')
+        self.assertEqual(findid('error-deformField7').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_add_one(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        browser.type("dom=document.forms[0].name[0]", 'name0')
-        browser.type("dom=document.forms[0].age[0]", '23')
-        browser.type("dom=document.forms[0].name[1]", 'name1')
-        browser.type("dom=document.forms[0].age[1]", '25')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Person')
-        self.assertEqual(browser.get_attribute('css=#deformField6@name'),
-                         'name')
-        self.assertEqual(browser.get_attribute('css=#deformField6@value'),
-                         'name0')
-        self.assertEqual(browser.get_attribute('css=#deformField7@name'),
-                         'age')
-        self.assertEqual(browser.get_attribute('css=#deformField7@value'),
-                         '23')
-        self.assertEqual(browser.get_attribute('css=#deformField9@name'),
-                         'name')
-        self.assertEqual(browser.get_attribute('css=#deformField9@value'),
-                         'name1')
-        self.assertEqual(browser.get_attribute('css=#deformField10@name'),
-                         'age')
-        self.assertEqual(browser.get_attribute('css=#deformField10@value'),
-                         '25')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(eval(captured),
+        findid("deformField1-seqAdd").click()
+        findxpaths('//input[@name="name"]')[0].send_keys('name0')
+        findxpaths('//input[@name="name"]')[1].send_keys('name1')
+        findxpaths('//input[@name="age"]')[0].send_keys('23')
+        findxpaths('//input[@name="age"]')[1].send_keys('25')
+        findid("deformsubmit").click()
+        self.assertEqual(eval(findid('captured').text),
                          {'people': [{'name': 'name0', 'age': 23},
-                                     {'name': 'name1', 'age': 25}]}
-                         )
+                                     {'name': 'name1', 'age': 25}]})
 
 class SequenceOfAutocompletes(Base, unittest.TestCase):
-    url = '/sequence_of_autocompletes/'
+    url = test_url('/sequence_of_autocompletes/')
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Texts"))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Text')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertTrue('Texts' in browser.page_source)
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Text')
+
     def test_submit_none_added(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Text')
-        self.assertEqual(browser.get_text('css=#captured'), "{'texts': []}")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        findid("deformsubmit").click()
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Text')
+        self.assertEqual(findid('captured').text, "{'texts': []}")
 
     def test_submit_two_unfilled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid("deformField1-seqAdd").click()
+        findid("deformField1-seqAdd").click()
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('error-deformField4').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_two_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        added = 'dom=document.forms[0].text'
-        self.assertEqual(browser.get_attribute(added + '@class'),
-                         'ui-autocomplete-input')
-        browser.type(added, 'bar')
-        browser.click('deformField1-seqAdd')
-        added = 'dom=document.forms[0].text[1]'
-        self.assertEqual(browser.get_attribute(added + '@class'),
-                         'ui-autocomplete-input')
-        browser.type(added, 'baz')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured,  
-            "{'texts': [u'bar', u'baz']}")
+        findid("deformField1-seqAdd").click()
+        self.assertEqual(
+            findxpaths('//input[@name="text"]')[0].get_attribute('class'),
+            'form-control  tt-query'
+            )
+        findxpaths('//input[@name="text"]')[0].send_keys('bar')
+
+        findid("deformField1-seqAdd").click()
+        self.assertEqual(
+            findxpaths('//input[@name="text"]')[1].get_attribute('class'),
+            'form-control  tt-query'
+            )
+        findxpaths('//input[@name="text"]')[1].send_keys('baz')
+        findid("deformsubmit").click()
+        self.assertEqual(eval(findid('captured').text),
+                         {'texts': [u'bar', u'baz']})
 
 class SequenceOfDateInputs(Base, unittest.TestCase):
-    url = '/sequence_of_dateinputs/'
+    url = test_url('/sequence_of_dateinputs/')
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Dates"))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Date')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        
+        self.assertTrue('Dates' in browser.page_source)
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Date')
+        self.assertEqual(findid('captured').text, 'None')
+
     def test_submit_none_added(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Date')
-        self.assertEqual(browser.get_text('css=#captured'), "{'dates': []}")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        findid("deformsubmit").click()
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Date')
+        self.assertSimilarRepr(
+            findid('captured').text,
+            "{'dates': []}"
+            )
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_two_unfilled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
-
+        findid("deformField1-seqAdd").click()
+        findid("deformField1-seqAdd").click()
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('error-deformField4').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
+        
     def test_submit_one_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        added = 'dom=document.forms[0].date'
-        browser.focus(added)
-        browser.click(added)
-        browser.click('link=6')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        captured = browser.get_text('css=#captured')
-        self.assertTrue(captured.startswith(u"{'dates': [datetime.date"))
-
-class SequenceOfConstrainedLength(Base, unittest.TestCase):
-    url = '/sequence_of_constrained_len/'
+        findid("deformField1-seqAdd").click()
+        findcss('input[type="text"]').click()
+        findcss(".picker__button--today").click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertTrue(
+            findid('captured').text.startswith("{'dates': [datetime.date")
+            )
+        
+class SequenceOfConstrainedLengthTests(Base, unittest.TestCase):
+    url = test_url('/sequence_of_constrained_len/')
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("At Least 2"))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Name')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('At Least 2' in browser.page_source)
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Name')
+        self.assertEqual(findid('captured').text, 'None')
         # default 2 inputs rendered
-        self.assertEqual(browser.get_value('deformField3'), '')
-        self.assertEqual(browser.get_value('deformField4'), '')
+        self.assertEqual(findid('deformField3').get_attribute('value'), '')
+        self.assertEqual(findid('deformField4').get_attribute('value'), '')
 
     def test_add_and_remove(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Name')
-        self.assertTrue(browser.is_visible('deformField1-seqAdd'))
-        browser.type('deformField3', 'hello1')
-        browser.type('deformField4', 'hello2')
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.type('dom=document.forms[0].elements[6]', 'hello3')
-        browser.type('dom=document.forms[0].elements[7]', 'hello4')
-        self.assertFalse(browser.is_visible('deformField1-seqAdd'))
-        browser.click('deformField3-close')
-        self.assertTrue(browser.is_visible('deformField1-seqAdd'))
-        browser.click('deformField1-seqAdd')
-        self.assertFalse(browser.is_visible('deformField1-seqAdd'))
-        browser.type('dom=document.forms[0].elements[7]', 'hello5')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField3'), 'hello2')
-        self.assertEqual(browser.get_value('deformField4'), 'hello3')
-        self.assertEqual(browser.get_value('deformField5'), 'hello4')
-        self.assertEqual(browser.get_value('deformField6'), 'hello5')
-        self.assertFalse(browser.is_visible('deformField1-seqAdd'))
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured,
-            "{'names': [u'hello2', u'hello3', u'hello4', u'hello5']}")
-        
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Name')
+        findid('deformField3').send_keys('hello1')
+        findid('deformField4').send_keys('hello2')
+        findid("deformField1-seqAdd").click()
+        findid("deformField1-seqAdd").click()
+        findxpaths('//input[@name="name"]')[2].send_keys('hello3')
+        findxpaths('//input[@name="name"]')[3].send_keys('hello4')
+
+        self.assertFalse(findid("deformField1-seqAdd").is_displayed())
+        findid("deformField3-close").click()
+        self.assertTrue(findid("deformField1-seqAdd").is_displayed())
+        findid("deformField1-seqAdd").click()
+        self.assertFalse(findid("deformField1-seqAdd").is_displayed())
+        findxpaths('//input[@name="name"]')[3].send_keys('hello5')
+        findid("deformsubmit").click()
+        self.assertFalse(findid("deformField1-seqAdd").is_displayed())
+        self.assertEqual(
+            eval(findid('captured').text),
+            {'names': [u'hello2', u'hello3', u'hello4', u'hello5']}
+            )
+
 class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
-    url = "/sequence_of_richtext/"
+    url = test_url("/sequence_of_richtext/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Texts"))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Text')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        
+        self.assertTrue('Texts' in browser.page_source)
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Text')
+        self.assertEqual(findid('captured').text, 'None')
+
     def test_submit_none_added(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Text')
-        self.assertEqual(browser.get_text('css=#captured'), "{'texts': []}")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        findid("deformsubmit").click()
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Text')
+        self.assertEqual(findid('captured').text, "{'texts': []}")
 
     def test_submit_two_unfilled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid("deformField1-seqAdd").click()
+        findid("deformField1-seqAdd").click()
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('error-deformField4').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_one_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        browser.wait_for_condition(\
-            "selenium.browserbot.getCurrentWindow().document"
-            ".getElementsByTagName('iframe')[0]", "10000")
-        browser.type('tinymce', 'yo')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured, 
-            "{'texts': [u'<p>yo</p>']}")
+        findid("deformField1-seqAdd").click()
+        browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
+        findid('tinymce').send_keys('yo')
+        browser.switch_to_default_content()
+        findid("deformsubmit").click()
+        self.assertEqual(eval(findid('captured').text),
+                         {'texts': [u'<p>yo</p>']})
 
 class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
-    url = "/sequence_of_masked_textinputs/"
+    url = test_url("/sequence_of_masked_textinputs/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Texts"))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Text')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Texts' in browser.page_source)
+        self.assertEqual(findid('deformField1-addtext').text,'Add Text')
+        self.assertEqual(findid('captured').text, 'None')
         
     def test_submit_none_added(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
-                         'Add Text')
-        self.assertEqual(browser.get_text('css=#captured'), "{'texts': []}")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        findid('deformsubmit').click()
+        self.assertEqual(findid('deformField1-addtext').text,'Add Text')
+        self.assertEqual(findid('captured').text, "{'texts': []}")
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_two_unfilled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField1-seqAdd')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid('deformField1-seqAdd').click()
+        findid('deformField1-seqAdd').click()
+        findid('deformsubmit').click()
+        self.assertTrue(findcss(".has-error"))
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('error-deformField4').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_one_filled(self):
-        import time
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        added = 'dom=document.forms[0].text'
-        browser.focus(added)
-        for key in '140118866':
-            browser.key_press(added, key)
-            time.sleep(.005)
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        captured = browser.get_text('css=#captured')
+        browser.get(self.url)
+        findid('deformField1-seqAdd').click()
+        textbox = findxpaths('//input[@name="text"]')[0]
+        textbox.click()
+        textbox.send_keys('140118866')
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        captured = findid('captured').text
         self.assertSimilarRepr(
             captured,  "{'texts': [u'140-11-8866']}"
             )
 
 class SelectWidgetTests(Base, unittest.TestCase):
-    url = "/select/"
+    url = test_url("/select/")
     submit_selected_captured = (
         "{'pepper': u'habanero'}",
         "{'pepper': 'habanero'}",
         )
 
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Pepper"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'pepper')
-        self.assertEqual(browser.get_selected_index('deformField1'), '0')
-        options = browser.get_select_options('deformField1')
+        self.assertTrue('Pepper' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'pepper')
+        self.assertFalse(select.get_attribute('multiple'))
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
         self.assertEqual(
-            options,
+            [o.text for o in options],
             [u'- Select -', u'Habanero', u'Jalapeno', u'Chipotle']) 
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findcss('.required').text, 'Pepper')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Pepper"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'pepper')
-        self.assertEqual(browser.get_selected_index('deformField1'), '0')
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        findid('deformsubmit').click()
+        self.assertTrue('Pepper' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'pepper')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_selected(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.select('deformField1', 'index=1')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_selected_index('deformField1'), '1')
-        captured = browser.get_text('css=#captured')
-        self.assertTrue(captured in self.submit_selected_captured)
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        options[1].click()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[1].is_selected())
+        self.assertTrue(
+            findid('captured').text in self.submit_selected_captured
+            )
 
 class SelectWidgetWithSizeTests(SelectWidgetTests):
-    url = "/select_with_size/"
+    url = test_url("/select_with_size/")
 
 class SelectWidgetWithUnicodeTests(SelectWidgetTests):
-    url = '/select_with_unicode/'
+    url = test_url('/select_with_unicode/')
     submit_selected_captured = (
         u"{'pepper': '\u30cf\u30d0\u30cd\u30ed'}",
         u"{'pepper': u'\\u30cf\\u30d0\\u30cd\\u30ed'}",
         )
 
 class SelectWidgetMultipleTests(Base, unittest.TestCase):
-    url = '/select_with_multiple/'
+    url = test_url('/select_with_multiple/')
 
     def test_submit_selected(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
+        select = findid('deformField1')
+        self.assertTrue(select.get_attribute('multiple'))
+        options = select.find_elements_by_tag_name('option')
+        options[0].click()
+        options[2].click()
 
-        captured_default = "{'pepper': set([u'habanero', u'chipotle'])}"
+        findid('deformsubmit').click()
 
-        browser.add_selection('deformField1', 'index=0')
-        browser.add_selection('deformField1', 'index=2')
-
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-
-        captured = browser.get_text('css=#captured')
-
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(captured, captured_default)
+        captured_default = {'pepper': set([u'chipotle', u'habanero'])}
+        self.assertEqual(eval(findid('captured').text), captured_default)
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
 class SelectWidgetIntegerTests(Base, unittest.TestCase):
-    url = '/select_integer/'
+    url = test_url('/select_integer/')
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Number"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'number')
-        self.assertEqual(browser.get_selected_index('deformField1'), '0')
-        options = browser.get_select_options('deformField1')
+        self.assertTrue('Number' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'number')
+        self.assertFalse(select.get_attribute('multiple'))
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
         self.assertEqual(
-            options,
-            [u'- Select -', u'Zero', u'One', u'Two']) 
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+            [o.text for o in options],
+            [u'- Select -', u'Zero', u'One', u'Two']
+            )
+        self.assertEqual(findcss('.required').text, 'Number')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Number"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'number')
-        self.assertEqual(browser.get_selected_index('deformField1'), '0')
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        findid('deformsubmit').click()
+        self.assertTrue('Number' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'number')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_selected(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.select('deformField1', 'index=1')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_selected_index('deformField1'), '1')
-        captured = browser.get_text('css=#captured')
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        options[1].click()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[1].is_selected())
+        captured = findid('captured').text
         self.assertSimilarRepr(
             captured, 
             "{'number': 0}")
-
-class SelectWidgetWithOptgroupTest(Base, unittest.TestCase):
-    url = "/select_with_optgroup/"
+        
+class SelectWidgetWithOptgroupTests(Base, unittest.TestCase):
+    url = test_url("/select_with_optgroup/")
 
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present('Musician'))
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'musician')
-        self.assertEqual(browser.get_selected_index('deformField1'), '0')
-        options = browser.get_select_options('deformField1')
+        self.assertTrue('Musician' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'musician')
+        self.assertFalse(select.get_attribute('multiple'))
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
         self.assertEqual(
-            options,
+            [o.text for o in options],
             [u'Select your favorite musician',
-             u'Jimmy Page', u'Jimi Hendrix', u'Billy Cobham', u'John Bonham']) 
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(int(browser.get_xpath_count('//optgroup')), 2)
-
+             u'Jimmy Page', u'Jimi Hendrix', u'Billy Cobham', u'John Bonham']
+            )
+        self.assertEqual(findcss('.required').text, 'Musician')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(len(findxpaths('//optgroup')), 2)
+        
     def test_submit_selected(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.select('deformField1', 'index=1')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_selected_index('deformField1'), '1')
-        captured = browser.get_text('css=#captured')
-        # With or without "u"...
-        expected = ("{'musician': 'page'}", "{'musician': u'page'}")
-        self.assertTrue(captured in expected)
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        options[1].click()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[1].is_selected())
+        captured = findid('captured').text
+        self.assertSimilarRepr(
+            captured,
+            "{'musician': 'page'}",
+            )
 
-class SelectWidgetWithOptgroupAndLabelTest(SelectWidgetWithOptgroupTest):
-    url = "/select_with_optgroup_and_label_attributes/"
+class SelectWidgetWithOptgroupAndLabelTests(SelectWidgetWithOptgroupTests):
+    url = test_url("/select_with_optgroup_and_label_attributes/")
 
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present('Musician'))
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'musician')
-        self.assertEqual(browser.get_selected_index('deformField1'), '0')
-        # We cannot test what the options look like because it depends
-        # on the browser.
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(int(browser.get_xpath_count('//optgroup')), 2)
+        self.assertTrue('Musician' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'musician')
+        self.assertFalse(select.get_attribute('multiple'))
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
+        self.assertEqual(
+            [o.text for o in options],
+            [u'Select your favorite musician',
+             u'Guitarists - Jimmy Page',
+             u'Guitarists - Jimi Hendrix',
+             u'Drummers - Billy Cobham',
+             u'Drummers - John Bonham']
+            )
+        self.assertEqual(findcss('.required').text, 'Musician')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(len(findxpaths('//optgroup')), 2)
+        
+    def test_submit_selected(self):
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        options[1].click()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[1].is_selected())
+        captured = findid('captured').text
+        self.assertSimilarRepr(
+            captured,
+            "{'musician': 'page'}",
+            )
+
+class SelectReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/select_readonly/")
+
+    def test_render_default(self):
+        musician = findid('deformField1-2-0')
+        self.assertEqual(musician.text, 'Billy Cobham')
+        multi1 = findid('deformField2-1-0')
+        self.assertEqual(multi1.text, 'Jimmy Page')
+        multi2 = findid('deformField2-2-0')
+        self.assertEqual(multi2.text, 'Billy Cobham')
+        self.assertEqual(findid('captured').text, 'None')
+
+class Select2WidgetTests(Base, unittest.TestCase):
+    url = test_url("/select2/")
+    submit_selected_captured = (
+        "{'pepper': u'habanero'}",
+        "{'pepper': 'habanero'}",
+        )
+
+    def test_render_default(self):
+        self.assertTrue('Pepper' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'pepper')
+        self.assertFalse(select.get_attribute('multiple'))
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
+        self.assertEqual(
+            [o.text for o in options],
+            [u'- Select -', u'Habanero', u'Jalapeno', u'Chipotle']) 
+        self.assertEqual(findcss('.required').text, 'Pepper')
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_default(self):
+        findid('deformsubmit').click()
+        self.assertTrue('Pepper' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'pepper')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_selected(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.select('deformField1', 'index=1')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_selected_index('deformField1'), '1')
-        captured = browser.get_text('css=#captured')
-        expected = ("{'musician': 'page'}", "{'musician': u'page'}")
-        self.assertTrue(captured in expected)
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        options[1].click()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[1].is_selected())
+        self.assertTrue(
+            findid('captured').text in self.submit_selected_captured
+            )
+
+class Select2WidgetMultipleTests(Base, unittest.TestCase):
+    url = test_url('/select2_with_multiple/')
+
+    def test_submit_selected(self):
+        select = findid('deformField1')
+        self.assertTrue(select.get_attribute('multiple'))
+        options = select.find_elements_by_tag_name('option')
+        options[0].click()
+        options[2].click()
+
+        findid('deformsubmit').click()
+
+        captured_default = {'pepper': set([u'chipotle', u'habanero'])}
+        self.assertEqual(eval(findid('captured').text), captured_default)
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+
+class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
+    url = test_url("/select2_with_optgroup/")
+
+    def test_render_default(self):
+        self.assertTrue('Musician' in browser.page_source)
+        select = findid('deformField1')
+        self.assertEqual(select.get_attribute('name'), 'musician')
+        self.assertFalse(select.get_attribute('multiple'))
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[0].is_selected())
+        self.assertEqual(
+            [o.text for o in options],
+            [u'Select your favorite musician',
+             u'Jimmy Page', u'Jimi Hendrix', u'Billy Cobham', u'John Bonham']
+            )
+        self.assertEqual(findcss('.required').text, 'Musician')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(len(findxpaths('//optgroup')), 2)
+        
+    def test_submit_selected(self):
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        options[1].click()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        select = findid('deformField1')
+        options = select.find_elements_by_tag_name('option')
+        self.assertTrue(options[1].is_selected())
+        captured = findid('captured').text
+        self.assertSimilarRepr(
+            captured,
+            "{'musician': 'page'}",
+            )
+
 
 class TextInputWidgetTests(Base, unittest.TestCase):
-    url = "/textinput/"
+    url = test_url("/textinput/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Text"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'text')
-        self.assertEqual(browser.get_attribute("deformField1@type"), 'text')
-        self.assertEqual(browser.get_value("deformField1"), '')
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Text' in browser.page_source)
+        element = findid('deformField1')
+        self.assertEqual(element.get_attribute('name'), 'text')
+        self.assertEqual(element.get_attribute('type'), 'text')
+        self.assertEqual(element.get_attribute('value'), '')
+        self.assertEqual(findcss('.required').text, 'Text')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid('deformsubmit').click()
+        element = findid('deformField1')
+        self.assertEqual(element.get_attribute('name'), 'text')
+        self.assertEqual(element.get_attribute('type'), 'text')
+        self.assertEqual(element.get_attribute('value'), '')
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'hello')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), 'hello')
-        captured = browser.get_text('css=#captured')
+        findid('deformField1').send_keys('hello')
+        findid('deformsubmit').click()
+        element = findid('deformField1')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(element.get_attribute('value'), 'hello')
+        captured = findid('captured').text
         self.assertSimilarRepr(
             captured, 
             "{'text': u'hello'}")
 
-class MoneyInputWidgetTests(Base, unittest.TestCase):
-    url = "/money_input/"
+class TextInputWithCssClassWidgetTests(Base, unittest.TestCase):
+    url = test_url("/textinput_with_css_class/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Greenbacks"))
-        self.assertEqual(browser.get_attribute("deformField1@name"),
+        findcss('.deformWidgetWithStyle')
+        
+class MoneyInputWidgetTests(Base, unittest.TestCase):
+    url = test_url("/money_input/")
+    def test_render_default(self):
+        findid('deformField1').send_keys('')
+        self.assertTrue('Greenbacks' in browser.page_source)
+        self.assertEqual(findid('deformField1').get_attribute('name'),
                          'greenbacks')
-        self.assertEqual(browser.get_attribute("deformField1@type"), 'text')
-        self.assertEqual(browser.get_value("deformField1"), '0.00')
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findid('deformField1').get_attribute('type'),
+                         'text')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '0.00')
+        self.assertEqual(findcss('.required').text, 'Greenbacks')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(captured, "{'greenbacks': Decimal('0.00')}")
+        findid('deformField1').send_keys('')
+        findid('deformsubmit').click()
+        self.assertEqual(findid('captured').text,
+                         "{'greenbacks': Decimal('0.00')}")
 
     def test_submit_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.focus('deformField1')
-        browser.type('deformField1', '100')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(captured, "{'greenbacks': Decimal('100')}")
-        self.assertEqual(browser.get_value('deformField1'), '100')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-
-class TextInputWithCssClassWidgetTests(Base, unittest.TestCase):
-    url = "/textinput_with_css_class/"
-    def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.deformWidgetWithStyle'))
+        findid('deformField1').send_keys(5 * Keys.ARROW_LEFT)
+        findid('deformField1').send_keys('10')
+        findid('deformsubmit').click()
+        self.assertEqual(findid('captured').text,
+                         "{'greenbacks': Decimal('100.00')}")
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
 class AutocompleteInputWidgetTests(Base, unittest.TestCase):
-    url = "/autocomplete_input/"
+    url = test_url("/autocomplete_input/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Autocomplete Input Widget"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'text')
-        self.assertEqual(browser.get_attribute("deformField1@type"), 'text')
-        self.assertEqual(browser.get_value("deformField1"), '')
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Autocomplete Input Widget' in browser.page_source)
+        self.assertEqual(findid('deformField1').get_attribute('name'),
+                         'text')
+        self.assertEqual(findid('deformField1').get_attribute('type'),
+                         'text')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '')
+        self.assertEqual(findcss('.required').text, 'Text')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid('deformsubmit').click()
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.focus('deformField1')
-        browser.type('deformField1', 'bar')
-        browser.type_keys('deformField1', 'bar')
-        import time
-        time.sleep(.2)
-        self.assertTrue(browser.is_text_present('bar'))
-        self.assertTrue(browser.is_text_present('baz'))
-        browser.mouse_over("//html/body/ul/li/a") # hurrr, necessary
-        browser.click("//html/body/ul/li/a")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), u'bar')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured, 
-            "{'text': u'bar'}")
+        findid('deformField1').send_keys('ba')
+        self.assertTrue(findxpath('//p[text()="baz"]').is_displayed())
+        findid('deformField1').send_keys('r')
+        findcss('.tt-suggestion').click()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('captured').text,
+                         "{'text': u'bar'}")
 
 class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
-    url = "/autocomplete_remote_input/"
+    url = test_url("/autocomplete_remote_input/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present(
-                "Autocomplete Input Widget with Remote Data Source"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'text')
-        self.assertEqual(browser.get_attribute("deformField1@type"), 'text')
-        self.assertEqual(browser.get_value("deformField1"), '')
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Autocomplete Input Widget (with Remote Data Source)'
+                        in browser.page_source)
+        self.assertEqual(findid('deformField1').get_attribute('name'),
+                         'text')
+        self.assertEqual(findid('deformField1').get_attribute('type'),
+                         'text')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '')
+        self.assertEqual(findcss('.required').text, 'Text')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid('deformsubmit').click()
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 't')
-        import time
-        time.sleep(.5)
-        browser.type_keys('deformField1', 't')
-        import time
-        time.sleep(.5)
-        self.assertTrue(browser.is_text_present('two'))
-        self.assertTrue(browser.is_text_present('three'))
-        browser.mouse_over("//html/body/ul/li/a")
-        browser.click("//html/body/ul/li/a")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), u'two')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured,
-            "{'text': u'two'}")
+        findid('deformField1').send_keys('t')
+        time.sleep(0.5)
+        self.assertTrue(findxpath('//p[text()="two"]').is_displayed())
+        self.assertTrue(findxpath('//p[text()="three"]').is_displayed())
+        findcss('.tt-suggestion').click()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('captured').text,
+                         "{'text': u'two'}")
 
 class TextAreaWidgetTests(Base, unittest.TestCase):
-    url = "/textarea/"
+    url = test_url("/textarea/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Text"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'text')
-        self.assertEqual(browser.get_attribute("deformField1@rows"), '10')
-        self.assertEqual(browser.get_attribute("deformField1@cols"), '60')
-        self.assertEqual(browser.get_value("deformField1"), '')
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Text' in browser.page_source)
+        self.assertEqual(findid('deformField1').get_attribute('name'),
+                         'text')
+        self.assertEqual(findid('deformField1').get_attribute('rows'),
+                         '10')
+        self.assertEqual(findid('deformField1').get_attribute('cols'),
+                         '60')
+        self.assertEqual(findcss('.required').text, 'Text')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid('deformsubmit').click()
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertTrue(findcss('.has-error'))
 
     def test_submit_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'hello')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), 'hello')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured,
-            "{'text': u'hello'}"
-            )
+        findid('deformField1').send_keys('hello')
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('captured').text,
+                         "{'text': u'hello'}")
 
+class TextAreaReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/textarea_readonly/")
+    def test_render_default(self):
+        self.assertEqual(findid('deformField1').text,
+                         'text')
+        self.assertEqual(findcss('.required').text, 'Text')
+        self.assertEqual(findid('captured').text, 'None')
+
+        
 class DelayedRichTextWidgetTests(Base, unittest.TestCase):
-    url = "/delayed_richtext/"
-
+    url = test_url("/delayed_richtext/")
     def test_submit_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('css=.tinymce-preload')
-        browser.wait_for_condition(\
-            "selenium.browserbot.getCurrentWindow().document"
-            ".getElementsByTagName('iframe')[0]", "10000")
-        browser.type('tinymce', 'hello')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), '<p>hello</p>')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured,
-            "{'text': u'<p>hello</p>'}"
-            )
+        findcss('.tinymce-preload').click()
+        time.sleep(0.5)
+        browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
+        findid('tinymce').send_keys('hello')
+        browser.switch_to_default_content()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(eval(findid('captured').text),
+                         {'text': u'<p>hello</p>'})
 
 class RichTextWidgetTests(Base, unittest.TestCase):
-    url = "/richtext/"
+    url = test_url("/richtext/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Text"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'text')
-        self.assertEqual(browser.get_value("deformField1"), '')
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Text' in browser.page_source)
+        self.assertEqual(findid('deformField1').get_attribute('name'),
+                         'text')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '')
+        self.assertEqual(findcss('.required').text, 'Text')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, 'None')
+        findid('deformsubmit').click()
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('tinymce', 'hello')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), '<p>hello</p>')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured, 
-            "{'text': u'<p>hello</p>'}"
-            )
+        browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
+        findid('tinymce').send_keys('hello')
+        browser.switch_to_default_content()
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(eval(findid('captured').text),
+                         {'text': u'<p>hello</p>'})
 
 class RichTextWidgetInternationalized(Base, unittest.TestCase):
-    url = "/richtext_i18n/?_LOCALE_=ru"
+    url = test_url("/richtext_i18n/?_LOCALE_=ru")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Text"))
-        self.assertEqual(browser.get_attribute("deformField1_bold@title"),
-                         u"Полужирный (Ctrl+B)")
+        self.assertTrue('Text' in browser.page_source)
+        self.assertTrue(u"Формат" in browser.page_source)
+
+class RichTextReadonlyTests(Base, unittest.TestCase):
+    url = test_url("/richtext_readonly/")
+    def test_render_default(self):
+        self.assertEqual(findid('deformField1').text, '<p>Hi!</p>')
+        self.assertEqual(findcss('.required').text, 'Text')
+        self.assertEqual(findid('captured').text, 'None')
 
 class UnicodeEverywhereTests(Base, unittest.TestCase):
-    url = "/unicodeeverywhere/"
+    url = test_url("/unicodeeverywhere/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
         description=(u"子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？ "
                      u"人不知而不慍，不亦君子乎？」")
 
-        self.assertTrue(browser.is_text_present(u"По оживлённым берегам"))
-        self.assertEqual(browser.get_attribute("item-deformField1@title"),
+        self.assertTrue(u"По оживлённым берегам" in browser.page_source)
+        self.assertEqual(findcss('.help-block').text,
                          description)
-        self.assertEqual(browser.get_attribute("css=label@title"),
-                         description)
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'field')
-        self.assertEqual(browser.get_value("deformField1"), u'☃')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findid('deformField1').get_attribute('name'),
+                         'field')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         u'☃')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), u'☃')
-        captured = browser.get_text('css=#captured')
+        findid('deformsubmit').click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         u'☃')
+        captured = findid('captured').text
         self.assertTrue(
             captured in (
                 u"{'field': u'\\u2603'}", # py2
@@ -2378,484 +2186,334 @@ class UnicodeEverywhereTests(Base, unittest.TestCase):
             )
             )
 
-class SequenceOfSequences(Base, unittest.TestCase):
-    url = "/sequence_of_sequences/"
+class SequenceOfSequencesTests(Base, unittest.TestCase):
+    url = test_url("/sequence_of_sequences/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('deformField1-addtext'),
+        self.assertEqual(findid('deformField1-addtext').text,
                          'Add Names and Titles')
-        self.assertEqual(browser.get_text('deformField6-addtext'),
+        self.assertEqual(findid('deformField6-addtext').text,
                          'Add Name and Title')
-        self.assertEqual(browser.get_value('deformField21'), '')
-        self.assertEqual(browser.get_value('deformField22'), '')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertEqual(findid('deformField21').text, '')
+        self.assertEqual(findid('deformField22').text, '')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_add_two(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        browser.click('deformField6-seqAdd')
-        browser.type('dom=document.forms[0].name[0]', 'name')
-        browser.type('dom=document.forms[0].title[0]', 'title')
-        browser.type('dom=document.forms[0].name[1]', 'name')
-        browser.type('dom=document.forms[0].title[1]', 'title')
-        browser.type('dom=document.forms[0].name[2]', 'name')
-        browser.type('dom=document.forms[0].title[2]', 'title')
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
-        captured = eval(browser.get_text('css=#captured'))
-        self.assertEqual(captured,
+        findid("deformField1-seqAdd").click()
+        findid("deformField6-seqAdd").click()
+        findxpaths('//input[@name="name"]')[0].send_keys('name')
+        findxpaths('//input[@name="title"]')[0].send_keys('title')
+        findxpaths('//input[@name="name"]')[1].send_keys('name')
+        findxpaths('//input[@name="title"]')[1].send_keys('title')
+        findxpaths('//input[@name="name"]')[2].send_keys('name')
+        findxpaths('//input[@name="title"]')[2].send_keys('title')
+        findid('deformsubmit').click()
+        self.assertEqual(eval(findid('captured').text),
                          {'names_and_titles_sequence': [
                              [{'name': u'name', 'title': u'title'},
                               {'name': u'name', 'title': u'title'}],
-                             [{'name': u'name', 'title': u'title'}]]}
-                         )
+                             [{'name': u'name', 'title': u'title'}]]})
 
     def test_remove_from_nested_mapping_sequence(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        browser.click("document.getElementsByClassName('deformClosebutton')[2]")
-        self.assertFalse(browser.is_element_present('dom=document.forms[0].name[1]'))
+        findid("deformField1-seqAdd").click()
+        self.assertEqual(len(findxpaths('//input[@name="name"]')), 2)
+        findcsses('.deformClosebutton')[3].click()
+        self.assertEqual(len(findxpaths('//input[@name="name"]')), 1)
 
-class SequenceOrderable(Base, unittest.TestCase):
-    url = "/sequence_orderable/"
+class SequenceOrderableTests(Base, unittest.TestCase):
+    url = test_url("/sequence_orderable/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.deformProto'))
-        self.assertEqual(browser.get_text('deformField1-addtext'),'Add Person')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue(findcss('.deformProto'))
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1-addtext').text,
+                         'Add Person')
 
     def test_submit_complex_interaction(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd') # add one
+        findid("deformField1-seqAdd").click()
+
         # A single item shouldn't have an active reorder button.
-        self.assertEqual(int(browser.get_xpath_count(
-            "//span[@class='deformOrderbutton deformOrderbuttonActive']")), 0)
-        browser.click('deformField1-seqAdd') # add a second
+        self.assertEqual(len(findcsses('.deformOrderbutton')), 1)
+        self.assertFalse(findcsses('.deformOrderbutton')[0].is_displayed())
+        
+        # add a second
+        findid("deformField1-seqAdd").click()
         # Now there should be 2 active reorder buttons.
-        self.assertEqual(int(browser.get_xpath_count(
-            "//span[@class='deformOrderbutton deformOrderbuttonActive']")), 2)
-        browser.click('deformField1-seqAdd') # add a third
+        self.assertEqual(len(findcsses('.deformOrderbutton')), 2)
+        self.assertTrue(findcsses('.deformOrderbutton')[0].is_displayed())
+        self.assertTrue(findcsses('.deformOrderbutton')[1].is_displayed())
 
-        browser.type("document.forms[0].name[0]", 'Name1')
-        browser.type("document.forms[0].age[0]", '11')
-        browser.type("document.forms[0].name[1]", 'Name2')
-        browser.type("document.forms[0].age[1]", '22')
-        browser.type("document.forms[0].name[2]", 'Name3')
-        browser.type("document.forms[0].age[2]", '33')
+        # add a third
+        findid("deformField1-seqAdd").click()
+        findxpaths('//input[@name="name"]')[0].send_keys('Name1')
+        findxpaths('//input[@name="age"]')[0].send_keys('11')
+        findxpaths('//input[@name="name"]')[1].send_keys('Name2')
+        findxpaths('//input[@name="age"]')[1].send_keys('22')
+        findxpaths('//input[@name="name"]')[2].send_keys('Name3')
+        findxpaths('//input[@name="age"]')[2].send_keys('33')
 
-        order1_id = browser.get_attribute(
-            "document.getElementsByClassName('deformOrderbutton')[0]@id")
-        order2_id = browser.get_attribute(
-            "document.getElementsByClassName('deformOrderbutton')[1]@id")
-        order3_id = browser.get_attribute(
-            "document.getElementsByClassName('deformOrderbutton')[2]@id")
+        order1_id = findcsses('.deformOrderbutton')[0].get_attribute('id')
+        order3_id = findcsses('.deformOrderbutton')[2].get_attribute('id')
+        seq_height = findcss('.deformSeqItem').size['height']
 
-        # Determine the number of pixels between two order buttons.
-        # We'll use this value later in calls to drag_and_drop().
-        order1_top = int(browser.get_element_position_top(order1_id))
-        order2_top = int(browser.get_element_position_top(order2_id))
-        vertical_offset = order2_top - order1_top
+        # Move item 3 up two
+        actions = ActionChains(browser)
+        actions.drag_and_drop_by_offset(
+            findid(order3_id), 0, -seq_height * 2.5).perform()
 
         # Move item 1 down one slot (actually a little more than 1 is
         # needed to trigger jQuery Sortable when dragging down, so use 1.5).
-        browser.drag_and_drop( order1_id,  "0,+%s" % (1.5 * vertical_offset))
+        actions = ActionChains(browser)
+        actions.drag_and_drop_by_offset(
+            findid(order1_id), 0, seq_height * 1.5).perform()
 
-        # Move item 3 up two
-        browser.drag_and_drop( order3_id,  "0,-%s" % (2 * vertical_offset))
+        findid('deformsubmit').click()
 
-        browser.click("submit")
-        browser.wait_for_page_to_load("30000")
+        # sequences should be in reversed order
+        inputs = findxpaths('//input[@name="name"]')
+        self.assertEqual(inputs[0].get_attribute('value'), 'Name3')
+        self.assertEqual(inputs[1].get_attribute('value'), 'Name2')
+        self.assertEqual(inputs[2].get_attribute('value'), 'Name1')
 
-        # Original 3 items should now be in reverse order: 3, 2, 1
-
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('document.forms[0].name[0]'),
-                         'Name3')
-        self.assertEqual(browser.get_value('document.forms[0].age[0]'),
-                         '33')
-        self.assertEqual(browser.get_value('document.forms[0].name[1]'),
-                         'Name2')
-        self.assertEqual(browser.get_value('document.forms[0].age[1]'),
-                         '22')
-        self.assertEqual(browser.get_value('document.forms[0].name[2]'),
-                         'Name1')
-        self.assertEqual(browser.get_value('document.forms[0].age[2]'),
-                         '11')
-
-        captured = browser.get_text('css=#captured')
-        captured = eval(captured)
-        self.assertEqual(captured, {'people': [
-            {'name': 'Name3', 'age': 33},
-            {'name': 'Name2', 'age': 22},
-            {'name': 'Name1', 'age': 11},
-        ]})
+        self.assertEqual(eval(findid('captured').text),
+                         {'people': [
+                         {'name': 'Name3', 'age': 33},
+                         {'name': 'Name2', 'age': 22},
+                         {'name': 'Name1', 'age': 11},
+                     ]})
 
 class TextAreaCSVWidgetTests(Base, unittest.TestCase):
-    url = "/textareacsv/"
+    url = test_url("/textareacsv/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Csv"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'csv')
-        self.assertEqual(browser.get_attribute("deformField1@rows"), '10')
-        self.assertEqual(browser.get_attribute("deformField1@cols"), '60')
-        self.assertEqual(browser.get_value("deformField1"),
-                         '1,hello,4.5\n2,goodbye,5.5')
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
+        self.assertTrue('Csv' in browser.page_source)
+        self.assertEqual(findid('deformField1').get_attribute('name'),
+                         'csv')
+        self.assertEqual(findid('deformField1').get_attribute('rows'),
+                         '10')
+        self.assertEqual(findid('deformField1').get_attribute('cols'),
+                         '60')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '1,hello,4.5\n2,goodbye,5.5\n')
+        self.assertEqual(findcss('.required').text, 'Csv')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_default(self):
-        from decimal import Decimal
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'),
-                         '1,hello,4.5\n2,goodbye,5.5')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(
-            eval(captured),
-            ({'csv': [(1, u'hello', Decimal("4.5")), 
-                      (2, u'goodbye', Decimal("5.5"))]
-              }))
+        findid("deformsubmit").click()
+        self.assertEqual(eval(findid('captured').text),
+                         {'csv': [(1, u'hello', Decimal("4.5")), 
+                                  (2, u'goodbye', Decimal("5.5"))]
+                         })
 
     def test_submit_line_error(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '1,2,3\nwrong')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertSimilarRepr(browser.get_text(error_node),
-                         ('line 2: {\'1\': u\'"[\\\'wrong\\\']" has an '
-                          'incorrect number of elements (expected 3, was 1)\'}')
-                         )
-        self.assertEqual(browser.get_value('deformField1'), '1,2,3\nwrong')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, "None")
-
-    def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, "None")
-
-class TextInputCSVWidgetTests(Base, unittest.TestCase):
-    url = "/textinputcsv/"
-    def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_text_present("Csv"))
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'csv')
-        self.assertEqual(browser.get_value("deformField1"),
-                         '1,hello,4.5')
-        self.assertEqual(browser.get_text('css=.req'), '*')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-
-    def test_submit_default(self):
-        from decimal import Decimal
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'),
-                         '1,hello,4.5')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(
-            eval(captured),
-            ({'csv': (1, u'hello', Decimal("4.5"))}))
-
-    def test_submit_line_error(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '1,2,wrong')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertSimilarRepr(
-            browser.get_text(error_node),
-            u'{\'2\': u\'"wrong" is not a number\'}'
+        findid('deformField1').clear()
+        findid('deformField1').send_keys('1,2,3\nwrong')
+        findid("deformsubmit").click()
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertTrue(
+            'has an incorrect number of elements (expected 3, was 1)' in
+            findid('error-deformField1').text
             )
-        self.assertEqual(browser.get_value('deformField1'), '1,2,wrong')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, "None")
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        error_node = 'css=#error-deformField1'
-        self.assertEqual(browser.get_text(error_node), 'Required')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, "None")
+        findid('deformField1').clear()
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
 class WidgetAdapterTests(TextAreaCSVWidgetTests):
-    url = "/widget_adapter/"
+    url = test_url("/widget_adapter/")
 
-class MultipleFormsTests(Base, unittest.TestCase):
-    url = "/multiple_forms/"
+class TextInputCSVWidgetTests(Base, unittest.TestCase):
+    url = test_url("/textinputcsv/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'name1')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_attribute("deformField3@name"), 'name2')
-        self.assertEqual(browser.get_value('deformField3'), '')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        self.assertTrue('Csv' in browser.page_source)
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '1,hello,4.5')
+        self.assertEqual(findcss('.required').text, 'Csv')
+        self.assertEqual(findid('captured').text, 'None')
 
-    def test_submit_first(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'hey')
-        browser.click('form1submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_value('deformField1'), 'hey')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured, 
-            u"{'name1': u'hey'}")
+    def test_submit_default(self):
+        findid("deformsubmit").click()
+        self.assertEqual(eval(findid('captured').text),
+                         {'csv': (1, u'hello', Decimal("4.5"))})
 
-    def test_submit_second(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField3', 'hey')
-        browser.click('form2submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_value('deformField3'), 'hey')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured, 
-            u"{'name2': u'hey'}"
+    def test_submit_line_error(self):
+        findid('deformField1').clear()
+        findid('deformField1').send_keys('1,2,wrong')
+        findid("deformsubmit").click()
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertTrue(
+            '"wrong" is not a number' in findid('error-deformField1').text
             )
-
-class RequireOneFieldOrAnotherTests(Base, unittest.TestCase):
-    url = "/require_one_or_another/"
-    def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'one')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_attribute("deformField2@name"), 'two')
-        self.assertEqual(browser.get_value('deformField2'), '')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-
-    def test_submit_none_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required if two is not supplied')
-        self.assertEqual(browser.get_text('css=#error-deformField2'),
-                         'Required if one is not supplied')
-        captured = browser.get_text('css=#captured')
-        self.assertEqual(captured, u"None")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-
-    def test_submit_one_filled(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'one')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-            captured, 
-            u"{'two': u'', 'one': u'one'}"
-            )
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-
-class AjaxFormTests(Base, unittest.TestCase):
-    url = "/ajaxform/"
-    def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField1'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField3'))
-        self.assertTrue(browser.is_element_present('css=#req-deformField4'))
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
-        self.assertEqual(browser.get_value('deformField1'), '')
-        self.assertEqual(browser.get_attribute('deformField1@name'), 'number')
-        self.assertEqual(browser.get_value('deformField3'), '')
-        self.assertEqual(browser.get_attribute('deformField3@name'), 'name')
-        self.assertEqual(browser.get_value('deformField4'), '')
-        self.assertEqual(browser.get_attribute('deformField4@name'), 'year')
-        self.assertEqual(browser.get_value('deformField4-month'), '')
-        self.assertEqual(browser.get_attribute('deformField4-month@name'),
-                         'month')
-        self.assertEqual(browser.get_value('deformField4-day'), '')
-        self.assertEqual(browser.get_attribute('deformField4-day@name'),
-                         'day')
-        self.assertEqual(browser.get_text('css=#captured'), 'None')
 
     def test_submit_empty(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('submit')
-        browser.wait_for_condition(
-            'selenium.browserbot.getCurrentWindow().jQuery.active == 0',
-            "30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#captured'),
-                         'None')
+        findid('deformField1').clear()
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
+
+class MultipleFormsTests(Base, unittest.TestCase):
+    url = test_url("/multiple_forms/")
+    def test_render_default(self):
+        self.assertEqual(findid('deformField1').get_attribute('name'),
+                         'name1')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '')
+        self.assertEqual(findid('deformField3').get_attribute('name'),
+                         'name2')
+        self.assertEqual(findid('deformField3').get_attribute('value'),
+                         '')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+
+    def test_submit_first(self):
+        findid('deformField1').send_keys('hey')
+        findid("form1submit").click()
+        self.assertEqual(eval(findid('captured').text),
+                         {'name1': 'hey'})
+
+    def test_submit_second(self):
+        findid('deformField3').send_keys('hey')
+        findid("form2submit").click()
+        self.assertEqual(eval(findid('captured').text),
+                         {'name2': 'hey'})
+
+class RequireOneFieldOrAnotherTests(Base, unittest.TestCase):
+    url = test_url("/require_one_or_another/")
+    def test_render_default(self):
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('deformField1').get_attribute('name'), 'one')
+        self.assertEqual(findid('deformField2').get_attribute('value'), '')
+        self.assertEqual(findid('deformField2').get_attribute('name'), 'two')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+
+    def test_submit_none_filled(self):
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField1').text,
+                         'Required if two is not supplied')
+        self.assertEqual(findid('error-deformField2').text,
+                         'Required if one is not supplied')
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_one_filled(self):
+        findid("deformField1").send_keys('one')
+        findid("deformsubmit").click()
+        self.assertEqual(eval(findid('captured').text),
+                         {'one': u'one', 'two': u''})
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+
+class AjaxFormTests(Base, unittest.TestCase):
+    url = test_url("/ajaxform/")
+    def test_render_default(self):
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('deformField3').get_attribute('value'), '')
+        self.assertEqual(findid('deformField4').get_attribute('value'), '')
+        self.assertEqual(
+            findid('deformField4-month').get_attribute('value'), '')
+        self.assertEqual(findid('deformField4-day').get_attribute('value'), '')
+
+    def test_submit_empty(self):
+        source = browser.page_source
+        findid("deformsubmit").click()
+        wait_for_ajax(source)
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('error-deformField4').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_invalid(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'notanumber')
-        browser.click('submit')
-        browser.wait_for_condition(
-            'selenium.browserbot.getCurrentWindow().jQuery.active == 0',
-            "30000")
-        self.assertTrue(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_text('css=#error-deformField1'),
+        findid('deformField1').send_keys('notanumber')
+        source = browser.page_source
+        findid("deformsubmit").click()
+        wait_for_ajax(source)
+        self.assertEqual(findid('error-deformField1').text,
                          '"notanumber" is not a number')
-        self.assertEqual(browser.get_text('css=#error-deformField3'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#error-deformField4'),
-                         'Required')
-        self.assertEqual(browser.get_text('css=#captured'),
-                         'None')
+        self.assertEqual(findid('error-deformField3').text, 'Required')
+        self.assertEqual(findid('error-deformField4').text, 'Required')
+        self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '1')
-        browser.type('deformField3', 'name')
-        browser.type('deformField4', '2010')
-        browser.type('deformField4-month', '1')
-        browser.type('deformField4-day', '1')
-        browser.type('deformField5', 'text')
-        browser.click('submit')
-        browser.wait_for_condition(
-            'selenium.browserbot.getCurrentWindow().jQuery.active == 0',
-            "30000")
-        self.assertEqual(browser.get_text('css=#thanks'), 'Thanks!')
+        findid('deformField1').send_keys('1')
+        findid('deformField3').send_keys('name')
+        findid('deformField4').send_keys('2010')
+        findid('deformField4-month').send_keys('1')
+        findid('deformField4-day').send_keys('1')
+        browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
+        findid('tinymce').send_keys('yo')
+        browser.switch_to_default_content()
+        source = browser.page_source
+        findid("deformsubmit").click()
+        wait_for_ajax(source)
+        self.assertEquals(findid('thanks').text, 'Thanks!')
 
 class RedirectingAjaxFormTests(AjaxFormTests):
-    url = "/ajaxform_redirect/"
+    url = test_url("/ajaxform_redirect/")
     def test_submit_success(self):
-        import time
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', '1')
-        browser.type('deformField3', 'name')
-        browser.type('deformField4', '2010')
-        browser.type('deformField4-month', '1')
-        browser.type('deformField4-day', '1')
-        browser.click('submit')
-        time.sleep(1)
-        ## browser.wait_for_condition(
-        ##     'selenium.browserbot.getCurrentWindow().jQuery.active == 0',
-        ##     "30000")
-        location = browser.get_location()
-        self.assertTrue(location.endswith('thanks.html'))
+        findid('deformField1').send_keys('1')
+        findid('deformField3').send_keys('name')
+        findid('deformField4').send_keys('2010')
+        findid('deformField4-month').send_keys('1')
+        findid('deformField4-day').send_keys('1')
+        source = browser.page_source
+        findid("deformsubmit").click()
+        wait_for_ajax(source)
+        self.assertTrue(browser.current_url.endswith('thanks.html'))
 
 class TextInputMaskTests(Base, unittest.TestCase):
-    url = "/text_input_masks/"
+    url = test_url("/text_input_masks/")
     def test_render_default(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_attribute("deformField1@name"), 'ssn')
-        self.assertEqual(browser.get_value('deformField1'), '___-__-____')
-        self.assertEqual(browser.get_attribute("deformField2@name"), 'date')
-        self.assertEqual(browser.get_value('deformField2'), '')
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
+        findid('deformField1').send_keys('')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '___-__-____')
+        self.assertEqual(findid('deformField1').get_attribute('name'), 'ssn')
+        self.assertEqual(findid('deformField2').get_attribute('value'), '')
+        self.assertEqual(findid('deformField2').get_attribute('name'), 'date')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_type_bad_input(self):
-        import time
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.focus('deformField1')
-        browser.key_press('deformField1', 'a')
-        time.sleep(.005)
-        browser.focus('deformField2')
-        browser.key_press('deformField2', 'a')
-        time.sleep(.005)
-        self.assertTrue(
-            browser.get_value('deformField1') in ('', '___-__-____'))
-        self.assertTrue(
-            browser.get_value('deformField2') in ('', '__/__/____'))
+        findid('deformField1').send_keys('')
+        findid('deformField1').send_keys('a')
+        self.assertEqual(findid('deformField1').get_attribute('value'),
+                         '___-__-____')
+        findid('deformField2').send_keys('')
+        findid('deformField2').send_keys('a')
+
+        self.assertEqual(findid('deformField2').get_attribute('value'),
+                         '__/__/____')
 
     def test_submit_success(self):
-        import time
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.focus('deformField1')
-        for key in '140118866':
-            browser.key_press('deformField1', key)
-            time.sleep(.005)
-        browser.focus('deformField2')
-        for key in '10102010':
-            browser.key_press('deformField2', key)
-            time.sleep(.005)
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertSimilarRepr(
-            browser.get_text('css=#captured'),
-            u"{'date': u'10/10/2010', 'ssn': u'140-11-8866'}"
-            )
+        findid('deformField1').send_keys('')
+        findid('deformField1').send_keys('140118866')
+        browser.execute_script(
+            'document.getElementById("deformField2").focus();')
+        findid('deformField2').send_keys('10102010')
+        findid("deformsubmit").click()
+        self.assertEqual(eval(findid('captured').text),
+                        {'date': u'10/10/2010', 'ssn': u'140-11-8866'})
 
 class MultipleErrorMessagesInMappingTest(Base, unittest.TestCase):
-    url = "/multiple_error_messages_mapping/"
+    url = test_url("/multiple_error_messages_mapping/")
     def test_it(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.type('deformField1', 'whatever')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('error-deformField1'), 'Error 1')
-        self.assertEqual(browser.get_text('error-deformField1-1'), 'Error 2')
-        self.assertEqual(browser.get_text('error-deformField1-2'), 'Error 3')
+        findid('deformField1').send_keys('whatever')
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField1').text, 'Error 1')
+        self.assertEqual(findid('error-deformField1-1').text, 'Error 2')
+        self.assertEqual(findid('error-deformField1-2').text, 'Error 3')
 
 class MultipleErrorMessagesInSequenceTest(Base, unittest.TestCase):
-    url = "/multiple_error_messages_seq/"
+    url = test_url("/multiple_error_messages_seq/")
     def test_it(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.click('deformField1-seqAdd')
-        browser.type('dom=document.forms[0].field', 'whatever')
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertEqual(browser.get_text('error-deformField3'), 'Error 1')
-        self.assertEqual(browser.get_text('error-deformField3-1'), 'Error 2')
-        self.assertEqual(browser.get_text('error-deformField3-2'), 'Error 3')
+        findid("deformField1-seqAdd").click()
+        findxpath("//input[@name='field']").send_keys('whatever')
+        findid("deformsubmit").click()
+        self.assertEqual(findid('error-deformField3').text, 'Error 1')
+        self.assertEqual(findid('error-deformField3-1').text, 'Error 2')
+        self.assertEqual(findid('error-deformField3-2').text, 'Error 3')
 
-class CssClassesOnTheOutermostHTMLElement(Base, unittest.TestCase):
-    url = "/custom_classes_on_outermost_html_element/"
+class CssClassesOnTheOutermostHTMLElementTests(Base, unittest.TestCase):
+    url = test_url("/custom_classes_on_outermost_html_element/")
     def test_it(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        self.assertTrue(browser.is_element_present('css=form > fieldset > ul > li.field.top_level_mapping_widget_custom_class'))
-        self.assertTrue(browser.is_element_present('css=[title=SequenceWidget] > .deformSeq > ul > li.sequenced_widget_custom_class'))
-        self.assertTrue(browser.is_element_present('css=[title=MappingWidget] > fieldset > ul.mapping > li > ul > li.mapped_widget_custom_class'))
+        findcss('form > fieldset > div.top_level_mapping_widget_custom_class')
+        findcss('[title=MappingWidget] div.mapped_widget_custom_class')
+        findcss('[title=SequenceWidget] div.sequenced_widget_custom_class')
         
 
 if __name__ == '__main__':
