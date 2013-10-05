@@ -14,3 +14,11 @@ pypyenv/
 2xenv/
 build/
 dist/
+.installed.cfg
+.mr.developer.cfg
+bin/
+develop-eggs/
+include/
+lib/
+src/
+
