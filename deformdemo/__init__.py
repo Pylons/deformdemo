@@ -2388,13 +2388,13 @@ class DeformDemo(object):
                 )
             money = colander.SchemaNode(
                 colander.Decimal(),
-                widget = deform.widget.MoneyWidget(readonly=True),
+                widget = deform.widget.MoneyInputWidget(readonly=True),
                 description='Some money',
                 missing=colander.null
                 )
             date = colander.SchemaNode(
                 colander.Date(),
-                widget = deform.widget.DateWidget(readonly=True),
+                widget = deform.widget.DateInputWidget(readonly=True),
                 description='Some date',
                 missing=colander.null
                 )
