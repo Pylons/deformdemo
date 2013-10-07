@@ -45,14 +45,35 @@
 
     <body id="public">
 
-    <div class="navbar navbar-default" role="navigation">
-        <div class="container">
-            <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-info-sign"></span> Deform 2 Demo</a>
+      <div class="container">
+        <div class="navbar navbar-default" role="navigation">
+          <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-info-sign"></span> Deform 2 Demo</a>
+          <p class="navbar-text pull-right"
+             tal:condition="form|None">
+          Form Layout
+            <span class="btn-group"
+                  tal:define="form_class form_class|None">
+              <a tal:define="active not form_class"
+                 class="btn btn-default ${active and 'active' or ''}"
+                 href="${request.path_url}?form_class=">
+                Default
+              </a>
+              <a tal:define="active form_class == 'form-horizontal'"
+                 class="btn btn-default ${active and 'active' or ''}"
+                 href="${request.path_url}?form_class=form-horizontal">
+                Horizontal
+              </a>
+              <a tal:define="active form_class == 'form-inline'"
+                 class="btn btn-default ${active and 'active' or ''}"
+                 href="${request.path_url}?form_class=form-inline">
+                Inline
+              </a>
+            </span>
+          </p>
         </div>
-    </div>
+      </div>
 
-    <div class="container">
-
+      <div class="container">
         <div class="row" style="margin-top: 10px">
             <div class="col-3 col-lg-3 col-sm-3">
                 <div class="list-group">
