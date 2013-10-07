@@ -73,9 +73,6 @@ setupkw = dict(
         ('**.py',   'lingua_python', None ),
         ('**.pt',   'lingua_xml', None ),
         ]},
-    extras_require = {
-       'testing':testing_extras,
-       },
     )
 
 setup(**setupkw)
