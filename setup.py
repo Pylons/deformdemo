@@ -35,8 +35,6 @@ requires = ['deform>=2.0dev',
             'pygments',
             'waitress']
 
-testing_extras = ['webtest',]
-
 if not PY3:
     requires.extend((
             'Babel',
@@ -73,9 +71,6 @@ setupkw = dict(
         ('**.py',   'lingua_python', None ),
         ('**.pt',   'lingua_xml', None ),
         ]},
-    extras_require = {
-       'testing':testing_extras,
-       },
     )
 
 setup(**setupkw)
