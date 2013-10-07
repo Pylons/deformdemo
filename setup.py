@@ -58,7 +58,6 @@ setupkw = dict(
     packages=find_packages(),
     include_package_data=True,
     zip_safe=False,
-    tests_require=testing_extras,
     install_requires=requires,
     extras_require = {
         'testing': ['nose', 'selenium'],
