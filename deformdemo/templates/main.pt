@@ -37,6 +37,8 @@
                 type="text/javascript"></script>
         <script src="${request.static_url('deform:static/scripts/bootstrap.min.js')}"
                 type="text/javascript"></script>
+        <script src="${request.static_url('deform:static/scripts/angular.js')}"
+                type="text/javascript"></script>
         <tal:block repeat="reqt js_links|[]">
         <script type="text/javascript" src="${request.static_url(reqt)}"></script>
         </tal:block>
