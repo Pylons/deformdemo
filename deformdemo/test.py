@@ -15,7 +15,7 @@ from selenium.webdriver.support.wait import WebDriverWait
 # to run:
 # console 1: java -jar selenium-server.jar
 # console 2: start the deform demo server (pserve demo.ini)
-# console 3: python2.X test.py
+# console 3: nosetests
 
 # Note that this test file does not run under Python 3, but it can be used
 # to test a deformdemo *instance* running under Python 3.
