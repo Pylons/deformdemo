@@ -489,6 +489,45 @@ class DateInputWidgetTests(Base, unittest.TestCase):
             )
 
 
+class TimeInputWidgetTests(Base, unittest.TestCase):
+    url = test_url('/timeinput/')
+    def test_render_default(self):
+        self.assertTrue('Time' in browser.page_source)
+        self.assertEqual(findcss('.required').text, 'Time')
+        self.assertEqual(findid('captured').text, 'None')
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'), '14:35:00')
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+
+    def test_submit_empty(self):
+        findid('deformField1').clear()
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(findid('error-deformField1').text, 'Required')
+        self.assertEqual(findid('deformField1').get_attribute('value'), '')
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_tooearly(self):
+        findid('deformField1').click()
+        findxpath('//li[@data-pick="600"]').click()
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertTrue('is earlier than' in findid('error-deformField1').text)
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_success(self):
+        findid('deformField1').click()
+        findxpath('//li[@data-pick="900"]').click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertRaises(NoSuchElementException, findid, 'error-deformField1')
+        expected = "{'time': datetime.time(15, 0)}"
+        captured = findid('captured').text
+        if captured.startswith('u'):
+            captured = captured[1:]
+        self.assertEqual(captured, expected)
+
+
 class DateTimeInputWidgetTests(Base, unittest.TestCase):
     url = test_url('/datetimeinput/')
     def test_render_default(self):
