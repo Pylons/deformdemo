@@ -78,6 +78,14 @@ class Base(object):
     def setUp(self):
         browser.get(self.url)
 
+    def tearDown(self):
+        # it should never happen that classes include None keyword
+        # (poor mans html parser):
+        for class_ in re.finditer(r'class="([^"]*)"', browser.page_source):
+            self.assertFalse('None' in class_.group(1))
+        for class_ in re.finditer(r"class='([^']*)'", browser.page_source):
+            self.assertFalse('None' in class_.group(1))
+
     def assertSimilarRepr(self, a, b):
         # ignore u'' and and \n in reprs, normalize set syntax between py2 and
         # py3
