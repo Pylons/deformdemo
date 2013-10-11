@@ -60,7 +60,7 @@ setupkw = dict(
     zip_safe=False,
     install_requires=requires,
     extras_require = {
-        'testing': ['nose', 'selenium'],
+        'testing': ['nose', 'selenium', 'nose-selecttests'],
     },
     entry_points = """\
     [paste.app_factory]
