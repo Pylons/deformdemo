@@ -1424,7 +1424,7 @@ class SequenceOfMappingsTests(Base, unittest.TestCase):
     def test_render_default(self):
         self.assertEqual(findid('deformField1-addtext').text, 'Add Person')
         self.assertEqual(findid('captured').text, 'None')
-        self.assertTrue(findcss('.deformProto'))
+        self.assertTrue(findcss('.deform-proto'))
 
     def test_submit_none_added(self):
         findid("deformsubmit").click()
@@ -1471,7 +1471,7 @@ class SequenceOfMappingsTests(Base, unittest.TestCase):
 class SequenceOfMappingsWithInitialItemTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_mappings_with_initial_item/")
     def test_render_default(self):
-        self.assertTrue(findcss('.deformProto'))
+        self.assertTrue(findcss('.deform-proto'))
         self.assertEqual(findid('deformField1-addtext').text, 'Add Person')
         self.assertEqual(findid('captured').text, 'None')
 
@@ -1982,7 +1982,7 @@ class TextInputWidgetTests(Base, unittest.TestCase):
 class TextInputWithCssClassWidgetTests(Base, unittest.TestCase):
     url = test_url("/textinput_with_css_class/")
     def test_render_default(self):
-        findcss('.deformWidgetWithStyle')
+        findcss('.deform-widget-with-style')
         
 class MoneyInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/money_input/")
@@ -2216,13 +2216,13 @@ class SequenceOfSequencesTests(Base, unittest.TestCase):
     def test_remove_from_nested_mapping_sequence(self):
         findid("deformField1-seqAdd").click()
         self.assertEqual(len(findxpaths('//input[@name="name"]')), 2)
-        findcsses('.deformClosebutton')[3].click()
+        findcsses('.deform-close-button')[3].click()
         self.assertEqual(len(findxpaths('//input[@name="name"]')), 1)
 
 class SequenceOrderableTests(Base, unittest.TestCase):
     url = test_url("/sequence_orderable/")
     def test_render_default(self):
-        self.assertTrue(findcss('.deformProto'))
+        self.assertTrue(findcss('.deform-proto'))
         self.assertEqual(findid('captured').text, 'None')
         self.assertEqual(findid('deformField1-addtext').text,
                          'Add Person')
@@ -2231,15 +2231,15 @@ class SequenceOrderableTests(Base, unittest.TestCase):
         findid("deformField1-seqAdd").click()
 
         # A single item shouldn't have an active reorder button.
-        self.assertEqual(len(findcsses('.deformOrderbutton')), 1)
-        self.assertFalse(findcsses('.deformOrderbutton')[0].is_displayed())
+        self.assertEqual(len(findcsses('.deform-order-button')), 1)
+        self.assertFalse(findcsses('.deform-order-button')[0].is_displayed())
         
         # add a second
         findid("deformField1-seqAdd").click()
         # Now there should be 2 active reorder buttons.
-        self.assertEqual(len(findcsses('.deformOrderbutton')), 2)
-        self.assertTrue(findcsses('.deformOrderbutton')[0].is_displayed())
-        self.assertTrue(findcsses('.deformOrderbutton')[1].is_displayed())
+        self.assertEqual(len(findcsses('.deform-order-button')), 2)
+        self.assertTrue(findcsses('.deform-order-button')[0].is_displayed())
+        self.assertTrue(findcsses('.deform-order-button')[1].is_displayed())
 
         # add a third
         findid("deformField1-seqAdd").click()
@@ -2250,9 +2250,9 @@ class SequenceOrderableTests(Base, unittest.TestCase):
         findxpaths('//input[@name="name"]')[2].send_keys('Name3')
         findxpaths('//input[@name="age"]')[2].send_keys('33')
 
-        order1_id = findcsses('.deformOrderbutton')[0].get_attribute('id')
-        order3_id = findcsses('.deformOrderbutton')[2].get_attribute('id')
-        seq_height = findcss('.deformSeqItem').size['height']
+        order1_id = findcsses('.deform-order-button')[0].get_attribute('id')
+        order3_id = findcsses('.deform-order-button')[2].get_attribute('id')
+        seq_height = findcss('.deform-seq-item').size['height']
 
         # Move item 3 up two
         actions = ActionChains(browser)

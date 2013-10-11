@@ -211,7 +211,7 @@ class DeformDemo(object):
     def textinput_with_css_class(self):
 
         css_widget = deform.widget.TextInputWidget(
-            css_class='deformWidgetWithStyle')
+            css_class='deform-widget-with-style')
 
         class Schema(colander.Schema):
             text = colander.SchemaNode(colander.String(),
