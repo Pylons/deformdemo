@@ -347,6 +347,59 @@ class CheckedInputReadonlyTests(Base, unittest.TestCase):
         
 class CheckedPasswordWidgetTests(Base, unittest.TestCase):
     url = test_url("/checkedpassword/")
+    def test_submit_tooshort(self):
+        findid('deformField1').send_keys('this')
+        findid('deformField1-confirm').send_keys('this')
+        findid("deformsubmit").click()
+        self.assertTrue(findcss('.has-error'))
+        self.assertEqual(
+            findid('error-deformField1').text,
+            'Shorter than minimum length 5'
+            )
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'),
+            ''
+            )
+        self.assertEqual(
+            findid('deformField1-confirm').get_attribute('value'),
+            ''
+            )
+
+    def test_submit_mismatch(self):
+        findid('deformField1').send_keys('this123')
+        findid('deformField1-confirm').send_keys('that123')
+        findid("deformsubmit").click()
+        self.assertEqual(
+            findid('error-deformField1').text,
+            'Password did not match confirm'
+            )
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'),
+            ''
+            )
+        self.assertEqual(
+            findid('deformField1-confirm').get_attribute('value'),
+            ''
+            )
+        self.assertEqual(findid('captured').text, 'None')
+
+    def test_submit_success(self):
+        findid('deformField1').send_keys('this123')
+        findid('deformField1-confirm').send_keys('this123')
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'),
+            ''
+            )
+        self.assertEqual(
+            findid('deformField1-confirm').get_attribute('value'),
+            ''
+            )
+        self.assertEqual(findid('captured').text, "{'password': u'this123'}")
+        
+class CheckedPasswordRedisplayWidgetTests(Base, unittest.TestCase):
+    url = test_url("/checkedpassword_redisplay/")
     def test_render_default(self):
         self.assertTrue('Password' in browser.page_source)
         self.assertEqual(findcss('.required').text, 'Password')
@@ -429,59 +482,6 @@ class CheckedPasswordWidgetTests(Base, unittest.TestCase):
             )
         self.assertEqual(findid('captured').text, "{'password': u'this123'}")
 
-class CheckedPasswordWidgetNoRedisplayTests(Base, unittest.TestCase):
-    url = test_url("/checkedpassword_noredisplay/")
-    def test_submit_tooshort(self):
-        findid('deformField1').send_keys('this')
-        findid('deformField1-confirm').send_keys('this')
-        findid("deformsubmit").click()
-        self.assertTrue(findcss('.has-error'))
-        self.assertEqual(
-            findid('error-deformField1').text,
-            'Shorter than minimum length 5'
-            )
-        self.assertEqual(
-            findid('deformField1').get_attribute('value'),
-            ''
-            )
-        self.assertEqual(
-            findid('deformField1-confirm').get_attribute('value'),
-            ''
-            )
-
-    def test_submit_mismatch(self):
-        findid('deformField1').send_keys('this123')
-        findid('deformField1-confirm').send_keys('that123')
-        findid("deformsubmit").click()
-        self.assertEqual(
-            findid('error-deformField1').text,
-            'Password did not match confirm'
-            )
-        self.assertEqual(
-            findid('deformField1').get_attribute('value'),
-            ''
-            )
-        self.assertEqual(
-            findid('deformField1-confirm').get_attribute('value'),
-            ''
-            )
-        self.assertEqual(findid('captured').text, 'None')
-
-    def test_submit_success(self):
-        findid('deformField1').send_keys('this123')
-        findid('deformField1-confirm').send_keys('this123')
-        findid("deformsubmit").click()
-        self.assertRaises(NoSuchElementException, findcss, '.has-error')
-        self.assertEqual(
-            findid('deformField1').get_attribute('value'),
-            ''
-            )
-        self.assertEqual(
-            findid('deformField1-confirm').get_attribute('value'),
-            ''
-            )
-        self.assertEqual(findid('captured').text, "{'password': u'this123'}")
-        
 class CheckedPasswordReadonlyTests(Base, unittest.TestCase):
     url = test_url("/checkedpassword_readonly/")
     def test_render_default(self):
@@ -493,7 +493,6 @@ class CheckedPasswordReadonlyTests(Base, unittest.TestCase):
             'Password not displayed.'
             )
 
-        
 class DateInputWidgetTests(Base, unittest.TestCase):
     url = test_url('/dateinput/')
     def test_render_default(self):
@@ -1171,6 +1170,21 @@ class InternationalizationTests(Base, unittest.TestCase):
 
 class PasswordWidgetTests(Base, unittest.TestCase):
     url = test_url("/password/")
+    def test_render_submit_success(self):
+        findid('deformField1').send_keys('abcdef123')
+        findid("deformsubmit").click()
+        self.assertTrue('Password' in browser.page_source)
+        self.assertEqual(
+            findid('deformField1').get_attribute('value'),
+            ''
+            )
+        self.assertRaises(NoSuchElementException, findcss, '.has-error')
+        self.assertSimilarRepr(
+            findid('captured').text,
+            "{'password': u'abcdef123'}")
+        
+class PasswordWidgetRedisplayTests(Base, unittest.TestCase):
+    url = test_url("/password_redisplay/")
     def test_render_default(self):
         self.assertTrue('Password' in browser.page_source)
         self.assertEqual(findid('captured').text, 'None')
@@ -1199,21 +1213,6 @@ class PasswordWidgetTests(Base, unittest.TestCase):
             findid('captured').text,
             "{'password': u'abcdef123'}")
 
-class PasswordWidgetNoRedisplayTests(Base, unittest.TestCase):
-    url = test_url("/password_noredisplay/")
-    def test_render_submit_success(self):
-        findid('deformField1').send_keys('abcdef123')
-        findid("deformsubmit").click()
-        self.assertTrue('Password' in browser.page_source)
-        self.assertEqual(
-            findid('deformField1').get_attribute('value'),
-            ''
-            )
-        self.assertRaises(NoSuchElementException, findcss, '.has-error')
-        self.assertSimilarRepr(
-            findid('captured').text,
-            "{'password': u'abcdef123'}")
-        
 class RadioChoiceWidgetTests(Base, unittest.TestCase):
     url = test_url("/radiochoice/")
     def test_render_default(self):

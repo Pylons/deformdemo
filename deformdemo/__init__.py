@@ -420,15 +420,15 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
-    @view_config(renderer='templates/form.pt', name='password_noredisplay')
-    @demonstrate('Password Widget (dont redisplay on validation failure)')
-    def password_noredisplay(self):
+    @view_config(renderer='templates/form.pt', name='password_redisplay')
+    @demonstrate('Password Widget (redisplay on validation failure)')
+    def password_redisplay(self):
 
         class Schema(colander.Schema):
             password = colander.SchemaNode(
                 colander.String(),
                 validator=colander.Length(min=5, max=100),
-                widget=deform.widget.PasswordWidget(redisplay=False),
+                widget=deform.widget.PasswordWidget(redisplay=True),
                 description='Enter a password')
 
         schema = Schema()
@@ -630,15 +630,15 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt',
-                 name='checkedpassword_noredisplay')
-    @demonstrate('Checked Password Widget')
-    def checkedpassword_noredisplay(self):
+                 name='checkedpassword_redisplay')
+    @demonstrate('Checked Password Widget (redisplay on validation failure)')
+    def checkedpassword_redisplay(self):
 
         class Schema(colander.Schema):
             password = colander.SchemaNode(
                 colander.String(),
                 validator=colander.Length(min=5),
-                widget=deform.widget.CheckedPasswordWidget(redisplay=False),
+                widget=deform.widget.CheckedPasswordWidget(redisplay=True),
                 description='Type your password and confirm it')
 
         schema = Schema()
