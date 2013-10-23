@@ -1,0 +1,18 @@
+language: python
+
+install: 
+  - python setup.py dev
+  - pip install git+https://github.com/Pylons/deform.git
+  - pip install git+https://github.com/Pylons/colander.git
+
+before_script:
+  # setup display  
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  # download and run selenium
+  - wget http://selenium.googlecode.com/files/selenium-server-standalone-2.35.0.jar
+  - java -jar selenium-server-standalone-1.35.0.jar&
+  # start deformdemo app     
+  - pserve demo.ini --daemon
+
+script: nosetests
