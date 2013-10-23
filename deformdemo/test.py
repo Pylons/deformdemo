@@ -556,11 +556,10 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findcss('.required').text, 'Time')
         self.assertEqual(findid('captured').text, 'None')
         self.assertEqual(
-            findid('deformField1').get_attribute('value'), '14:35:00')
+            findid('deformField1').get_attribute('value'), u'')
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_empty(self):
-        findid('deformField1').clear()
         findid("deformsubmit").click()
         self.assertTrue(findcss('.has-error'))
         self.assertEqual(findid('error-deformField1').text, 'Required')
@@ -569,7 +568,7 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_tooearly(self):
         findid('deformField1').click()
-        findxpath('//li[@data-pick="600"]').click()
+        findxpath('//li[@data-pick="0"]').click()
         findid("deformsubmit").click()
         self.assertTrue(findcss('.has-error'))
         self.assertTrue('is earlier than' in findid('error-deformField1').text)

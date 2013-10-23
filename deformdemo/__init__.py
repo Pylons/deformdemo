@@ -1271,9 +1271,8 @@ class DeformDemo(object):
 
         schema = Schema()
         form = deform.Form(schema, buttons=('submit',))
-        when = datetime.time(14, 35)
 
-        return self.render_form(form, appstruct={'time': when})
+        return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='datetimeinput')
     @demonstrate('DateTime Input Widget')
