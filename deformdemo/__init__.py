@@ -1298,7 +1298,7 @@ class DeformDemo(object):
     @demonstrate('DateTime Input Widget (read-only)')
     def datetimeinput_readonly(self):
         import datetime
-        then = datetime.datetime(2011, 05, 05, 01, 02)
+        then = datetime.datetime(2011, 5, 5, 1, 2)
 
         class Schema(colander.Schema):
             date_time = colander.SchemaNode(
