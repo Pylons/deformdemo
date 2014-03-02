@@ -5,6 +5,7 @@ import re
 import os
 import time
 from decimal import Decimal
+import json
 
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import WebDriverException
@@ -52,6 +53,14 @@ def wait_for_ajax(source):
             pass
 
     WebDriverWait(browser, 5).until(compare_source)
+
+def send_keys_to_tinymce(keys):
+    # Doesn't seem to work for me (selenium 2.24.0, FF 24.0)
+    #browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
+    #findid('tinymce').send_keys(keys)
+    #browser.switch_to_default_content()
+    browser.execute_script('tinyMCE.activeEditor.setContent({0})'
+                           .format(json.dumps(keys)))
 
 def setUpModule():
     from selenium.webdriver import Firefox
@@ -1732,9 +1741,7 @@ class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
 
     def test_submit_one_filled(self):
         findid("deformField1-seqAdd").click()
-        browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
-        findid('tinymce').send_keys('yo')
-        browser.switch_to_default_content()
+        send_keys_to_tinymce('yo')
         findid("deformsubmit").click()
         self.assertEqual(eval(findid('captured').text),
                          {'texts': [u'<p>yo</p>']})
@@ -2224,9 +2231,7 @@ class DelayedRichTextWidgetTests(Base, unittest.TestCase):
     def test_submit_filled(self):
         findcss('.tinymce-preload').click()
         time.sleep(0.5)
-        browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
-        findid('tinymce').send_keys('hello')
-        browser.switch_to_default_content()
+        send_keys_to_tinymce('hello')
         findid('deformsubmit').click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(eval(findid('captured').text),
@@ -2250,9 +2255,7 @@ class RichTextWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_filled(self):
-        browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
-        findid('tinymce').send_keys('hello')
-        browser.switch_to_default_content()
+        send_keys_to_tinymce('hello')
         findid('deformsubmit').click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(eval(findid('captured').text),
@@ -2549,9 +2552,7 @@ class AjaxFormTests(Base, unittest.TestCase):
         findid('deformField4').send_keys('2010')
         findid('deformField4-month').send_keys('1')
         findid('deformField4-day').send_keys('1')
-        browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
-        findid('tinymce').send_keys('yo')
-        browser.switch_to_default_content()
+        send_keys_to_tinymce('yo')
         source = browser.page_source
         findid("deformsubmit").click()
         wait_for_ajax(source)
