@@ -542,7 +542,7 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertRaises(NoSuchElementException, findid, 'error-deformField1')
         expected = '%d, %d, %d' % (today.year, today.month, today.day)
-        expected = "{'date': datetime.date(%s)}" % expected
+        expected = "{'somedate': datetime.date(%s)}" % expected
         self.assertSimilarRepr(
             findid('captured').text,
             expected
@@ -580,7 +580,7 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertRaises(NoSuchElementException, findid, 'error-deformField1')
-        expected = "{'time': datetime.time(15, 0)}"
+        expected = "{'sometime': datetime.time(15, 0)}"
         captured = findid('captured').text
         if captured.startswith('u'):
             captured = captured[1:]
