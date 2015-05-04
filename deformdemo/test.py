@@ -1864,7 +1864,11 @@ class SequenceOfDateInputs(Base, unittest.TestCase):
 
     def test_submit_one_filled(self):
         findid("deformField1-seqAdd").click()
-        findcss('input[type="text"]').click()
+        try:
+            dte = findcss('input[type="text"]')
+        except NoSuchElementException:
+            dte = findcss('input[type="date"]')
+        dte.click()
         wait_picker_to_show_up()
         findcss(".picker__button--today").click()
         submit_date_picker_safe()
