@@ -2626,7 +2626,7 @@ class CssClassesOnTheOutermostHTMLElementTests(Base, unittest.TestCase):
     def test_it(self):
         findcss('form > fieldset > div.top_level_mapping_widget_custom_class')
         findcss('[title=MappingWidget] div.mapped_widget_custom_class')
-        findcss('[title=SequenceWidget] div.sequenced_widget_custom_class')
+        findcss('#item-deformField2 div.sequenced_widget_custom_class')
         
 
 if __name__ == '__main__':
