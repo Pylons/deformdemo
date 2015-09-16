@@ -14,9 +14,6 @@
         <link rel="stylesheet" 
               href="${request.resource_url(request.root, 'pygments.css', route_name='deformdemo')}"
               type="text/css"/>
-        <link rel="stylesheet" 
-              href="${request.static_url('deform:static/css/form.css')}"
-              type="text/css"/>
 
         <style type="text/css">
            .linenodiv pre {
@@ -28,6 +25,9 @@
         <link rel="stylesheet"
               href="${request.static_url('deform:static/css/bootstrap.min.css')}"
               type="text/css" media="screen" charset="utf-8"/>
+        <link rel="stylesheet" 
+              href="${request.static_url('deform:static/css/form.css')}"
+              type="text/css"/>
         <tal:block repeat="reqt css_links|[]">
         <link rel="stylesheet" href="${request.static_url(reqt)}" type="text/css" />
         </tal:block>
