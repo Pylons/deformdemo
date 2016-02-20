@@ -1170,7 +1170,8 @@ class InternationalizationTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         self.assertEqual(
             findcss('.alert-danger').text,
-            'There was a problem with your submission'
+            'There was a problem with your submission\n'
+            'Errors have been highlighted below'
             )
         self.assertEqual(findid('error-deformField1').text, 'Required')
         self.assertEqual(findcss('label').text, 'A number between 1 and 10')
@@ -1181,7 +1182,8 @@ class InternationalizationTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         self.assertEqual(
             findcss('.alert-danger').text,
-            u'Данные которые вы предоставили содержат ошибку')
+            u'Данные которые вы предоставили содержат ошибку\n'
+            u'Ниже вы найдёте подробное описание ошибок')
         self.assertEqual(findid('error-deformField1').text, u'Требуется')
         self.assertEqual(findcss('label').text, u'Число между 1 и 10')
         self.assertEqual(findid("deformsubmit").text, u'отправить')
@@ -1192,7 +1194,8 @@ class InternationalizationTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         self.assertEqual(
             findcss('.alert-danger').text,
-            'There was a problem with your submission'
+            'There was a problem with your submission\n'
+            'Errors have been highlighted below'
             )
         self.assertEqual(
             findid('error-deformField1').text,
@@ -1207,7 +1210,8 @@ class InternationalizationTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         self.assertEqual(
             findcss('.alert-danger').text,
-            u'Данные которые вы предоставили содержат ошибку'
+            u'Данные которые вы предоставили содержат ошибку\n'
+            u'Ниже вы найдёте подробное описание ошибок'
             )
         self.assertEqual(findid('error-deformField1').text, u'0 меньше чем 1')
         self.assertEqual(findcss('label').text, u'Число между 1 и 10')
