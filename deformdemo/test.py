@@ -599,31 +599,44 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_both_empty(self):
-        findid("deformsubmit").click()
+        _sbm = findid("deformsubmit")
+        time.sleep(0.2)
+        _sbm.click()
         self.assertTrue(findcss('.has-error'))
         self.assertEqual(findid('error-deformField1').text, 'Required')
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_time_empty(self):
-        findid('deformField1-date').click()
+        _dtw = findid('deformField1-date')
+        time.sleep(0.2)
+        _dtw.click()
         findcss(".picker__button--today").click()
+        time.sleep(0.5)
         findid("deformsubmit").click()
         self.assertTrue(findcss('.has-error'))
         self.assertEqual(findid('error-deformField1').text, 'Incomplete time')
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_date_empty(self):
-        findid('deformField1-time').click()
+        _tmw = findid('deformField1-time')
+        time.sleep(0.2)
+        _tmw.click()
         findxpath('//li[@data-pick="0"]').click()
-        findid("deformsubmit").click()
+        time.sleep(0.5)
+        _sbm = findid("deformsubmit")
+        time.sleep(0.2)
+        _sbm.click()
         self.assertTrue(findcss('.has-error'))
         self.assertEqual(findid('error-deformField1').text, 'Incomplete date')
         self.assertEqual(findid('captured').text, 'None')
         
     def test_submit_tooearly(self):
         import datetime
-        findid('deformField1-time').click()
+        _tmw = findid('deformField1-time')
+        time.sleep(0.2)
+        _tmw.click()
         findxpath('//li[@data-pick="0"]').click()
+        time.sleep(0.5)
         findid('deformField1-date').click()
         def diff_month(d1, d2):
             return (d1.year - d2.year)*12 + d1.month - d2.month
@@ -632,7 +645,10 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         num_months = diff_month(today, tooearly)
         [ findcss('.picker__nav--prev').click() for x in range(num_months) ]
         findcss(".picker__day").click()
-        findid("deformsubmit").click()
+        time.sleep(0.5)
+        _sbm = findid("deformsubmit")
+        time.sleep(0.2)
+        _sbm.click()
         self.assertTrue(findcss('.has-error'))
         self.assertTrue('is earlier than' in findid('error-deformField1').text)
         self.assertEqual(findid('captured').text, 'None')
@@ -640,10 +656,14 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
     def test_submit_success(self):
         import datetime
         now = datetime.datetime.utcnow()
-        findid('deformField1-time').click()
+        _tmw = findid('deformField1-time')
+        time.sleep(0.2)
+        _tmw.click()
         findxpath('//li[@data-pick="60"]').click()
+        time.sleep(0.5)
         findid('deformField1-date').click()
         findcss(".picker__button--today").click()
+        time.sleep(0.5)
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertRaises(NoSuchElementException, findid, 'error-deformField1')
