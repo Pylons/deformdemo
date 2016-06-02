@@ -106,3 +106,4 @@ Contributors
 - Domen Kožar, 2012/11/10
 - Charlie Clark, 2013/09/03
 - Calvin Hendryx-Parker, 2013/09/03
+- Mikko Ohtamaa 2016/06/01
