@@ -65,6 +65,12 @@ def wait_picker_to_show_up():
     time.sleep(1.0)
 
 
+def submit_date_picker_save():
+    # # TODO: This tests uses explicit waits to make it run on a modern browsers. The waits could be replaced by calling picker JS API directly inside Selenium browser
+    time.sleep(1.0)
+    findid("deformsubmit").click()
+
+
 def setUpModule():
 
     global browser
@@ -643,7 +649,7 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
     def test_submit_date_empty(self):
         findid('deformField1-time').click()
         findxpath('//li[@data-pick="0"]').click()
-        findid("deformsubmit").click()
+        submit_date_picket_safe()
         self.assertTrue(findcss('.has-error'))
         self.assertEqual(findid('error-deformField1').text, 'Incomplete date')
         self.assertEqual(findid('captured').text, 'None')
