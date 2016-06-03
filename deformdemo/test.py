@@ -1124,10 +1124,11 @@ class FileUploadTests(Base, unittest.TestCase):
         self.assertEqual(findcss('[name=uid]').get_attribute('value'), uid)
 
         # resubmit after entering a new filename should change the file
-        path2, filename2 = _getFile('selenium.py')
+        path2, filename2 = _getFile('validation.py')
         findcss('input[type=file]').send_keys(path2)
         findid("deformsubmit").click()
-        self.assertEqual(findcss('.upload-filename').get_attribute('value'),
+        got_name = findcss('.upload-filename').get_attribute('value')
+        self.assertEqual(got_name,
                          filename2)
         self.assertTrue('filename' in findid('captured').text)
         self.assertTrue(uid in findid('captured').text)
@@ -1228,7 +1229,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         self.assertEqual(
             findcss('.alert-danger').text,
-            'There was a problem with your submission'
+            'There was a problem with your submission\nErrors have been highlighted below'
             )
         self.assertEqual(findid('error-deformField1').text, 'Required')
         self.assertEqual(findcss('label').text, 'A number between 1 and 10')
@@ -1238,7 +1239,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         browser.get("%s?_LOCALE_=ru" % self.url)
         findid("deformsubmit").click()
         self.assertEqual(
-            findcss('.alert-danger').text,
+            findcss('.alert-danger .error-msg-lbl').text,
             u'Данные которые вы предоставили содержат ошибку')
         self.assertEqual(findid('error-deformField1').text, u'Требуется')
         self.assertEqual(findcss('label').text, u'Число между 1 и 10')
@@ -1250,7 +1251,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         self.assertEqual(
             findcss('.alert-danger').text,
-            'There was a problem with your submission'
+            'There was a problem with your submission\nErrors have been highlighted below'
             )
         self.assertEqual(
             findid('error-deformField1').text,
@@ -1264,7 +1265,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         findid('deformField1').send_keys('0')
         findid("deformsubmit").click()
         self.assertEqual(
-            findcss('.alert-danger').text,
+            findcss('.alert-danger .error-msg-lbl').text,
             u'Данные которые вы предоставили содержат ошибку'
             )
         self.assertEqual(findid('error-deformField1').text, u'0 меньше чем 1')
