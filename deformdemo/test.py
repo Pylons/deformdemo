@@ -16,6 +16,10 @@ from selenium.webdriver.support import expected_conditions as EC
 
 browser = None
 
+
+# Some sleep we assume the datetime widget takes to show or hide itself properly
+DATE_PICKER_DELAY = 1.0
+
 BASE_PATH = os.environ.get('BASE_PATH', '')
 URL = os.environ.get('URL', 'http://localhost:8522')
 
@@ -65,7 +69,7 @@ def wait_picker_to_show_up():
     time.sleep(1.0)
 
 
-def submit_date_picker_save():
+def submit_date_picker_safe():
     # # TODO: This tests uses explicit waits to make it run on a modern browsers. The waits could be replaced by calling picker JS API directly inside Selenium browser
     time.sleep(1.0)
     findid("deformsubmit").click()
@@ -640,7 +644,9 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_time_empty(self):
         findid('deformField1-date').click()
+        time.sleep(DATE_PICKER_DELAY)
         findcss(".picker__button--today").click()
+        time.sleep(DATE_PICKER_DELAY)
         findid("deformsubmit").click()
         self.assertTrue(findcss('.has-error'))
         self.assertEqual(findid('error-deformField1').text, 'Incomplete time')
@@ -648,8 +654,9 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_date_empty(self):
         findid('deformField1-time').click()
+        time.sleep(DATE_PICKER_DELAY)
         findxpath('//li[@data-pick="0"]').click()
-        submit_date_picket_safe()
+        submit_date_picker_safe()
         self.assertTrue(findcss('.has-error'))
         self.assertEqual(findid('error-deformField1').text, 'Incomplete date')
         self.assertEqual(findid('captured').text, 'None')
@@ -657,15 +664,19 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
     def test_submit_tooearly(self):
         import datetime
         findid('deformField1-time').click()
+        time.sleep(DATE_PICKER_DELAY)
         findxpath('//li[@data-pick="0"]').click()
+        time.sleep(DATE_PICKER_DELAY)
         findid('deformField1-date').click()
         def diff_month(d1, d2):
             return (d1.year - d2.year)*12 + d1.month - d2.month
         tooearly = datetime.date(2010, 1, 1)
         today = datetime.date.today()
         num_months = diff_month(today, tooearly)
+        time.sleep(DATE_PICKER_DELAY)
         [ findcss('.picker__nav--prev').click() for x in range(num_months) ]
         findcss(".picker__day").click()
+        time.sleep(DATE_PICKER_DELAY)
         findid("deformsubmit").click()
         self.assertTrue(findcss('.has-error'))
         self.assertTrue('is earlier than' in findid('error-deformField1').text)
@@ -673,11 +684,15 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_success(self):
         import datetime
-        now = datetime.datetime.utcnow()
+        now = datetime.datetime.now()
         findid('deformField1-time').click()
+        time.sleep(DATE_PICKER_DELAY)
         findxpath('//li[@data-pick="60"]').click()
+        time.sleep(DATE_PICKER_DELAY)
         findid('deformField1-date').click()
+        time.sleep(DATE_PICKER_DELAY)
         findcss(".picker__button--today").click()
+        time.sleep(DATE_PICKER_DELAY)
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertRaises(NoSuchElementException, findid, 'error-deformField1')
