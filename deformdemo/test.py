@@ -1431,6 +1431,7 @@ class SequenceOfRadioChoicesTests(Base, unittest.TestCase):
         self.assertEqual(eval(findid('captured').text),
                          {'peppers': ['habanero', 'jalapeno']})
 
+
 class SequenceOfDefaultedSelectsTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_defaulted_selects/")
     def test_render_default(self):
@@ -1450,17 +1451,20 @@ class SequenceOfDefaultedSelectsTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_two_filled(self):
+        import ipdb; ipdb.set_trace()
         findid("deformField1-seqAdd").click()
         findid("deformField1-seqAdd").click()
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
             eval(findid('captured').text), # should be 2 values, both defaults
-            {'peppers': ['jalapeno', 'jalapeno']}
+            {'peppers': ['habanero', 'habanero']}
             )
+
 
 class SequenceOfDefaultedSelectsWithInitialItemTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_defaulted_selects_with_initial_item/")
+
     def test_submit_none_added(self):
         findid("deformsubmit").click()
         self.assertEqual(
@@ -1470,7 +1474,7 @@ class SequenceOfDefaultedSelectsWithInitialItemTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
             eval(findid('captured').text), # should be 1 value (min_len 1)
-            {'peppers': ['jalapeno']}
+            {'peppers': ['habanero']}
             )
 
     def test_submit_one_added(self):
@@ -1479,7 +1483,7 @@ class SequenceOfDefaultedSelectsWithInitialItemTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
             eval(findid('captured').text), # should be 2 values, both defaults
-            {'peppers': ['jalapeno', 'jalapeno']}
+            {'peppers': ['habanero', 'habanero']}
             )
 
 class SequenceOfFileUploadsTests(Base, unittest.TestCase):
@@ -1743,8 +1747,9 @@ class SequenceOfDateInputs(Base, unittest.TestCase):
     def test_submit_one_filled(self):
         findid("deformField1-seqAdd").click()
         findcss('input[type="text"]').click()
+        wait_picker_to_show_up()
         findcss(".picker__button--today").click()
-        findid("deformsubmit").click()
+        submit_date_picker_safe()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertTrue(
             findid('captured').text.startswith("{'dates': [datetime.date")
