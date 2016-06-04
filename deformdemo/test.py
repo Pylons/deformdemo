@@ -23,20 +23,26 @@ DATE_PICKER_DELAY = 1.0
 BASE_PATH = os.environ.get('BASE_PATH', '')
 URL = os.environ.get('URL', 'http://localhost:8522')
 
+
 def findid(elid):
     return browser.find_element_by_id(elid)
+
 
 def findcss(selector):
     return browser.find_element_by_css_selector(selector)
 
+
 def findcsses(selector):
     return browser.find_elements_by_css_selector(selector)
+
 
 def findxpath(selector):
     return browser.find_element_by_xpath(selector)
 
+
 def findxpaths(selector):
     return browser.find_elements_by_xpath(selector)
+
 
 def wait_for_ajax(source):
     def compare_source(driver):
@@ -93,17 +99,21 @@ def setUpModule():
         browser = Firefox()
         return browser
 
+
 def tearDownModule():
     browser.quit()
+
 
 def _getFile(name='test.py'):
     path = os.path.join(os.path.abspath(os.path.dirname(__file__)), name)
     filename = os.path.split(path)[-1]
     return path, filename
 
+
 # appease nosetests by giving a default argument, it thinks this is a test
 def test_url(url=''):
     return URL + BASE_PATH + url
+
 
 class Base(object):
     urepl = re.compile('\\bu(\'.*?\'|".*?")')
@@ -131,8 +141,11 @@ class Base(object):
         br = self.setrepl.sub(r'{\1}', br)
         self.assertEqual(ar.replace(' ', ''), br.replace(' ', ''))
 
+
 class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
+
     url = test_url("/checkboxchoice/")
+
     def test_render_default(self):
         self.assertTrue('Pepper' in browser.page_source)
         self.assertFalse(findid('deformField1-0').is_selected())
@@ -590,7 +603,9 @@ class DateInputWidgetTests(Base, unittest.TestCase):
 
 
 class TimeInputWidgetTests(Base, unittest.TestCase):
+
     url = test_url('/timeinput/')
+
     def test_render_default(self):
         self.assertTrue('Time' in browser.page_source)
         self.assertEqual(findcss('.required').text, 'Time')
@@ -608,16 +623,18 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_tooearly(self):
         findid('deformField1').click()
+        wait_picker_to_show_up()
         findxpath('//li[@data-pick="0"]').click()
-        findid("deformsubmit").click()
+        submit_date_picker_safe()
         self.assertTrue(findcss('.has-error'))
         self.assertTrue('is earlier than' in findid('error-deformField1').text)
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
         findid('deformField1').click()
+        wait_picker_to_show_up()
         findxpath('//li[@data-pick="900"]').click()
-        findid("deformsubmit").click()
+        submit_date_picker_safe()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertRaises(NoSuchElementException, findid, 'error-deformField1')
         expected = "{'time': datetime.time(15, 0)}"
@@ -1451,7 +1468,6 @@ class SequenceOfDefaultedSelectsTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_two_filled(self):
-        import ipdb; ipdb.set_trace()
         findid("deformField1-seqAdd").click()
         findid("deformField1-seqAdd").click()
         findid("deformsubmit").click()
@@ -1486,8 +1502,10 @@ class SequenceOfDefaultedSelectsWithInitialItemTests(Base, unittest.TestCase):
             {'peppers': ['habanero', 'habanero']}
             )
 
+
 class SequenceOfFileUploadsTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_fileuploads/")
+
     def test_render_default(self):
         self.assertEqual(findid('deformField1-addtext').text, 'Add Upload')
         self.assertEqual(findid('captured').text, 'None')
@@ -1543,7 +1561,7 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
         self.assertTrue(uid in findid('captured').text)
 
         # resubmit after entering a new filename should change the file
-        path2, filename2 = _getFile('selenium.py')
+        path2, filename2 = _getFile('validation.py')
         findcss('input[type=file]').send_keys(path2)
         findid("deformsubmit").click()
         self.assertEqual(findcss('.upload-filename').get_attribute('value'),
@@ -1608,8 +1626,11 @@ class SequenceOfFileUploadsWithInitialItemTests(Base, unittest.TestCase):
         uid = uid_elems[1].get_attribute('value')
         self.assertTrue(uid in findid('captured').text)
 
+
 class SequenceOfMappingsTests(Base, unittest.TestCase):
+
     url = test_url("/sequence_of_mappings/")
+
     def test_render_default(self):
         self.assertEqual(findid('deformField1-addtext').text, 'Add Person')
         self.assertEqual(findid('captured').text, 'None')
@@ -1631,8 +1652,9 @@ class SequenceOfMappingsTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_complex_interaction(self):
+
         findid("deformField1-seqAdd").click()
-        findid('deformField1').send_keys('abcdef123')
+
         findxpath('//input[@name="name"]').send_keys('name')
         findxpath('//input[@name="age"]').send_keys('23')
         findid("deformsubmit").click()
