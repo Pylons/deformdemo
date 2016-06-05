@@ -16,6 +16,8 @@ from selenium.webdriver.support import expected_conditions as EC
 
 browser = None
 
+#: Where we write stuff when Selenium doesn't work
+BROKEN_SELENIUM_LOG_FILE = "/tmp/selenium.log"
 
 # Some sleep we assume the datetime widget takes to show or hide itself properly
 DATE_PICKER_DELAY = 1.0
@@ -94,9 +96,22 @@ def setUpModule():
         from selenium.webdriver import Chrome
         browser = Chrome()
         return browser
+    elif driver_name == "phantomjs":
+        # TODO: Test fails on Phantomjs
+        # They just hang in some point
+        from selenium.webdriver import PhantomJS
+        browser = PhantomJS()
     else:
         from selenium.webdriver import Firefox
-        browser = Firefox()
+        from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+        bin = FirefoxBinary(log_file=open(BROKEN_SELENIUM_LOG_FILE, "wt"))
+        try:
+            browser = Firefox(firefox_binary=bin)
+        except WebDriverException:
+            if os.path.exists(BROKEN_SELENIUM_LOG_FILE):
+                print "Selenium says no"
+                print open(BROKEN_SELENIUM_LOG_FILE, "rt").read()
+            raise
         return browser
 
 
