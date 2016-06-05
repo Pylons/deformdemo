@@ -301,6 +301,42 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt',
+                 name='autocomplete_extended_config')
+    @demonstrate('Autocomplete Input Widget (with extended configuration)')
+    def autocomplete_extended_config(self):
+        # Ripped-off from http://twitter.github.io/typeahead.js/examples/
+        prefetch_url = self.request.static_url(
+            'deformdemo:static/data/films_post_1960.json')
+        template = u'''
+        function (datum) {
+            var value = datum.value, year = datum.year;
+            return $("<div>").append(
+                $("<p><span class='glyphicon glyphicon-film'></span> </p>")
+                    .append($("<strong>").text(value))
+                    .append($("<span>").text(" — " + year))
+            ).html();
+        }'''
+        widget = deform.widget.AutocompleteInputWidget(
+            datasets={
+                'name': 'best-picture-winners',
+                'prefetch': prefetch_url,
+                'template': deform.widget.literal_js(template),
+                }
+            )
+
+        class Schema(colander.Schema):
+            best_picture = colander.SchemaNode(
+                colander.String(),
+                validator=colander.Length(max=100),
+                widget=widget,
+                description='Select a movie')
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form)
+
     @view_config(renderer='json', name='autocomplete_input_values')
     def autocomplete_input_values(self):
         text = self.request.params.get('term', '')
