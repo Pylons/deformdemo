@@ -1505,7 +1505,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='select_with_multiple')
-    @demonstrate('Select Widget (with mulitple)')
+    @demonstrate('Select Widget (with multiple)')
     def select_with_multiple(self):
 
         choices = (('habanero', 'Habanero'),
@@ -1702,7 +1702,7 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(renderer='templates/form.pt', name='select2_with_multiple')
-    @demonstrate('Select2 Widget (with mulitple)')
+    @demonstrate('Select2 Widget (with multiple)')
     def select2_with_multiple(self):
 
         choices = (('habanero', 'Habanero'),
