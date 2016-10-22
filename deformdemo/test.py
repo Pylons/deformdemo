@@ -376,10 +376,14 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
     def test_render_default(self):
         self.assertEqual(findcss('.required').text, 'Social Security Number')
         self.assertEqual(findid('captured').text, 'None')
+
+        findid('deformField1').send_keys('0')
+
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
-            '###-##-####'
+            '0##-##-####'
             )
+
         self.assertEqual(
             findid('deformField1-confirm').get_attribute('value'),
             ''
