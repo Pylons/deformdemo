@@ -2351,6 +2351,7 @@ class DelayedRichTextWidgetTests(Base, unittest.TestCase):
         findcss('.tinymce-preload').click()
         time.sleep(0.5)
         browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
+        findid('tinymce').click()
         findid('tinymce').send_keys('hello')
         browser.switch_to_default_content()
         findid('deformsubmit').click()
