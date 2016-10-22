@@ -1856,6 +1856,7 @@ class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
     def test_submit_one_filled(self):
         findid("deformField1-seqAdd").click()
         browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
+        findid('tinymce').click()
         findid('tinymce').send_keys('yo')
         browser.switch_to_default_content()
         findid("deformsubmit").click()
@@ -2228,29 +2229,30 @@ class TextInputWithCssClassWidgetTests(Base, unittest.TestCase):
 class MoneyInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/money_input/")
     def test_render_default(self):
-        findid('deformField1').send_keys('')
+        findid('deformField1').send_keys('12')
         self.assertTrue('Greenbacks' in browser.page_source)
         self.assertEqual(findid('deformField1').get_attribute('name'),
                          'greenbacks')
         self.assertEqual(findid('deformField1').get_attribute('type'),
                          'text')
         self.assertEqual(findid('deformField1').get_attribute('value'),
-                         '0.00')
+                         '0.12')
         self.assertEqual(findcss('.required').text, 'Greenbacks')
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
-        findid('deformField1').send_keys('')
+        findid('deformField1').send_keys('12')
         findid('deformsubmit').click()
         self.assertEqual(findid('captured').text,
-                         "{'greenbacks': Decimal('0.00')}")
+                         "{'greenbacks': Decimal('0.12')}")
 
     def test_submit_filled(self):
+        findid('deformField1').send_keys('1')
         findid('deformField1').send_keys(5 * Keys.ARROW_LEFT)
         findid('deformField1').send_keys('10')
         findid('deformsubmit').click()
         self.assertEqual(findid('captured').text,
-                         "{'greenbacks': Decimal('100.00')}")
+                         "{'greenbacks': Decimal('100.01')}")
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
 class AutocompleteInputWidgetTests(Base, unittest.TestCase):
@@ -2380,6 +2382,7 @@ class RichTextWidgetTests(Base, unittest.TestCase):
 
     def test_submit_filled(self):
         browser.switch_to_frame(browser.find_element_by_tag_name('iframe'))
+        findid('tinymce').click()
         findid('tinymce').send_keys('hello')
         browser.switch_to_default_content()
         findid('deformsubmit').click()
@@ -2702,24 +2705,24 @@ class RedirectingAjaxFormTests(AjaxFormTests):
 class TextInputMaskTests(Base, unittest.TestCase):
     url = test_url("/text_input_masks/")
     def test_render_default(self):
-        findid('deformField1').send_keys('')
+        findid('deformField1').send_keys('0')
         self.assertEqual(findid('deformField1').get_attribute('value'),
-                         '___-__-____')
+                         '0__-__-____')
         self.assertEqual(findid('deformField1').get_attribute('name'), 'ssn')
         self.assertEqual(findid('deformField2').get_attribute('value'), '')
         self.assertEqual(findid('deformField2').get_attribute('name'), 'date')
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_type_bad_input(self):
-        findid('deformField1').send_keys('')
+        findid('deformField1').send_keys('0')
         findid('deformField1').send_keys('a')
         self.assertEqual(findid('deformField1').get_attribute('value'),
-                         '___-__-____')
-        findid('deformField2').send_keys('')
+                         '0__-__-____')
+        findid('deformField2').send_keys('0')
         findid('deformField2').send_keys('a')
 
         self.assertEqual(findid('deformField2').get_attribute('value'),
-                         '__/__/____')
+                         '0_/__/____')
 
     def test_submit_success(self):
         findid('deformField1').send_keys('')
