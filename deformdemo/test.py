@@ -2705,6 +2705,7 @@ class RedirectingAjaxFormTests(AjaxFormTests):
 class TextInputMaskTests(Base, unittest.TestCase):
     url = test_url("/text_input_masks/")
     def test_render_default(self):
+        findid('deformField1').click()
         findid('deformField1').send_keys('0')
         self.assertEqual(findid('deformField1').get_attribute('value'),
                          '0__-__-____')
@@ -2714,12 +2715,11 @@ class TextInputMaskTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_type_bad_input(self):
-        findid('deformField1').send_keys('0')
-        findid('deformField1').send_keys('a')
+        findid('deformField1').send_keys('0a')
         self.assertEqual(findid('deformField1').get_attribute('value'),
                          '0__-__-____')
-        findid('deformField2').send_keys('0')
-        findid('deformField2').send_keys('a')
+        findid('deformField2').click()
+        findid('deformField2').send_keys('0a')
 
         self.assertEqual(findid('deformField2').get_attribute('value'),
                          '0_/__/____')
