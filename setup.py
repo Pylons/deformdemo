@@ -65,6 +65,7 @@ setupkw = dict(
     entry_points = """\
     [paste.app_factory]
     demo = deformdemo:main
+    mini= deformdemo.mini:main
     """,
     message_extractors = { '.': [
         ('**.py',   'lingua_python', None ),
