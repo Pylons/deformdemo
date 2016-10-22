@@ -104,7 +104,10 @@ def setUpModule():
     else:
         from selenium.webdriver import Firefox
         from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
-        bin = FirefoxBinary(log_file=open(BROKEN_SELENIUM_LOG_FILE, "wt"))
+
+        firefox_path= os.environ.get("FIREFOX_PATH")
+
+        bin = FirefoxBinary(firefox_path=firefox_path, log_file=open(BROKEN_SELENIUM_LOG_FILE, "wt"))
         try:
             browser = Firefox(firefox_binary=bin)
         except WebDriverException:
