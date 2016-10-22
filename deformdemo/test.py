@@ -377,6 +377,8 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
         self.assertEqual(findcss('.required').text, 'Social Security Number')
         self.assertEqual(findid('captured').text, 'None')
 
+        # Ensure the masked input has a focus and ### mask
+        # has kicked in
         findid('deformField1').send_keys('0')
 
         self.assertEqual(
