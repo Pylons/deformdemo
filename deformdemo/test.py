@@ -105,7 +105,7 @@ def setUpModule():
         from selenium.webdriver import Firefox
         from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 
-        firefox_path= os.environ.get("FIREFOX_PATH")
+        firefox_path = os.environ.get("FIREFOX_PATH")
 
         bin = FirefoxBinary(firefox_path=firefox_path, log_file=open(BROKEN_SELENIUM_LOG_FILE, "wt"))
         try:
@@ -192,7 +192,7 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         self.assertSimilarRepr(
             captured,
             u"{'pepper': {'habanero'}}",
-            )
+        )
 
     def test_submit_three_checked(self):
         findid("deformField1-0").click()
@@ -207,10 +207,12 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         self.assertSimilarRepr(
             captured,
             u"{'pepper': {'chipotle', 'habanero', 'jalapeno'}}",
-            )
+        )
+
 
 class CheckboxChoiceWidgetInlineTests(Base, unittest.TestCase):
     url = test_url("/checkboxchoice_inline/")
+
     def test_render_default(self):
         self.assertTrue('Pepper' in browser.page_source)
         self.assertFalse(findid('deformField1-0').is_selected())
@@ -239,7 +241,7 @@ class CheckboxChoiceWidgetInlineTests(Base, unittest.TestCase):
         self.assertSimilarRepr(
             captured,
             u"{'pepper': {'habanero'}}",
-            )
+        )
 
     def test_submit_three_checked(self):
         findid("deformField1-0").click()
@@ -254,24 +256,28 @@ class CheckboxChoiceWidgetInlineTests(Base, unittest.TestCase):
         self.assertSimilarRepr(
             captured,
             u"{'pepper': {'chipotle', 'habanero', 'jalapeno'}}",
-            )
+        )
+
 
 class CheckboxChoiceReadonlyTests(Base, unittest.TestCase):
     url = test_url("/checkboxchoice_readonly/")
+
     def test_render_default(self):
         self.assertTrue('Pepper' in browser.page_source)
         self.assertEqual(
             findid('deformField1-1').text,
             'Jalapeno'
-            )
+        )
         self.assertEqual(
             findid('deformField1-2').text,
             'Chipotle'
-            )
+        )
         self.assertEqual(findid('captured').text, 'None')
+
 
 class CheckboxWidgetTests(Base, unittest.TestCase):
     url = test_url("/checkbox/")
+
     def test_render_default(self):
         self.assertTrue('I Want It!' in browser.page_source)
         self.assertFalse(findid('deformField1').is_selected())
@@ -289,18 +295,22 @@ class CheckboxWidgetTests(Base, unittest.TestCase):
         self.assertTrue(findid('deformField1').is_selected())
         self.assertEqual(findid('captured').text, "{'want': True}")
 
+
 class CheckboxReadonlyTests(Base, unittest.TestCase):
     url = test_url("/checkbox_readonly/")
+
     def test_render_default(self):
         self.assertTrue('I Want It!' in browser.page_source)
         self.assertEqual(
             findid('deformField1').text,
             'True'
-            )
+        )
         self.assertEqual(findid('captured').text, 'None')
+
 
 class CheckedInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/checkedinput/")
+
     def test_render_default(self):
         self.assertTrue('Email Address' in browser.page_source)
         self.assertEqual(findcss('.required').text, 'Email Address')
@@ -332,7 +342,7 @@ class CheckedInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1-confirm').get_attribute('value'),
             'this'
-            )
+        )
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_mismatch(self):
@@ -343,15 +353,15 @@ class CheckedInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('error-deformField1').text,
             'Fields did not match'
-            )
+        )
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             'this@example.com'
-            )
+        )
         self.assertEqual(
             findid('deformField1-confirm').get_attribute('value'),
             'that@example.com'
-            )
+        )
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
@@ -365,14 +375,16 @@ class CheckedInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1-confirm').get_attribute('value'),
             'user@example.com'
-            )
+        )
         self.assertEqual(
             findid('captured').text,
             "{'email': u'user@example.com'}"
-            )
+        )
+
 
 class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
     url = test_url("/checkedinput_withmask/")
+
     def test_render_default(self):
         self.assertEqual(findcss('.required').text, 'Social Security Number')
         self.assertEqual(findid('captured').text, 'None')
@@ -384,12 +396,12 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             '0##-##-####'
-            )
+        )
 
         self.assertEqual(
             findid('deformField1-confirm').get_attribute('value'),
             ''
-            )
+        )
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_type_bad_input(self):
@@ -398,11 +410,11 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
         self.assertTrue(
             findid('deformField1').get_attribute('value') in
             ('', '###-##-####')
-            )
+        )
         self.assertTrue(
             findid('deformField1-confirm').get_attribute('value') in
             ('', '###-##-####')
-            )
+        )
 
     def test_submit_success(self):
         findid('deformField1').send_keys('140118866')
@@ -415,6 +427,7 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
 
 class CheckedInputReadonlyTests(Base, unittest.TestCase):
     url = test_url("/checkedinput_readonly/")
+
     def test_render_default(self):
         self.assertTrue('Email Address' in browser.page_source)
         self.assertEqual(findcss('.required').text, 'Email Address')
@@ -422,10 +435,12 @@ class CheckedInputReadonlyTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1').text,
             'ww@graymatter.com'
-            )
+        )
+
 
 class CheckedPasswordWidgetTests(Base, unittest.TestCase):
     url = test_url("/checkedpassword/")
+
     def test_submit_tooshort(self):
         findid('deformField1').send_keys('this')
         findid('deformField1-confirm').send_keys('this')
@@ -434,15 +449,15 @@ class CheckedPasswordWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('error-deformField1').text,
             'Shorter than minimum length 5'
-            )
+        )
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             ''
-            )
+        )
         self.assertEqual(
             findid('deformField1-confirm').get_attribute('value'),
             ''
-            )
+        )
 
     def test_submit_mismatch(self):
         findid('deformField1').send_keys('this123')
@@ -451,15 +466,15 @@ class CheckedPasswordWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('error-deformField1').text,
             'Password did not match confirm'
-            )
+        )
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             ''
-            )
+        )
         self.assertEqual(
             findid('deformField1-confirm').get_attribute('value'),
             ''
-            )
+        )
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
@@ -470,15 +485,17 @@ class CheckedPasswordWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             ''
-            )
+        )
         self.assertEqual(
             findid('deformField1-confirm').get_attribute('value'),
             ''
-            )
+        )
         self.assertEqual(findid('captured').text, "{'password': u'this123'}")
+
 
 class CheckedPasswordRedisplayWidgetTests(Base, unittest.TestCase):
     url = test_url("/checkedpassword_redisplay/")
+
     def test_render_default(self):
         self.assertTrue('Password' in browser.page_source)
         self.assertEqual(findcss('.required').text, 'Password')
@@ -487,16 +504,16 @@ class CheckedPasswordRedisplayWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1-confirm').get_attribute('value'),
             ''
-            )
+        )
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
             findid('deformField1').get_attribute('type'),
             'password'
-            )
+        )
         self.assertEqual(
             findid('deformField1-confirm').get_attribute('type'),
             'password'
-            )
+        )
 
     def test_submit_empty(self):
         findid("deformsubmit").click()
@@ -506,7 +523,7 @@ class CheckedPasswordRedisplayWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1-confirm').get_attribute('value'),
             ''
-            )
+        )
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_tooshort(self):
@@ -517,15 +534,15 @@ class CheckedPasswordRedisplayWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('error-deformField1').text,
             'Shorter than minimum length 5'
-            )
+        )
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             'this'
-            )
+        )
         self.assertEqual(
             findid('deformField1-confirm').get_attribute('value'),
             'this'
-            )
+        )
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_mismatch(self):
@@ -535,15 +552,15 @@ class CheckedPasswordRedisplayWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('error-deformField1').text,
             'Password did not match confirm'
-            )
+        )
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             'this123'
-            )
+        )
         self.assertEqual(
             findid('deformField1-confirm').get_attribute('value'),
             'that123'
-            )
+        )
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
@@ -554,15 +571,17 @@ class CheckedPasswordRedisplayWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             'this123'
-            )
+        )
         self.assertEqual(
             findid('deformField1-confirm').get_attribute('value'),
             'this123'
-            )
+        )
         self.assertEqual(findid('captured').text, "{'password': u'this123'}")
+
 
 class CheckedPasswordReadonlyTests(Base, unittest.TestCase):
     url = test_url("/checkedpassword_readonly/")
+
     def test_render_default(self):
         self.assertTrue('Password' in browser.page_source)
         self.assertEqual(findcss('.required').text, 'Password')
@@ -570,10 +589,12 @@ class CheckedPasswordReadonlyTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1').text,
             'Password not displayed.'
-            )
+        )
+
 
 class DateInputWidgetTests(Base, unittest.TestCase):
     url = test_url('/dateinput/')
+
     def test_render_default(self):
         self.assertTrue('Date' in browser.page_source)
         self.assertEqual(findcss('.required').text, 'Date')
@@ -593,12 +614,14 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         import datetime
         findid('deformField1').click()
         wait_picker_to_show_up()
+
         def diff_month(d1, d2):
-            return (d1.year - d2.year)*12 + d1.month - d2.month
+            return (d1.year - d2.year) * 12 + d1.month - d2.month
+
         tooearly = datetime.date(2010, 1, 1)
         today = datetime.date.today()
         num_months = diff_month(today, tooearly)
-        [ findcss('.picker__nav--prev').click() for x in range(num_months) ]
+        [findcss('.picker__nav--prev').click() for x in range(num_months)]
         findcss(".picker__day").click()
         # TODO: This tests uses explicit waits to make it run on a modern browsers. The waits could be replaced by calling picker JS API directly inside Selenium browser
         time.sleep(1.0)
@@ -623,7 +646,7 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         self.assertSimilarRepr(
             findid('captured').text,
             expected
-            )
+        )
 
 
 class TimeInputWidgetTests(Base, unittest.TestCase):
@@ -670,6 +693,7 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
 
 class DateTimeInputWidgetTests(Base, unittest.TestCase):
     url = test_url('/datetimeinput/')
+
     def test_render_default(self):
         self.assertEqual(findcss('.required').text, 'Date Time')
         self.assertEqual(findid('captured').text, 'None')
@@ -711,13 +735,15 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         findxpath('//li[@data-pick="0"]').click()
         time.sleep(DATE_PICKER_DELAY)
         findid('deformField1-date').click()
+
         def diff_month(d1, d2):
-            return (d1.year - d2.year)*12 + d1.month - d2.month
+            return (d1.year - d2.year) * 12 + d1.month - d2.month
+
         tooearly = datetime.date(2010, 1, 1)
         today = datetime.date.today()
         num_months = diff_month(today, tooearly)
         time.sleep(DATE_PICKER_DELAY)
-        [ findcss('.picker__nav--prev').click() for x in range(num_months) ]
+        [findcss('.picker__nav--prev').click() for x in range(num_months)]
         findcss(".picker__day").click()
         time.sleep(DATE_PICKER_DELAY)
         findid("deformsubmit").click()
@@ -741,7 +767,7 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findid, 'error-deformField1')
         expected = '%d, %d, %d, %d, %d' % (
             now.year, now.month, now.day, 1, 0
-            )
+        )
         expected = "{'date_time': datetime.datetime(%s" % expected
         captured = findid('captured').text
         if captured.startswith('u'):
@@ -749,10 +775,12 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         self.assertTrue(
             captured.startswith(expected),
             (captured, expected)
-            )
+        )
+
 
 class DateTimeInputReadonlyTests(Base, unittest.TestCase):
     url = test_url('/datetimeinput_readonly/')
+
     def test_render_default(self):
         self.assertEqual(findcss('.required').text, 'Date Time')
         self.assertEqual(findid('captured').text, 'None')
@@ -761,12 +789,13 @@ class DateTimeInputReadonlyTests(Base, unittest.TestCase):
 
 class DatePartsWidgetTests(Base, unittest.TestCase):
     url = test_url('/dateparts/')
+
     def test_render_default(self):
         self.assertTrue('Date' in browser.page_source)
         self.assertEqual(findcss('.required').text, 'Date')
         self.assertEqual(findid('captured').text, 'None')
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
-        self.assertEqual(findid('deformField1-month').get_attribute('value'),'')
+        self.assertEqual(findid('deformField1-month').get_attribute('value'), '')
         self.assertEqual(findid('deformField1-day').get_attribute('value'), '')
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
@@ -775,7 +804,7 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('error-deformField1').text, 'Required')
         self.assertEqual(findid('captured').text, 'None')
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
-        self.assertEqual(findid('deformField1-month').get_attribute('value'),'')
+        self.assertEqual(findid('deformField1-month').get_attribute('value'), '')
         self.assertEqual(findid('deformField1-day').get_attribute('value'), '')
         self.assertTrue(findcss('.has-error'))
 
@@ -785,7 +814,7 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('error-deformField1').text, 'Incomplete date')
         self.assertEqual(findid('captured').text, 'None')
         self.assertEqual(findid('deformField1').get_attribute('value'), '2010')
-        self.assertEqual(findid('deformField1-month').get_attribute('value'),'')
+        self.assertEqual(findid('deformField1-month').get_attribute('value'), '')
         self.assertEqual(findid('deformField1-day').get_attribute('value'), '')
         self.assertTrue(findcss('.has-error'))
 
@@ -800,7 +829,7 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1-month').get_attribute('value'),
             '1'
-            )
+        )
         self.assertEqual(findid('deformField1-day').get_attribute('value'), '')
 
     def test_submit_tooearly(self):
@@ -816,11 +845,11 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1-month').get_attribute('value'),
             '1'
-            )
+        )
         self.assertEqual(
             findid('deformField1-day').get_attribute('value'),
             '1'
-            )
+        )
 
     def test_submit_success(self):
         findid('deformField1').send_keys('2010')
@@ -833,18 +862,20 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             '2010'
-            )
+        )
         self.assertEqual(
             findid('deformField1-month').get_attribute('value'),
             '01'
-            )
+        )
         self.assertEqual(
             findid('deformField1-day').get_attribute('value'),
             '01'
-            )
+        )
+
 
 class DatePartsReadonlyTests(Base, unittest.TestCase):
     url = test_url('/dateparts_readonly/')
+
     def test_render_default(self):
         self.assertTrue('Date' in browser.page_source)
         self.assertEqual(findcss('.required').text, 'Date')
@@ -852,50 +883,52 @@ class DatePartsReadonlyTests(Base, unittest.TestCase):
         self.assertEqual(findid('deformField1').text, '2010/05/05')
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
+
 class EditFormTests(Base, unittest.TestCase):
     url = test_url("/edit/")
+
     def test_render_default(self):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             '42'
-            )
+        )
         self.assertEqual(
             findid('deformField1').get_attribute('name'),
             'number'
-            )
+        )
         self.assertEqual(
             findid('deformField3').get_attribute('value'),
             ''
-            )
+        )
         self.assertEqual(
             findid('deformField3').get_attribute('name'),
             'name'
-            )
+        )
         self.assertEqual(
             findid('deformField4').get_attribute('value'),
             '2010'
-            )
+        )
         self.assertEqual(
             findid('deformField4').get_attribute('name'),
             'year'
-            )
+        )
         self.assertEqual(
             findid('deformField4-month').get_attribute('value'),
             '04'
-            )
+        )
         self.assertEqual(
             findid('deformField4-month').get_attribute('name'),
             'month'
-            )
+        )
         self.assertEqual(
             findid('deformField4-day').get_attribute('value'),
             '09'
-            )
+        )
         self.assertEqual(
             findid('deformField4-day').get_attribute('name'),
             'day'
-            )
+        )
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_empty(self):
@@ -911,32 +944,34 @@ class EditFormTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             '42'
-            )
+        )
         self.assertEqual(findid('deformField3').get_attribute('value'), 'name')
         self.assertEqual(findid('deformField4').get_attribute('value'), '2010')
         self.assertEqual(
             findid('deformField4-month').get_attribute('value'),
             '04'
-            )
+        )
         self.assertEqual(
             findid('deformField4-day').get_attribute('value'),
             '09'
-            )
+        )
         self.assertSimilarRepr(
             findid('captured').text,
             (u"{'mapping': {'date': datetime.date(2010, 4, 9), "
              "'name': u'name'}, 'number': 42}")
-            )
+        )
+
 
 class MappingWidgetTests(Base, unittest.TestCase):
     url = test_url("/mapping/")
+
     def test_render_default(self):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('captured').text, 'None')
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
         self.assertEqual(findid('deformField3').get_attribute('value'), '')
         self.assertEqual(findid('deformField4').get_attribute('value'), '')
-        self.assertEqual(findid('deformField4-month').get_attribute('value'),'')
+        self.assertEqual(findid('deformField4-month').get_attribute('value'), '')
         self.assertEqual(findid('deformField4-day').get_attribute('value'), '')
 
     def test_submit_empty(self):
@@ -954,7 +989,7 @@ class MappingWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('error-deformField1').text,
             '"notanumber" is not a number'
-            )
+        )
         self.assertEqual(findid('error-deformField3').text, 'Required')
         self.assertEqual(findid('error-deformField4').text, 'Required')
         self.assertEqual(findid('captured').text, 'None')
@@ -974,11 +1009,11 @@ class MappingWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField4-month').get_attribute('value'),
             'mo'
-            )
+        )
         self.assertEqual(
             findid('deformField4-day').get_attribute('value'),
             'da'
-            )
+        )
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_success(self):
@@ -991,41 +1026,43 @@ class MappingWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             '1'
-            )
+        )
         self.assertEqual(
             findid('deformField3').get_attribute('value'),
             'name'
-            )
+        )
         self.assertEqual(
             findid('deformField4').get_attribute('value'),
             '2010'
-            )
+        )
         self.assertEqual(
             findid('deformField4-month').get_attribute('value'),
             '01'
-            )
+        )
         self.assertEqual(
             findid('deformField4-day').get_attribute('value'),
             '01'
-            )
+        )
         self.assertSimilarRepr(
             findid('captured').text,
             (u"{'mapping': {'date': datetime.date(2010, 1, 1), "
              "'name': u'name'}, 'number': 1}")
-            )
+        )
+
 
 class FieldDefaultTests(Base, unittest.TestCase):
     url = test_url("/fielddefaults/")
+
     def test_render_default(self):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             'Grandaddy'
-            )
+        )
         self.assertEqual(
             findid('deformField2').get_attribute('value'),
             'Just Like the Fambly Cat'
-            )
+        )
         self.assertEqual(findid('deformField3').get_attribute('value'), '')
         self.assertEqual(findid('captured').text, 'None')
 
@@ -1035,11 +1072,11 @@ class FieldDefaultTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             'Grandaddy'
-            )
+        )
         self.assertEqual(
             findid('deformField2').get_attribute('value'),
             'Just Like the Fambly Cat'
-            )
+        )
         self.assertEqual(findid('deformField3').get_attribute('value'), '')
         self.assertEqual(findid('error-deformField3').text, 'Required')
 
@@ -1059,8 +1096,10 @@ class FieldDefaultTests(Base, unittest.TestCase):
             findid('captured').text,
             u"{'album': u'def', 'artist': u'abc', 'song': u'ghi'}")
 
+
 class NonRequiredFieldTests(Base, unittest.TestCase):
     url = test_url("/nonrequiredfields/")
+
     def test_render_default(self):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
@@ -1096,8 +1135,10 @@ class NonRequiredFieldTests(Base, unittest.TestCase):
             findid('captured').text,
             u"{'notrequired': u'def', 'required': u'abc'}")
 
+
 class HiddenFieldWidgetTests(Base, unittest.TestCase):
     url = test_url("/hidden_field/")
+
     def test_render_default(self):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('deformField1').get_attribute('value'), 'true')
@@ -1109,8 +1150,10 @@ class HiddenFieldWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('deformField1').get_attribute('value'), 'true')
         self.assertEqual(findid('captured').text, "{'sneaky': True}")
 
+
 class HiddenmissingTests(Base, unittest.TestCase):
     url = test_url("/hiddenmissing/")
+
     def test_render_default(self):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
@@ -1125,6 +1168,7 @@ class HiddenmissingTests(Base, unittest.TestCase):
         self.assertSimilarRepr(
             findid('captured').text,
             "{'number': <colander.null>, 'title': u'yup'}")
+
 
 class FileUploadTests(Base, unittest.TestCase):
     url = test_url("/file/")
@@ -1176,6 +1220,7 @@ class FileUploadTests(Base, unittest.TestCase):
         self.assertTrue('filename' in findid('captured').text)
         self.assertTrue(uid in findid('captured').text)
 
+
 class FileUploadReadonlyTests(Base, unittest.TestCase):
     url = test_url("/file_readonly/")
 
@@ -1186,7 +1231,8 @@ class FileUploadReadonlyTests(Base, unittest.TestCase):
 
 
 class InterFieldValidationTests(Base, unittest.TestCase):
-    url=  test_url("/interfield/")
+    url = test_url("/interfield/")
+
     def test_render_default(self):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
@@ -1221,7 +1267,7 @@ class InterFieldValidationTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('error-deformField2').text,
             'Must start with name abc'
-            )
+        )
         self.assertEqual(findid('deformField1').get_attribute('value'), 'abc')
         self.assertEqual(findid('deformField2').get_attribute('value'), 'def')
         self.assertEqual(findid('captured').text, 'None')
@@ -1237,9 +1283,10 @@ class InterFieldValidationTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField2').get_attribute('value'),
             'abcdef'
-            )
+        )
         self.assertEqual(eval(findid('captured').text),
                          {'name': 'abc', 'title': 'abcdef'})
+
 
 class InternationalizationTests(Base, unittest.TestCase):
     url = test_url("/i18n/")
@@ -1273,7 +1320,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         self.assertEqual(
             findcss('.alert-danger').text,
             'There was a problem with your submission\nErrors have been highlighted below'
-            )
+        )
         self.assertEqual(findid('error-deformField1').text, 'Required')
         self.assertEqual(findcss('label').text, 'A number between 1 and 10')
         self.assertEqual(findid("deformsubmit").text, 'Submit')
@@ -1295,11 +1342,11 @@ class InternationalizationTests(Base, unittest.TestCase):
         self.assertEqual(
             findcss('.alert-danger').text,
             'There was a problem with your submission\nErrors have been highlighted below'
-            )
+        )
         self.assertEqual(
             findid('error-deformField1').text,
             '0 is less than minimum value 1'
-            )
+        )
         self.assertEqual(findcss('label').text, 'A number between 1 and 10')
         self.assertEqual(findid("deformsubmit").text, 'Submit')
 
@@ -1310,7 +1357,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         self.assertEqual(
             findcss('.alert-danger .error-msg-lbl').text,
             u'Данные которые вы предоставили содержат ошибку'
-            )
+        )
         self.assertEqual(findid('error-deformField1').text, u'0 меньше чем 1')
         self.assertEqual(findcss('label').text, u'Число между 1 и 10')
         self.assertEqual(findid("deformsubmit").text, u'отправить')
@@ -1318,6 +1365,7 @@ class InternationalizationTests(Base, unittest.TestCase):
 
 class PasswordWidgetTests(Base, unittest.TestCase):
     url = test_url("/password/")
+
     def test_render_submit_success(self):
         findid('deformField1').send_keys('abcdef123')
         findid("deformsubmit").click()
@@ -1325,14 +1373,16 @@ class PasswordWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             ''
-            )
+        )
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertSimilarRepr(
             findid('captured').text,
             "{'password': u'abcdef123'}")
 
+
 class PasswordWidgetRedisplayTests(Base, unittest.TestCase):
     url = test_url("/password_redisplay/")
+
     def test_render_default(self):
         self.assertTrue('Password' in browser.page_source)
         self.assertEqual(findid('captured').text, 'None')
@@ -1355,14 +1405,16 @@ class PasswordWidgetRedisplayTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1').get_attribute('value'),
             'abcdef123'
-            )
+        )
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertSimilarRepr(
             findid('captured').text,
             "{'password': u'abcdef123'}")
 
+
 class RadioChoiceWidgetTests(Base, unittest.TestCase):
     url = test_url("/radiochoice/")
+
     def test_render_default(self):
         self.assertTrue('Password' in browser.page_source)
         self.assertFalse(findid('deformField1-0').is_selected())
@@ -1388,9 +1440,11 @@ class RadioChoiceWidgetTests(Base, unittest.TestCase):
         self.assertSimilarRepr(
             findid('captured').text,
             "{'pepper': u'habanero'}")
+
 
 class RadioChoiceWidgetInlineTests(Base, unittest.TestCase):
     url = test_url("/radiochoice_inline/")
+
     def test_render_default(self):
         self.assertTrue('Password' in browser.page_source)
         self.assertFalse(findid('deformField1-0').is_selected())
@@ -1417,8 +1471,10 @@ class RadioChoiceWidgetInlineTests(Base, unittest.TestCase):
             findid('captured').text,
             "{'pepper': u'habanero'}")
 
+
 class RadioChoiceWidgetIntTests(RadioChoiceWidgetTests):
     url = test_url("/radiochoice_int/")
+
     def test_submit_one_checked(self):
         findid('deformField1-0').click()
         findid("deformsubmit").click()
@@ -1429,28 +1485,34 @@ class RadioChoiceWidgetIntTests(RadioChoiceWidgetTests):
             findid('captured').text,
             "{'pepper': 0}")
 
+
 class RadioChoiceReadonlyTests(Base, unittest.TestCase):
     url = test_url("/radiochoice_readonly/")
+
     def test_render_default(self):
         self.assertEqual(findid('deformField1-1').text, 'Jalapeno')
         self.assertEqual(findcss('.required').text, 'Pepper')
         self.assertEqual(findid('captured').text, 'None')
 
+
 class ReadOnlySequenceOfMappingTests(Base, unittest.TestCase):
     url = test_url("/readonly_sequence_of_mappings/")
+
     def test_render_default(self):
         self.assertEqual(findid('deformField6').text, 'name1')
         self.assertEqual(findid('deformField7').text, '23')
         self.assertEqual(findid('deformField9').text, 'name2')
         self.assertEqual(findid('deformField10').text, '25')
 
+
 class SequenceOfRadioChoicesTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_radiochoices/")
+
     def test_render_default(self):
         self.assertEqual(
             findid('deformField1-addtext').text,
             'Add Pepper Chooser'
-            )
+        )
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_none_added(self):
@@ -1458,7 +1520,7 @@ class SequenceOfRadioChoicesTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1-addtext').text,
             'Add Pepper Chooser'
-            )
+        )
         self.assertEqual(findid('captured').text, "{'peppers': []}")
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
@@ -1475,11 +1537,12 @@ class SequenceOfRadioChoicesTests(Base, unittest.TestCase):
 
 class SequenceOfDefaultedSelectsTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_defaulted_selects/")
+
     def test_render_default(self):
         self.assertEqual(
             findid('deformField1-addtext').text,
             'Add Pepper Chooser'
-            )
+        )
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_none_added(self):
@@ -1487,7 +1550,7 @@ class SequenceOfDefaultedSelectsTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1-addtext').text,
             'Add Pepper Chooser'
-            )
+        )
         self.assertEqual(findid('captured').text, "{'peppers': []}")
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
@@ -1497,9 +1560,9 @@ class SequenceOfDefaultedSelectsTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
-            eval(findid('captured').text), # should be 2 values, both defaults
+            eval(findid('captured').text),  # should be 2 values, both defaults
             {'peppers': ['habanero', 'habanero']}
-            )
+        )
 
 
 class SequenceOfDefaultedSelectsWithInitialItemTests(Base, unittest.TestCase):
@@ -1510,21 +1573,21 @@ class SequenceOfDefaultedSelectsWithInitialItemTests(Base, unittest.TestCase):
         self.assertEqual(
             findid('deformField1-addtext').text,
             'Add Pepper Chooser'
-            )
+        )
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
-            eval(findid('captured').text), # should be 1 value (min_len 1)
+            eval(findid('captured').text),  # should be 1 value (min_len 1)
             {'peppers': ['habanero']}
-            )
+        )
 
     def test_submit_one_added(self):
         findid("deformField1-seqAdd").click()
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
-            eval(findid('captured').text), # should be 2 values, both defaults
+            eval(findid('captured').text),  # should be 2 values, both defaults
             {'peppers': ['habanero', 'habanero']}
-            )
+        )
 
 
 class SequenceOfFileUploadsTests(Base, unittest.TestCase):
@@ -1614,8 +1677,10 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
         self.assertEqual(upload_filenames[0].get_attribute('value'), filename2)
         self.assertEqual(len(upload_filenames), 1)
 
+
 class SequenceOfFileUploadsWithInitialItemTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_fileuploads_with_initial_item/")
+
     def test_render_default(self):
         self.assertEqual(findid('deformField1-addtext').text, 'Add Upload')
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
@@ -1652,7 +1717,6 @@ class SequenceOfFileUploadsWithInitialItemTests(Base, unittest.TestCase):
 
 
 class SequenceOfMappingsTests(Base, unittest.TestCase):
-
     url = test_url("/sequence_of_mappings/")
 
     def test_render_default(self):
@@ -1676,7 +1740,6 @@ class SequenceOfMappingsTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_complex_interaction(self):
-
         findid("deformField1-seqAdd").click()
 
         findxpath('//input[@name="name"]').send_keys('name')
@@ -1693,18 +1756,23 @@ class SequenceOfMappingsTests(Base, unittest.TestCase):
         findxpaths('//input[@name="age"]')[0].send_keys('24')
         findxpaths('//input[@name="age"]')[1].send_keys('26')
         findid("deformsubmit").click()
-        self.assertEqual(eval(findid('captured').text),
+        self.assertEqual(
+            eval(findid('captured').text),
             {'people': [{'name': 'name-changed', 'age': 24},
-                        {'name': 'name2', 'age': 26}]})
+                        {'name': 'name2', 'age': 26}]},
+        )
 
-        findid("deformField5-close").click() # remove the first mapping
+        findid("deformField5-close").click()  # remove the first mapping
         findid("deformsubmit").click()
-        self.assertEqual(eval(findid('captured').text),
-            {'people': [{'name': 'name2', 'age': 26}]})
+        self.assertEqual(
+            eval(findid('captured').text),
+            {'people': [{'name': 'name2', 'age': 26}]},
+        )
 
 
 class SequenceOfMappingsWithInitialItemTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_mappings_with_initial_item/")
+
     def test_render_default(self):
         self.assertTrue(findcss('.deform-proto'))
         self.assertEqual(findid('deformField1-addtext').text, 'Add Person')
@@ -1727,8 +1795,10 @@ class SequenceOfMappingsWithInitialItemTests(Base, unittest.TestCase):
                          {'people': [{'name': 'name0', 'age': 23},
                                      {'name': 'name1', 'age': 25}]})
 
+
 class SequenceOfAutocompletes(Base, unittest.TestCase):
     url = test_url('/sequence_of_autocompletes/')
+
     def test_render_default(self):
         self.assertEqual(findid('captured').text, 'None')
         self.assertTrue('Texts' in browser.page_source)
@@ -1752,21 +1822,23 @@ class SequenceOfAutocompletes(Base, unittest.TestCase):
         self.assertEqual(
             findxpaths('//input[@name="text"]')[0].get_attribute('class'),
             'form-control  tt-query'
-            )
+        )
         findxpaths('//input[@name="text"]')[0].send_keys('bar')
 
         findid("deformField1-seqAdd").click()
         self.assertEqual(
             findxpaths('//input[@name="text"]')[1].get_attribute('class'),
             'form-control  tt-query'
-            )
+        )
         findxpaths('//input[@name="text"]')[1].send_keys('baz')
         findid("deformsubmit").click()
         self.assertEqual(eval(findid('captured').text),
                          {'texts': [u'bar', u'baz']})
 
+
 class SequenceOfDateInputs(Base, unittest.TestCase):
     url = test_url('/sequence_of_dateinputs/')
+
     def test_render_default(self):
         self.assertTrue('Dates' in browser.page_source)
         self.assertEqual(findid('deformField1-addtext').text, 'Add Date')
@@ -1778,7 +1850,7 @@ class SequenceOfDateInputs(Base, unittest.TestCase):
         self.assertSimilarRepr(
             findid('captured').text,
             "{'dates': []}"
-            )
+        )
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
     def test_submit_two_unfilled(self):
@@ -1799,10 +1871,12 @@ class SequenceOfDateInputs(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertTrue(
             findid('captured').text.startswith("{'dates': [datetime.date")
-            )
+        )
+
 
 class SequenceOfConstrainedLengthTests(Base, unittest.TestCase):
     url = test_url('/sequence_of_constrained_len/')
+
     def test_render_default(self):
         self.assertTrue('At Least 2' in browser.page_source)
         self.assertEqual(findid('deformField1-addtext').text, 'Add Name')
@@ -1831,10 +1905,12 @@ class SequenceOfConstrainedLengthTests(Base, unittest.TestCase):
         self.assertEqual(
             eval(findid('captured').text),
             {'names': [u'hello2', u'hello3', u'hello4', u'hello5']}
-            )
+        )
+
 
 class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_richtext/")
+
     def test_render_default(self):
         self.assertTrue('Texts' in browser.page_source)
         self.assertEqual(findid('deformField1-addtext').text, 'Add Text')
@@ -1863,16 +1939,18 @@ class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
         self.assertEqual(eval(findid('captured').text),
                          {'texts': [u'<p>yo</p>']})
 
+
 class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
     url = test_url("/sequence_of_masked_textinputs/")
+
     def test_render_default(self):
         self.assertTrue('Texts' in browser.page_source)
-        self.assertEqual(findid('deformField1-addtext').text,'Add Text')
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Text')
         self.assertEqual(findid('captured').text, 'None')
 
     def test_submit_none_added(self):
         findid('deformsubmit').click()
-        self.assertEqual(findid('deformField1-addtext').text,'Add Text')
+        self.assertEqual(findid('deformField1-addtext').text, 'Add Text')
         self.assertEqual(findid('captured').text, "{'texts': []}")
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
@@ -1895,15 +1973,16 @@ class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         captured = findid('captured').text
         self.assertSimilarRepr(
-            captured,  "{'texts': [u'140-11-8866']}"
-            )
+            captured, "{'texts': [u'140-11-8866']}"
+        )
+
 
 class SelectWidgetTests(Base, unittest.TestCase):
     url = test_url("/select/")
     submit_selected_captured = (
         "{'pepper': u'habanero'}",
         "{'pepper': 'habanero'}",
-        )
+    )
 
     def test_render_default(self):
         self.assertTrue('Pepper' in browser.page_source)
@@ -1922,7 +2001,6 @@ class SelectWidgetTests(Base, unittest.TestCase):
         self.assertTrue('Pepper' in browser.page_source)
         select = findid('deformField1')
         self.assertEqual(select.get_attribute('name'), 'pepper')
-        options = select.find_elements_by_tag_name('option')
         self.assertEqual(findid('error-deformField1').text, 'Required')
         self.assertEqual(findid('captured').text, 'None')
 
@@ -1939,17 +2017,20 @@ class SelectWidgetTests(Base, unittest.TestCase):
         # self.assertTrue(options[1].is_selected())
         self.assertTrue(
             findid('captured').text in self.submit_selected_captured
-            )
+        )
+
 
 class SelectWidgetWithSizeTests(SelectWidgetTests):
     url = test_url("/select_with_size/")
+
 
 class SelectWidgetWithUnicodeTests(SelectWidgetTests):
     url = test_url('/select_with_unicode/')
     submit_selected_captured = (
         u"{'pepper': '\u30cf\u30d0\u30cd\u30ed'}",
         u"{'pepper': u'\\u30cf\\u30d0\\u30cd\\u30ed'}",
-        )
+    )
+
 
 class SelectWidgetMultipleTests(Base, unittest.TestCase):
     url = test_url('/select_with_multiple/')
@@ -1967,8 +2048,10 @@ class SelectWidgetMultipleTests(Base, unittest.TestCase):
         self.assertEqual(eval(findid('captured').text), captured_default)
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
+
 class SelectWidgetIntegerTests(Base, unittest.TestCase):
     url = test_url('/select_integer/')
+
     def test_render_default(self):
         self.assertTrue('Number' in browser.page_source)
         select = findid('deformField1')
@@ -1979,7 +2062,7 @@ class SelectWidgetIntegerTests(Base, unittest.TestCase):
         self.assertEqual(
             [o.text for o in options],
             [u'- Select -', u'Zero', u'One', u'Two']
-            )
+        )
         self.assertEqual(findcss('.required').text, 'Number')
         self.assertEqual(findid('captured').text, 'None')
 
@@ -2008,6 +2091,7 @@ class SelectWidgetIntegerTests(Base, unittest.TestCase):
             captured,
             "{'number': 0}")
 
+
 class SelectWidgetWithOptgroupTests(Base, unittest.TestCase):
     url = test_url("/select_with_optgroup/")
 
@@ -2022,7 +2106,7 @@ class SelectWidgetWithOptgroupTests(Base, unittest.TestCase):
             [o.text for o in options],
             [u'Select your favorite musician',
              u'Jimmy Page', u'Jimi Hendrix', u'Billy Cobham', u'John Bonham']
-            )
+        )
         self.assertEqual(findcss('.required').text, 'Musician')
         self.assertEqual(findid('captured').text, 'None')
         self.assertEqual(len(findxpaths('//optgroup')), 2)
@@ -2041,7 +2125,8 @@ class SelectWidgetWithOptgroupTests(Base, unittest.TestCase):
         self.assertSimilarRepr(
             captured,
             "{'musician': 'page'}",
-            )
+        )
+
 
 class SelectWidgetWithOptgroupAndLabelTests(SelectWidgetWithOptgroupTests):
     url = test_url("/select_with_optgroup_and_label_attributes/")
@@ -2060,7 +2145,7 @@ class SelectWidgetWithOptgroupAndLabelTests(SelectWidgetWithOptgroupTests):
              u'Guitarists - Jimi Hendrix',
              u'Drummers - Billy Cobham',
              u'Drummers - John Bonham']
-            )
+        )
         self.assertEqual(findcss('.required').text, 'Musician')
         self.assertEqual(findid('captured').text, 'None')
         self.assertEqual(len(findxpaths('//optgroup')), 2)
@@ -2079,7 +2164,8 @@ class SelectWidgetWithOptgroupAndLabelTests(SelectWidgetWithOptgroupTests):
         self.assertSimilarRepr(
             captured,
             "{'musician': 'page'}",
-            )
+        )
+
 
 class SelectReadonlyTests(Base, unittest.TestCase):
     url = test_url("/select_readonly/")
@@ -2093,12 +2179,13 @@ class SelectReadonlyTests(Base, unittest.TestCase):
         self.assertEqual(multi2.text, 'Billy Cobham')
         self.assertEqual(findid('captured').text, 'None')
 
+
 class Select2WidgetTests(Base, unittest.TestCase):
     url = test_url("/select2/")
     submit_selected_captured = (
         "{'pepper': u'habanero'}",
         "{'pepper': 'habanero'}",
-        )
+    )
 
     def test_render_default(self):
         self.assertTrue('Pepper' in browser.page_source)
@@ -2135,7 +2222,8 @@ class Select2WidgetTests(Base, unittest.TestCase):
         # self.assertTrue(options[1].is_selected())
         self.assertTrue(
             findid('captured').text in self.submit_selected_captured
-            )
+        )
+
 
 class Select2WidgetMultipleTests(Base, unittest.TestCase):
     url = test_url('/select2_with_multiple/')
@@ -2153,6 +2241,7 @@ class Select2WidgetMultipleTests(Base, unittest.TestCase):
         self.assertEqual(eval(findid('captured').text), captured_default)
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
+
 class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
     url = test_url("/select2_with_optgroup/")
 
@@ -2167,7 +2256,7 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
             [o.text for o in options],
             [u'Select your favorite musician',
              u'Jimmy Page', u'Jimi Hendrix', u'Billy Cobham', u'John Bonham']
-            )
+        )
         self.assertEqual(findcss('.required').text, 'Musician')
         self.assertEqual(findid('captured').text, 'None')
         self.assertEqual(len(findxpaths('//optgroup')), 2)
@@ -2186,11 +2275,12 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
         self.assertSimilarRepr(
             captured,
             "{'musician': 'page'}",
-            )
+        )
 
 
 class TextInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/textinput/")
+
     def test_render_default(self):
         self.assertTrue('Text' in browser.page_source)
         element = findid('deformField1')
@@ -2221,13 +2311,17 @@ class TextInputWidgetTests(Base, unittest.TestCase):
             captured,
             "{'text': u'hello'}")
 
+
 class TextInputWithCssClassWidgetTests(Base, unittest.TestCase):
     url = test_url("/textinput_with_css_class/")
+
     def test_render_default(self):
         findcss('.deform-widget-with-style')
 
+
 class MoneyInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/money_input/")
+
     def test_render_default(self):
         findid('deformField1').send_keys('12')
         self.assertTrue('Greenbacks' in browser.page_source)
@@ -2255,8 +2349,10 @@ class MoneyInputWidgetTests(Base, unittest.TestCase):
                          "{'greenbacks': Decimal('100.01')}")
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
+
 class AutocompleteInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/autocomplete_input/")
+
     def test_render_default(self):
         self.assertTrue('Autocomplete Input Widget' in browser.page_source)
         self.assertEqual(findid('deformField1').get_attribute('name'),
@@ -2284,8 +2380,10 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text,
                          "{'text': u'bar'}")
 
+
 class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/autocomplete_remote_input/")
+
     def test_render_default(self):
         self.assertTrue('Autocomplete Input Widget (with Remote Data Source)'
                         in browser.page_source)
@@ -2314,8 +2412,10 @@ class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text,
                          "{'text': u'two'}")
 
+
 class TextAreaWidgetTests(Base, unittest.TestCase):
     url = test_url("/textarea/")
+
     def test_render_default(self):
         self.assertTrue('Text' in browser.page_source)
         self.assertEqual(findid('deformField1').get_attribute('name'),
@@ -2340,8 +2440,10 @@ class TextAreaWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text,
                          "{'text': u'hello'}")
 
+
 class TextAreaReadonlyTests(Base, unittest.TestCase):
     url = test_url("/textarea_readonly/")
+
     def test_render_default(self):
         self.assertEqual(findid('deformField1').text,
                          'text')
@@ -2351,6 +2453,7 @@ class TextAreaReadonlyTests(Base, unittest.TestCase):
 
 class DelayedRichTextWidgetTests(Base, unittest.TestCase):
     url = test_url("/delayed_richtext/")
+
     def test_submit_filled(self):
         findcss('.tinymce-preload').click()
         time.sleep(0.5)
@@ -2363,8 +2466,10 @@ class DelayedRichTextWidgetTests(Base, unittest.TestCase):
         self.assertEqual(eval(findid('captured').text),
                          {'text': u'<p>hello</p>'})
 
+
 class RichTextWidgetTests(Base, unittest.TestCase):
     url = test_url("/richtext/")
+
     def test_render_default(self):
         self.assertTrue('Text' in browser.page_source)
         self.assertEqual(findid('deformField1').get_attribute('name'),
@@ -2390,24 +2495,30 @@ class RichTextWidgetTests(Base, unittest.TestCase):
         self.assertEqual(eval(findid('captured').text),
                          {'text': u'<p>hello</p>'})
 
+
 class RichTextWidgetInternationalized(Base, unittest.TestCase):
     url = test_url("/richtext_i18n/?_LOCALE_=ru")
+
     def test_render_default(self):
         self.assertTrue('Text' in browser.page_source)
         self.assertTrue(u"Формат" in browser.page_source)
 
+
 class RichTextReadonlyTests(Base, unittest.TestCase):
     url = test_url("/richtext_readonly/")
+
     def test_render_default(self):
         self.assertEqual(findid('deformField1').text, '<p>Hi!</p>')
         self.assertEqual(findcss('.required').text, 'Text')
         self.assertEqual(findid('captured').text, 'None')
 
+
 class UnicodeEverywhereTests(Base, unittest.TestCase):
     url = test_url("/unicodeeverywhere/")
+
     def test_render_default(self):
-        description=(u"子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？ "
-                     u"人不知而不慍，不亦君子乎？」")
+        description = (u"子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？ "
+                       u"人不知而不慍，不亦君子乎？」")
 
         self.assertTrue(u"По оживлённым берегам" in browser.page_source)
         self.assertEqual(findcss('.help-block').text,
@@ -2426,13 +2537,15 @@ class UnicodeEverywhereTests(Base, unittest.TestCase):
         captured = findid('captured').text
         self.assertTrue(
             captured in (
-                u"{'field': u'\\u2603'}", # py2
-                u"{'field': '\u2603'}",  # py3
+                u"{'field': u'\\u2603'}",  # py2
+                u"{'field': '\u2603'}",   # py3
             )
-            )
+        )
+
 
 class SequenceOfSequencesTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_sequences/")
+
     def test_render_default(self):
         self.assertEqual(findid('deformField1-addtext').text,
                          'Add Names and Titles')
@@ -2464,8 +2577,10 @@ class SequenceOfSequencesTests(Base, unittest.TestCase):
         findcsses('.deform-close-button')[3].click()
         self.assertEqual(len(findxpaths('//input[@name="name"]')), 1)
 
+
 class SequenceOrderableTests(Base, unittest.TestCase):
     url = test_url("/sequence_orderable/")
+
     def test_render_default(self):
         self.assertTrue(findcss('.deform-proto'))
         self.assertEqual(findid('captured').text, 'None')
@@ -2518,15 +2633,19 @@ class SequenceOrderableTests(Base, unittest.TestCase):
         self.assertEqual(inputs[1].get_attribute('value'), 'Name2')
         self.assertEqual(inputs[2].get_attribute('value'), 'Name1')
 
-        self.assertEqual(eval(findid('captured').text),
-                         {'people': [
-                         {'name': 'Name3', 'age': 33},
-                         {'name': 'Name2', 'age': 22},
-                         {'name': 'Name1', 'age': 11},
-                     ]})
+        self.assertEqual(
+            eval(findid('captured').text),
+            {'people': [
+                {'name': 'Name3', 'age': 33},
+                {'name': 'Name2', 'age': 22},
+                {'name': 'Name1', 'age': 11},
+            ]}
+        )
+
 
 class TextAreaCSVWidgetTests(Base, unittest.TestCase):
     url = test_url("/textareacsv/")
+
     def test_render_default(self):
         self.assertTrue('Csv' in browser.page_source)
         self.assertEqual(findid('deformField1').get_attribute('name'),
@@ -2542,10 +2661,11 @@ class TextAreaCSVWidgetTests(Base, unittest.TestCase):
 
     def test_submit_default(self):
         findid("deformsubmit").click()
-        self.assertEqual(eval(findid('captured').text),
-                         {'csv': [(1, u'hello', Decimal("4.5")),
-                                  (2, u'goodbye', Decimal("5.5"))]
-                         })
+        self.assertEqual(
+            eval(findid('captured').text),
+            {'csv': [(1, u'hello', Decimal("4.5")),
+                     (2, u'goodbye', Decimal("5.5"))]}
+        )
 
     def test_submit_line_error(self):
         findid('deformField1').clear()
@@ -2555,7 +2675,7 @@ class TextAreaCSVWidgetTests(Base, unittest.TestCase):
         self.assertTrue(
             'has an incorrect number of elements (expected 3, was 1)' in
             findid('error-deformField1').text
-            )
+        )
 
     def test_submit_empty(self):
         findid('deformField1').clear()
@@ -2563,11 +2683,14 @@ class TextAreaCSVWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('error-deformField1').text, 'Required')
         self.assertEqual(findid('captured').text, 'None')
 
+
 class WidgetAdapterTests(TextAreaCSVWidgetTests):
     url = test_url("/widget_adapter/")
 
+
 class TextInputCSVWidgetTests(Base, unittest.TestCase):
     url = test_url("/textinputcsv/")
+
     def test_render_default(self):
         self.assertTrue('Csv' in browser.page_source)
         self.assertEqual(findid('deformField1').get_attribute('value'),
@@ -2587,7 +2710,7 @@ class TextInputCSVWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('captured').text, 'None')
         self.assertTrue(
             '"wrong" is not a number' in findid('error-deformField1').text
-            )
+        )
 
     def test_submit_empty(self):
         findid('deformField1').clear()
@@ -2595,8 +2718,10 @@ class TextInputCSVWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid('error-deformField1').text, 'Required')
         self.assertEqual(findid('captured').text, 'None')
 
+
 class MultipleFormsTests(Base, unittest.TestCase):
     url = test_url("/multiple_forms/")
+
     def test_render_default(self):
         self.assertEqual(findid('deformField1').get_attribute('name'),
                          'name1')
@@ -2620,8 +2745,10 @@ class MultipleFormsTests(Base, unittest.TestCase):
         self.assertEqual(eval(findid('captured').text),
                          {'name2': 'hey'})
 
+
 class RequireOneFieldOrAnotherTests(Base, unittest.TestCase):
     url = test_url("/require_one_or_another/")
+
     def test_render_default(self):
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
         self.assertEqual(findid('deformField1').get_attribute('name'), 'one')
@@ -2644,8 +2771,10 @@ class RequireOneFieldOrAnotherTests(Base, unittest.TestCase):
                          {'one': u'one', 'two': u''})
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
 
+
 class AjaxFormTests(Base, unittest.TestCase):
     url = test_url("/ajaxform/")
+
     def test_render_default(self):
         self.assertEqual(findid('captured').text, 'None')
         self.assertEqual(findid('deformField1').get_attribute('value'), '')
@@ -2689,8 +2818,10 @@ class AjaxFormTests(Base, unittest.TestCase):
         wait_for_ajax(source)
         self.assertEquals(findid('thanks').text, 'Thanks!')
 
+
 class RedirectingAjaxFormTests(AjaxFormTests):
     url = test_url("/ajaxform_redirect/")
+
     def test_submit_success(self):
         findid('deformField1').send_keys('1')
         findid('deformField3').send_keys('name')
@@ -2702,8 +2833,10 @@ class RedirectingAjaxFormTests(AjaxFormTests):
         wait_for_ajax(source)
         self.assertTrue(browser.current_url.endswith('thanks.html'))
 
+
 class TextInputMaskTests(Base, unittest.TestCase):
     url = test_url("/text_input_masks/")
+
     def test_render_default(self):
         findid('deformField1').click()
         findid('deformField1').send_keys(11 * Keys.ARROW_LEFT)
@@ -2735,10 +2868,12 @@ class TextInputMaskTests(Base, unittest.TestCase):
         findid('deformField2').send_keys('10102010')
         findid("deformsubmit").click()
         self.assertEqual(eval(findid('captured').text),
-                        {'date': u'10/10/2010', 'ssn': u'140-11-8866'})
+                         {'date': u'10/10/2010', 'ssn': u'140-11-8866'})
+
 
 class MultipleErrorMessagesInMappingTest(Base, unittest.TestCase):
     url = test_url("/multiple_error_messages_mapping/")
+
     def test_it(self):
         findid('deformField1').send_keys('whatever')
         findid("deformsubmit").click()
@@ -2746,8 +2881,10 @@ class MultipleErrorMessagesInMappingTest(Base, unittest.TestCase):
         self.assertEqual(findid('error-deformField1-1').text, 'Error 2')
         self.assertEqual(findid('error-deformField1-2').text, 'Error 3')
 
+
 class MultipleErrorMessagesInSequenceTest(Base, unittest.TestCase):
     url = test_url("/multiple_error_messages_seq/")
+
     def test_it(self):
         findid("deformField1-seqAdd").click()
         findxpath("//input[@name='field']").send_keys('whatever')
@@ -2756,8 +2893,10 @@ class MultipleErrorMessagesInSequenceTest(Base, unittest.TestCase):
         self.assertEqual(findid('error-deformField3-1').text, 'Error 2')
         self.assertEqual(findid('error-deformField3-2').text, 'Error 3')
 
+
 class CssClassesOnTheOutermostHTMLElementTests(Base, unittest.TestCase):
     url = test_url("/custom_classes_on_outermost_html_element/")
+
     def test_it(self):
         findcss('form > fieldset > div.top_level_mapping_widget_custom_class')
         findcss('[title=MappingWidget] div.mapped_widget_custom_class')
