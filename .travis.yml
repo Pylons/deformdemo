@@ -10,10 +10,13 @@ install:
   - pip install "selenium<3"
 
 before_script:
-  # setup display  
   - "export DISPLAY=:99.0"
   - "sh -e /etc/init.d/xvfb start"
-  # start deformdemo app
+  - sleep 3 # give xvfb some time to start
+  - echo "Extracting firefox and setting PATH variable..."
+  - tar -xjf /tmp/firefox-45.0.tar.bz2 --directory /tmp
+  - export PATH="/tmp/firefox:$PATH"
+  - echo "Using firefox version `firefox --version`"
   - pserve demo.ini &
 
 script: nosetests
