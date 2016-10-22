@@ -4,7 +4,7 @@ install:
   - python setup.py dev
   - pip install git+https://github.com/Pylons/deform.git
   - pip install git+https://github.com/Pylons/colander.git
-  - pip install selenium<3
+  - pip install "selenium<3"
 
 before_script:
   # setup display  
