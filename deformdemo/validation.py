@@ -21,7 +21,6 @@ def validate(data):
         "xml": "application/xml",
     }
 
-
     errorsOnly = 0
     encoding = None
     contentType = "text/html"
@@ -52,14 +51,15 @@ def validate(data):
             sys.stderr.write('URI scheme %s not supported.\n' % parsed[0])
             sys.exit(7)
         if redirectCount > 0:
-            connection.close() # previous connection
+            connection.close()  # previous connection
             print 'Redirecting to %s' % url
             print 'Please press enter to continue or type "stop" followed by enter to stop.'
             if raw_input() != "":
                 sys.exit(0)
         connection = httplib.HTTPConnection(parsed[1])
         connection.connect()
-        connection.putrequest("POST", "%s?%s" % (parsed[2], parsed[3]), skip_accept_encoding=1)
+        connection.putrequest("POST", "%s?%s" %
+                              (parsed[2], parsed[3]), skip_accept_encoding=1)
         connection.putheader("Accept-Encoding", 'gzip')
         connection.putheader("Content-Type", contentType)
         connection.putheader("Content-Encoding", 'gzip')
@@ -83,8 +83,8 @@ def validate(data):
     return result
 
 
-
 class FunctionalTests(unittest.TestCase):
+
     def setUp(self):
         bs = bootstrap('demo.ini')
         app = bs['app']
@@ -99,7 +99,6 @@ class FunctionalTests(unittest.TestCase):
         for demo in demos_urls:
             res = self.testapp.get(demo[1], status=200)
             check = validate(res.body)
-            #import pdb; pdb.set_trace()  # NOQA
             try:
                 self.assertFalse(check)
                 print demo[0], "."
@@ -108,7 +107,7 @@ class FunctionalTests(unittest.TestCase):
                 print demo[0], "E"
                 print check
                 print
-        #self.assertFalse(errors)
+        self.assertFalse(errors)
 
 if __name__ == '__main__':
     unittest.main()
