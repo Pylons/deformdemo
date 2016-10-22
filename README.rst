@@ -1,6 +1,9 @@
 Deform Demo
 ===========
 
+.. image:: https://travis-ci.org/Pylons/deformdemo.png?branch=master
+           :target: https://travis-ci.org/Pylons/deformdemo
+
 Demonstration application for the `Deform
 <http://docs.pylonsproject.org/projects/deform/dev/>`_ Python HTML form
 library.  Please see http://deformdemo.repoze.org for a running version
