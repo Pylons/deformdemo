@@ -694,7 +694,6 @@ class DeformDemo(object):
 
         class Schema(colander.Schema):
 
-            # Initially all fields are defined in the schema
             field1 = colander.SchemaNode(
                 colander.String(),
                 title='Field 1',
@@ -704,26 +703,28 @@ class DeformDemo(object):
                 colander.String(),
                 title='Field 2',
                 description='May or may not appear')
+            
+            def bind(self, *args, **kwargs):
+                super(Schema, self).bind(*args, **kwargs)
 
-        # After schema object is instiated
-        # you can dynamically modify its fields
+                # When schema is being constructed you are free to post-process any fields:
+                # Hide fields, change widgets or dynamically add more fields.
+                # You can read request, request.session and other variables here to fulfill
+                # conditions.
+                if random.random() < 0.5:
+                    del self["field1"]
+
+                if random.random() < 0.5:
+                    del self["field2"]
+
+                # Dynamically add new field
+                self["field3"] = colander.SchemaNode(
+                    colander.String(),
+                    title='Field 3',
+                    description='Dynamically created')
+
         schema = Schema()
-
-        # When schema is being constructed you are free to post-process any fields:
-        # Hide fields, change widgets or dynamically add more fields.
-        # You can read request, request.session and other variables here to fulfill
-        # conditions.
-        if random.random() < 0.5:
-            del schema["field1"]
-
-        if random.random() < 0.5:
-            del schema["field2"]
-
-        # Dynamically add new field
-        schema["field3"] = colander.SchemaNode(
-                colander.String(),
-                title='Field 3',
-                description='Dynamically created')
+        schema.bind(request=self.request)
 
         form = deform.Form(schema, buttons=('submit',))
 
