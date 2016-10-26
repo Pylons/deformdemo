@@ -19,7 +19,7 @@ class ExampleSchema(deform.schema.CSRFSchema):
         colander.Int(),
         default=18,
         title="Age",
-        help_text="Your age in years")
+        description="Your age in years")
 
 
 def mini_example(request):
@@ -57,6 +57,8 @@ def mini_example(request):
         rendered_form = form.render()
 
     return {
+        # This is just rendered HTML in a string
+        # and can be embedded in any template language
         "rendered_form": rendered_form,
     }
 

@@ -5,6 +5,7 @@ capabilities and which provides a functional test suite  """
 
 import decimal
 import inspect
+import random
 import sys
 import csv
 import pprint
@@ -682,6 +683,48 @@ class DeformDemo(object):
                 description='Type your Social Security Number and confirm it')
 
         schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form)
+
+    @view_config(renderer='templates/form.pt', name='dynamic_field')
+    @demonstrate('Dynamic fields: add and remove')
+    def dynamic_field(self):
+        # Hit refresh in browser for dynamic effects
+
+        class Schema(colander.Schema):
+
+            # Initially all fields are defined in the schema
+            field1 = colander.SchemaNode(
+                colander.String(),
+                title='Field 1',
+                description='May or may not appear')
+
+            field2 = colander.SchemaNode(
+                colander.String(),
+                title='Field 2',
+                description='May or may not appear')
+
+        # After schema object is instiated
+        # you can dynamically modify its fields
+        schema = Schema()
+
+        # When schema is being constructed you are free to post-process any fields:
+        # Hide fields, change widgets or dynamically add more fields.
+        # You can read request, request.session and other variables here to fulfill
+        # conditions.
+        if random.random() < 0.5:
+            del schema["field1"]
+
+        if random.random() < 0.5:
+            del schema["field2"]
+
+        # Dynamically add new field
+        schema["field3"] = colander.SchemaNode(
+                colander.String(),
+                title='Field 3',
+                description='Dynamically created')
+
         form = deform.Form(schema, buttons=('submit',))
 
         return self.render_form(form)
