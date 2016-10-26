@@ -707,10 +707,13 @@ class DeformDemo(object):
             def bind(self, *args, **kwargs):
                 super(Schema, self).bind(*args, **kwargs)
 
-                # When schema is being constructed you are free to post-process any fields:
+                # When schema is bound you are free to post-process any fields:
                 # Hide fields, change widgets or dynamically add more fields.
                 # You can read request, request.session and other variables here to fulfill
                 # conditions.
+                #
+                # More abount binding:
+                # http://docs.pylonsproject.org/projects/colander/en/latest/binding.html
                 if random.random() < 0.5:
                     del self["field1"]
 
