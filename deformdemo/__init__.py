@@ -690,31 +690,39 @@ class DeformDemo(object):
     @view_config(renderer='templates/form.pt', name='dynamic_field')
     @demonstrate('Dynamic fields: add and remove')
     def dynamic_field(self):
-        # Hit refresh in browser for dynamic effects
 
         class Schema(colander.Schema):
 
             field1 = colander.SchemaNode(
                 colander.String(),
                 title='Field 1',
-                description='May or may not appear')
+                description='Add ?nofield1 to URL to delete this field')
 
             field2 = colander.SchemaNode(
                 colander.String(),
                 title='Field 2',
-                description='May or may not appear')
+                description='May or may not appear. Hit refresh.')
             
-            def bind(self, *args, **kwargs):
-                super(Schema, self).bind(*args, **kwargs)
+            def after_bind(self, schema, kwargs):
 
+                # after_bind() can be used as subclass method
+                # or a parameter passed to schema constructor.
+                #
                 # When schema is bound you are free to post-process any fields:
                 # Hide fields, change widgets or dynamically add more fields.
                 # You can read request, request.session and other variables here to fulfill
                 # conditions.
                 #
                 # More abount binding:
+                #
                 # http://docs.pylonsproject.org/projects/colander/en/latest/binding.html
-                if random.random() < 0.5:
+                #
+                # http://docs.pylonsproject.org/projects/colander/en/latest/binding.html#after-bind
+                #
+
+                request = kwargs["request"]
+
+                if "nofield1" in request.params:
                     del self["field1"]
 
                 if random.random() < 0.5:
@@ -727,7 +735,7 @@ class DeformDemo(object):
                     description='Dynamically created')
 
         schema = Schema()
-        schema.bind(request=self.request)
+        schema = schema.bind(request=self.request)
 
         form = deform.Form(schema, buttons=('submit',))
 
