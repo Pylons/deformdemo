@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 
+from __future__ import print_function
+
 import unittest
 import re
 import os
@@ -20,7 +22,7 @@ browser = None
 BROKEN_SELENIUM_LOG_FILE = "/tmp/selenium.log"
 
 # Some sleep we assume the datetime widget takes to show or hide itself properly
-DATE_PICKER_DELAY = 1.0
+DATE_PICKER_DELAY = 2.0
 
 BASE_PATH = os.environ.get('BASE_PATH', '')
 URL = os.environ.get('URL', 'http://localhost:8522')
@@ -112,8 +114,8 @@ def setUpModule():
             browser = Firefox(firefox_binary=bin)
         except WebDriverException:
             if os.path.exists(BROKEN_SELENIUM_LOG_FILE):
-                print "Selenium says no"
-                print open(BROKEN_SELENIUM_LOG_FILE, "rt").read()
+                print("Selenium says no")
+                print(open(BROKEN_SELENIUM_LOG_FILE, "rt").read())
             raise
         return browser
 
@@ -1561,7 +1563,7 @@ class SequenceOfDefaultedSelectsTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
             eval(findid('captured').text),  # should be 2 values, both defaults
-            {'peppers': ['habanero', 'habanero']}
+            {'peppers': ['jalapeno', 'jalapeno']}
         )
 
 
@@ -1577,7 +1579,7 @@ class SequenceOfDefaultedSelectsWithInitialItemTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
             eval(findid('captured').text),  # should be 1 value (min_len 1)
-            {'peppers': ['habanero']}
+            {'peppers': ['jalapeno']}
         )
 
     def test_submit_one_added(self):
@@ -1586,7 +1588,7 @@ class SequenceOfDefaultedSelectsWithInitialItemTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, '.has-error')
         self.assertEqual(
             eval(findid('captured').text),  # should be 2 values, both defaults
-            {'peppers': ['habanero', 'habanero']}
+            {'peppers': ['jalapeno', 'jalapeno']}
         )
 
 
@@ -2276,6 +2278,37 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
             captured,
             "{'musician': 'page'}",
         )
+
+
+class SelectWithDefaultTests(Base, unittest.TestCase):
+
+    url = test_url("/select_with_default/")
+
+    def test_default_selected(self):
+        """Make sure the supplied default value for select is honoured."""
+
+        elem = findcss("option[value='jalapeno']")
+        assert elem.get_attribute("selected") is not None
+
+        elem = findcss("option[value='chipotle']")
+        assert elem.get_attribute("selected") is None
+
+
+class SelectWithMultipleDefaultTests(Base, unittest.TestCase):
+
+    url = test_url("/select_with_multiple_default_integers/")
+
+    def test_default_selected(self):
+        """Make sure the supplied default value for select is honoured for multiple values."""
+
+        elem = findcss("option[value='1']")
+        assert elem.get_attribute("selected") is not None
+
+        elem = findcss("option[value='2']")
+        assert elem.get_attribute("selected") is not None
+
+        elem = findcss("option[value='3']")
+        assert elem.get_attribute("selected") is None
 
 
 class TextInputWidgetTests(Base, unittest.TestCase):
