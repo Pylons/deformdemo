@@ -75,7 +75,7 @@ class demonstrate(object):
 # elinate u''
 def my_safe_repr(object, context, maxlevels, level):
     if type(object) == unicode:
-        object = str(object)
+        object = object.encode("utf-8")
     return pprint._safe_repr(object, context, maxlevels, level)
 
 
