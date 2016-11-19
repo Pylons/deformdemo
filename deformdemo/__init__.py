@@ -764,6 +764,49 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/form.pt', name='mapping_accordion')
+    @demonstrate('Accordion')
+    def mapping_accordion(self):
+        """A section of form can be hidden by using Bootstrap 3 accordions.
+
+        On field errors accordions are always forced to open.
+
+        See ``deform/static/form.css`` for chevron styling.
+
+        http://getbootstrap.com/javascript/#collapse
+        """
+
+        class Mapping(colander.Schema):
+            name = colander.SchemaNode(
+                colander.String(),
+                description='Content name')
+            date = colander.SchemaNode(
+                colander.Date(),
+                widget=deform.widget.DatePartsWidget(),
+                description='Content date')
+
+        class Schema(colander.Schema):
+            number = colander.SchemaNode(
+                colander.Integer())
+
+            mapping = Mapping(
+                title="Open by default",
+                widget=deform.widget.MappingWidget(
+                    template="mapping_accordion",
+                    open=True))
+
+            mapping2 = Mapping(
+                title="Closed by default",
+                widget=deform.widget.MappingWidget(
+                    template="mapping_accordion",
+                    open=False,
+                    ))
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='ajaxform')
     @demonstrate('AJAX form submission (inline success)')
     def ajaxform(self):
