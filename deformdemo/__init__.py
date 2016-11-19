@@ -72,7 +72,7 @@ class demonstrate(object):
 
 # Py2/Py3 compat
 # http://stackoverflow.com/a/16888673/315168
-# elinate u''
+# eliminate u''
 def my_safe_repr(object, context, maxlevels, level):
     if type(object) == unicode:
         object = object.encode("utf-8")
