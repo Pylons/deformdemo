@@ -1340,13 +1340,13 @@ class DeformDemo(object):
         import datetime
 
         class Schema(colander.Schema):
-            date = colander.SchemaNode(
+            somedate = colander.SchemaNode(
                 colander.Date(),
                 validator=colander.Range(
                     min=datetime.date(2010, 5, 5),
                     min_err=_('${val} is earlier than earliest date ${min}')
-                    )
-                )
+                    ),
+                title='Date')
 
         schema = Schema()
         form = deform.Form(schema, buttons=('submit',))
@@ -1359,13 +1359,13 @@ class DeformDemo(object):
         import datetime
 
         class Schema(colander.Schema):
-            time = colander.SchemaNode(
+            sometime = colander.SchemaNode(
                 colander.Time(),
                 validator=colander.Range(
                     min=datetime.time(12, 16),
                     min_err=_('${val} is earlier than earliest time ${min}')
-                    )
-                )
+                    ),
+                title='Time')
 
         schema = Schema()
         form = deform.Form(schema, buttons=('submit',))
