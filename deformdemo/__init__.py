@@ -6,6 +6,7 @@ capabilities and which provides a functional test suite  """
 import decimal
 import inspect
 import random
+import re
 import sys
 import csv
 import pprint
@@ -68,6 +69,16 @@ class demonstrate(object):
         method.demo = self.title
         return method
 
+
+# Py2/Py3 compat
+# http://stackoverflow.com/a/16888673/315168
+# elinate u''
+def my_safe_repr(object, context, maxlevels, level):
+    if type(object) == unicode:
+        object = str(object)
+    return pprint._safe_repr(object, context, maxlevels, level)
+
+
 @view_defaults(route_name='deformdemo')
 class DeformDemo(object):
     def __init__(self, request):
@@ -106,7 +117,10 @@ class DeformDemo(object):
 
         reqts = form.get_widget_resources()
 
-        captured = highlight(pprint.pformat(captured, width=1),
+        printer = pprint.PrettyPrinter(width=1)
+        printer.format = my_safe_repr
+        output = printer.pformat(captured)
+        captured = highlight(output,
                              PythonLexer(),
                              formatter)
 
@@ -2242,6 +2256,8 @@ class DeformDemo(object):
                     try:
                         controls = self.request.POST.items()
                         captured = form.validate(controls)
+
+
                         html.append(form.render(captured))
                     except deform.ValidationFailure as e:
                         # the submitted values could not be validated
