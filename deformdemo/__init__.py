@@ -355,13 +355,16 @@ class DeformDemo(object):
         return self.render_form(form, appstruct={'text':'text'})
     
     @view_config(renderer='templates/form.pt', name='richtext')
-    @demonstrate('Rich Text Widget')
+    @demonstrate('Rich Text Widget (TinyMCE)')
     def richtext(self):
 
         class Schema(colander.Schema):
             text = colander.SchemaNode(
                 colander.String(),
-                widget=deform.widget.RichTextWidget(),
+                # These options are directly passed to underylying TinyMCE as
+                # browser_spellcheck : true
+                # See https://www.tinymce.com/docs/configure/
+                widget=deform.widget.RichTextWidget(options=(('browser_spellcheck', True),)),
                 description='Enter some text')
 
         schema = Schema()
