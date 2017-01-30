@@ -36,7 +36,7 @@
         </button>
         </div>
 
-      <!-- This will render modal.pt -->
+      <!-- Variable `form` contains the renderer form HTML as a Python string -->
       <form tal:replace="structure form"></form>
 
     </div>
