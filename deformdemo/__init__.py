@@ -479,7 +479,9 @@ class DeformDemo(object):
         .. note ::
 
             Pop up form templates are NOT supplied with Deform core.
-            They are in ddemonstrationckage for demostration purposes.
+            They are in the deformdemo package for demostration purposes.
+            You can copy them to your own project and configure
+            widget template paths.
 
         popup_example.pt contains the page HTML template.
 
@@ -489,6 +491,12 @@ class DeformDemo(object):
         Template registration: See ``deformdemo.main`` how we register a template path
         ``custom_widgets`` where the custom form template lies.
         See also :ref:`templates` in Deform documentation for more information.
+
+        Source code:
+
+        https://github.com/Pylons/deformdemo/blob/master/deformdemo/templates/popup_example.pt
+
+        https://github.com/Pylons/deformdemo/blob/master/deformdemo/custom_widgets/modal.pt
         """
 
         class Schema(colander.Schema):
