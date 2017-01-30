@@ -470,6 +470,46 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer='templates/popup_example.pt', name="popup")
+    @demonstrate('Popup and retail rendering')
+    def popup(self):
+        """Render a page (``popup_example.pt``) that contains
+        a specially styled form (``modal.pt``).
+
+        .. note ::
+
+            Pop up form templates are NOT supplied with Deform core.
+            They are in ddemonstrationckage for demostration purposes.
+
+        popup_example.pt contains the page HTML template.
+
+        Javascript: The JavaScript logic to show and hide the pop up is in ``poup_example.pt``.
+        We need to automatically open the pop up on a validation error.
+
+        Template registration: See ``deformdemo.main`` how we register a template path
+        ``custom_widgets`` where the custom form template lies.
+        See also :ref:`templates` in Deform documentation for more information.
+        """
+
+        class Schema(colander.Schema):
+
+            title = "Pop up example title"
+
+            # Override default form.pt for rendering <form>
+            widget = deform.widget.FormWidget(template="modal.pt")
+
+            name = colander.SchemaNode(
+                colander.String(),
+                description='Enter your name (required)')
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=('submit',))
+
+        # CSS is used in <button> opener and JS code
+        form.formid = "my-pop-up"
+
+        return self.render_form(form)
+
     @view_config(renderer='templates/form.pt', name='checkbox_with_label')
     @demonstrate('Checkbox Widget (with Label)')
     def checkbox_with_label(self):
@@ -2693,12 +2733,16 @@ class SequenceToTextWidgetAdapter(object):
 def main(global_config, **settings):
     # paster serve entry point
     settings['debug_templates'] = 'true'
+
     renderer = settings['deformdemo.renderer']
     session_factory = UnencryptedCookieSessionFactoryConfig('seekrit!')
     config = Configurator(settings=settings, session_factory=session_factory)
     config.include('pyramid_chameleon')
     renderer = config.maybe_dotted(renderer)
-    deform.Form.set_default_renderer(renderer)
+
+    #deform.Form.set_default_renderer(renderer)
+    deform.renderer.configure_zpt_renderer(["deformdemo:custom_widgets"])
+
     config.add_static_view('static_deform', 'deform:static')
     config.add_static_view('static_demo', 'deformdemo:static')
     config.add_route('deformdemo', '*traverse')

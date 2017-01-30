@@ -50,6 +50,8 @@
             window.forceDateTimePolyfill = true;
         </script>
 
+        <tal:slot metal:define-slot="head_end"></tal:slot>
+
     </head>
 
     <body id="public">
@@ -79,6 +81,8 @@
 
     </div>
 
+
+    <tal:slot metal:define-slot="body_end"></tal:slot>
     </body>
 
     </html>
