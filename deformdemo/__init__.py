@@ -10,6 +10,7 @@ import re
 import sys
 import csv
 import pprint
+import logging
 
 try:
     from StringIO import StringIO
@@ -45,13 +46,25 @@ from pygments.lexers import PythonLexer
 import deform
 import colander
 
-from translationstring import TranslationStringFactory
+from pyramid.i18n import default_locale_negotiator
 
-_ = TranslationStringFactory('deform')
+
+from translationstring import TranslationStringFactory
+#from pyramid.i18n import TranslationStringFactory
+_ = TranslationStringFactory('deformdemo')
+
+log = logging.getLogger(__name__)
+
 formatter = HtmlFormatter(nowrap=True)
 css = formatter.get_style_defs()
 
+def my_locale_negotiator(request):
+    locale_name = default_locale_negotiator(request)
+    log.debug('locale_name from default_locale_negotiator: %s', locale_name)
+    return locale_name
+
 def translator(term):
+    log.debug('translator: %s', term)
     return get_localizer(get_current_request()).translate(term)
 
 deform_template_dir = resource_filename('deform', 'templates/')
@@ -165,7 +178,7 @@ class DeformDemo(object):
             end = int(end)
             hl_lines = list(range(start, end))
         code = open(inspect.getsourcefile(self.__class__), 'r').read()
-        code = code.decode('utf-8')
+        code = code.encode('utf-8')
         formatter = HtmlFormatter(linenos='table', lineanchors='line',
                                   cssclass="hightlight ",
                                   hl_lines=hl_lines)
@@ -2063,6 +2076,8 @@ class DeformDemo(object):
 
         minmax = {'min': 1, 'max': 10}
         locale_name = get_locale_name(self.request)
+        log.debug('locale_name: %s, request._LOCALE_: %s', locale_name,
+                  self.request.params.get('_LOCALE_'))
 
         class Schema(colander.Schema):
             number = colander.SchemaNode(
@@ -2754,6 +2769,7 @@ def main(global_config, **settings):
     config.add_static_view('static_deform', 'deform:static')
     config.add_static_view('static_demo', 'deformdemo:static')
     config.add_route('deformdemo', '*traverse')
+    config.set_locale_negotiator(my_locale_negotiator)
     config.add_translation_dirs(
         'colander:locale',
         'deform:locale',
