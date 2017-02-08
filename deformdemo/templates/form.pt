@@ -3,6 +3,7 @@
   <div metal:fill-slot="main">
     <div class="btn-group" tal:condition="is_i18n|False">
         <a tal:attributes="class locale == 'en' and 'active btn btn-default' or 'btn btn-default'" href="${request.path_url}?_LOCALE_=en">English</a>
+        <a tal:attributes="class locale == 'de' and 'active btn btn-default' or 'btn btn-default'" href="${request.path_url}?_LOCALE_=de">Deutsch</a>
         <a tal:attributes="class locale == 'nl' and 'active btn btn-default' or 'btn btn-default'" href="${request.path_url}?_LOCALE_=nl">Nederlands</a>
         <a tal:attributes="class locale == 'ru' and 'active btn btn-default' or 'btn btn-default'" href="${request.path_url}?_LOCALE_=ru">Russian</a>
         <a tal:attributes="class locale == 'es' and 'active btn btn-default' or 'btn btn-default'" href="${request.path_url}?_LOCALE_=es">Español</a>
