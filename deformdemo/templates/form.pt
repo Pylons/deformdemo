@@ -1,5 +1,6 @@
 <!DOCTYPE html>
-<div metal:use-macro="view.macros['master']">
+<div metal:use-macro="view.macros['master']"
+     i18n:domain="deformdemo">
   <div metal:fill-slot="main">
     <div class="btn-group" tal:condition="is_i18n|False">
         <a tal:attributes="class locale == 'en' and 'active btn btn-default' or 'btn btn-default'" href="${request.path_url}?_LOCALE_=en">English</a>

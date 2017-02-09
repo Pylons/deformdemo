@@ -1,13 +1,15 @@
 <metal:block define-macro="master">
   <!DOCTYPE html>
     <html tal:define="app_url request.application_url;
-                      static request.static_url('deform:static/')">
+                      static request.static_url('deform:static/')"
+          xmlns:i18n="http://xml.zope.org/namespaces/i18n"
+          i18n:domain="deformdemo">
 
     <head>
         <meta charset="utf-8"/>
         <meta name="viewport"
               content="width=device-width, initial-scale=1.0">
-        <title>
+        <title i18n:translate="">
             Deform 2 Demo Site
         </title>
 
@@ -58,7 +60,9 @@
 
     <div class="navbar navbar-default" role="navigation">
         <div class="container">
-            <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-info-sign"></span> Deform 2 Demo</a>
+            <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-info-sign"></span>
+                                             <span i18n:translate=""> Deform 2 Demo</span>
+            </a>
         </div>
     </div>
 
