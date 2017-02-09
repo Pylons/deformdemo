@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: deformsite 0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-09 16:37+0100\n"
+"POT-Creation-Date: 2017-02-09 19:00+0100\n"
 "PO-Revision-Date: 2010-09-11 01:20+0100\n"
 "Last-Translator: Wichert Akkerman <wichert@wiggy.net>\n"
 "Language-Team: nl <LL@li.org>\n"
@@ -18,39 +18,47 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "Generated-By: Babel 0.9.6\n"
 
-#: deformdemo/__init__.py:1030 deformdemo/__init__.py:1054
-#: deformdemo/__init__.py:1390 deformdemo/__init__.py:1428
+#: deformdemo/__init__.py:389
+msgid "Enter some text"
+msgstr ""
+
+#: deformdemo/__init__.py:397 deformdemo/__init__.py:1056
+#: deformdemo/__init__.py:2089
+msgid "Submit"
+msgstr "Verstuur"
+
+#: deformdemo/__init__.py:1019 deformdemo/__init__.py:1043
+#: deformdemo/__init__.py:1379 deformdemo/__init__.py:1417
 #, python-format
 msgid "${val} is earlier than earliest date ${min}"
 msgstr "${val} is eerder dan de eerst toegestane datum ${min}"
 
-#: deformdemo/__init__.py:1051
+#: deformdemo/__init__.py:1040
 msgid "Event date"
 msgstr "Evenement datum"
 
-#: deformdemo/__init__.py:1067 deformdemo/__init__.py:2111
-msgid "Submit"
-msgstr "Verstuur"
+#: deformdemo/__init__.py:1048
+msgid "Dates"
+msgstr ""
 
-#: deformdemo/__init__.py:1447
+#: deformdemo/__init__.py:1436
 #, python-format
 msgid "${val} is earlier than earliest time ${min}"
 msgstr "${val} mag niet voor ${min} zijn"
 
-#: deformdemo/__init__.py:1467
+#: deformdemo/__init__.py:1456
 #, python-format
 msgid "${val} is earlier than earliest datetime ${min}"
 msgstr "${val} mag niet voor ${min} zijn"
 
-#: deformdemo/__init__.py:2086 deformdemo/__init__.py:2097
-#: deformdemo/__init__.py:2099
+#: deformdemo/__init__.py:2075 deformdemo/__init__.py:2077
 #, python-format
 msgid "A number between ${min} and ${max}"
 msgstr "Een getal tussen ${min} en ${max}"
 
-#: deformdemo/__init__.py:2244 deformdemo/__init__.py:2248
-#: deformdemo/__init__.py:2252 deformdemo/__init__.py:2272
-#: deformdemo/__init__.py:2276 deformdemo/__init__.py:2280
+#: deformdemo/__init__.py:2222 deformdemo/__init__.py:2226
+#: deformdemo/__init__.py:2230 deformdemo/__init__.py:2250
+#: deformdemo/__init__.py:2254 deformdemo/__init__.py:2258
 #, python-format
 msgid "Error ${num}"
 msgstr "Fout ${num}"
