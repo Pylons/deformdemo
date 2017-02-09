@@ -386,14 +386,15 @@ class DeformDemo(object):
             text = colander.SchemaNode(
                 colander.String(),
                 widget=deform.widget.RichTextWidget(),
-                description='Enter some text')
+                description=_('Enter some text'))
             _LOCALE_ = colander.SchemaNode(
                 colander.String(),
                 widget = deform.widget.HiddenWidget(),
                 default=locale_name)
 
         schema = Schema()
-        form = deform.Form(schema, buttons=('submit',))
+        form = deform.Form(schema,
+                           buttons=[deform.Button('submit', _('Submit'))])
         return self.render_form(form, is_i18n=True)
 
     @view_config(renderer='templates/form.pt', name='delayed_richtext')
@@ -1044,7 +1045,7 @@ class DeformDemo(object):
                 )
 
         class Schema(colander.Schema):
-            dates = Sequence()
+            dates = Sequence(title=_('Dates'))
             _LOCALE_ = colander.SchemaNode(
                 colander.String(),
                 widget=deform.widget.HiddenWidget(),
