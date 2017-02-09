@@ -12,6 +12,8 @@ import csv
 import pprint
 import logging
 
+log = logging.getLogger(__name__)
+
 try:
     from StringIO import StringIO
 except ImportError:
@@ -48,12 +50,10 @@ import colander
 
 from pyramid.i18n import default_locale_negotiator
 
-
 from translationstring import TranslationStringFactory
 #from pyramid.i18n import TranslationStringFactory
 _ = TranslationStringFactory('deformdemo')
 
-log = logging.getLogger(__name__)
 
 formatter = HtmlFormatter(nowrap=True)
 css = formatter.get_style_defs()
@@ -70,7 +70,7 @@ def translator(term):
 deform_template_dir = resource_filename('deform', 'templates/')
 
 zpt_renderer = deform.ZPTRendererFactory(
-    [deform_template_dir], translator=translator)
+    (deform_template_dir,), translator=translator)
 
 # the zpt_renderer above is referred to within the demo.ini file by dotted name
 
@@ -97,6 +97,9 @@ class DeformDemo(object):
     def __init__(self, request):
         self.request = request
         self.macros = get_renderer('templates/main.pt').implementation().macros
+
+        log.debug('renderer: %s', get_renderer('templates/main.pt'))
+        log.debug('renderer.implementation: %s', get_renderer('templates/main.pt').implementation())
 
     def render_form(self, form, appstruct=colander.null, submitted='submit',
                     success=None, readonly=False, is_i18n=False):
@@ -2079,6 +2082,15 @@ class DeformDemo(object):
         log.debug('locale_name: %s, request._LOCALE_: %s', locale_name,
                   self.request.params.get('_LOCALE_'))
 
+        log.debug('localizer: %s', self.request.localizer)
+        title=_('A number between ${min} and ${max}', mapping=minmax)
+        trtitle=self.request.localizer.translate(title)
+        log.debug('localizer.translate: %s', trtitle)
+        log.debug('default_renderer: %s',
+                  deform.form.Form.default_renderer)
+        log.debug('default_renderer.loader.search_path: %s',
+                  deform.form.Form.default_renderer.loader.search_path)
+
         class Schema(colander.Schema):
             number = colander.SchemaNode(
                 colander.Integer(),
@@ -2760,21 +2772,22 @@ def main(global_config, **settings):
     renderer = settings['deformdemo.renderer']
     session_factory = UnencryptedCookieSessionFactoryConfig('seekrit!')
     config = Configurator(settings=settings, session_factory=session_factory)
-    config.include('pyramid_chameleon')
-    renderer = config.maybe_dotted(renderer)
-
-    #deform.Form.set_default_renderer(renderer)
-    deform.renderer.configure_zpt_renderer(["deformdemo:custom_widgets"])
-
-    config.add_static_view('static_deform', 'deform:static')
-    config.add_static_view('static_demo', 'deformdemo:static')
-    config.add_route('deformdemo', '*traverse')
-    config.set_locale_negotiator(my_locale_negotiator)
     config.add_translation_dirs(
         'colander:locale',
         'deform:locale',
         'deformdemo:locale'
         )
+
+    config.include('pyramid_chameleon')
+    renderer = config.maybe_dotted(renderer)
+
+    deform.Form.set_default_renderer(renderer)
+    deform.renderer.configure_zpt_renderer(("deform:templates", "deformdemo:custom_widgets",))
+
+    config.add_static_view('static_deform', 'deform:static')
+    config.add_static_view('static_demo', 'deformdemo:static')
+    config.add_route('deformdemo', '*traverse')
+    config.set_locale_negotiator(my_locale_negotiator)
     def onerror(*arg):
         pass
     config.scan('deformdemo', onerror=onerror)
