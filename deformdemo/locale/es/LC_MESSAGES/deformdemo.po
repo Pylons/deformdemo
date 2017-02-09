@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: deformsite 0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2017-02-08 22:38+0100\n"
+"POT-Creation-Date: 2017-02-09 16:37+0100\n"
 "PO-Revision-Date: 2010-09-09 13:53-0600\n"
 "Last-Translator: Douglas Cerna <douglascerna@yahoo.com>\n"
 "Language-Team: es <LL@li.org>\n"
@@ -18,38 +18,47 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=(n != 1)\n"
 "Generated-By: Babel 0.9.6\n"
 
-#: deformdemo/__init__.py:1027 deformdemo/__init__.py:1051
-#: deformdemo/__init__.py:1387 deformdemo/__init__.py:1425
+#: deformdemo/__init__.py:1030 deformdemo/__init__.py:1054
+#: deformdemo/__init__.py:1390 deformdemo/__init__.py:1428
 #, python-format
 msgid "${val} is earlier than earliest date ${min}"
 msgstr ""
 
-#: deformdemo/__init__.py:1048
+#: deformdemo/__init__.py:1051
 msgid "Event date"
 msgstr ""
 
-#: deformdemo/__init__.py:1064 deformdemo/__init__.py:2099
+#: deformdemo/__init__.py:1067 deformdemo/__init__.py:2111
 msgid "Submit"
 msgstr "Enviar"
 
-#: deformdemo/__init__.py:1444
+#: deformdemo/__init__.py:1447
 #, python-format
 msgid "${val} is earlier than earliest time ${min}"
 msgstr ""
 
-#: deformdemo/__init__.py:1464
+#: deformdemo/__init__.py:1467
 #, python-format
 msgid "${val} is earlier than earliest datetime ${min}"
 msgstr ""
 
-#: deformdemo/__init__.py:2085 deformdemo/__init__.py:2087
+#: deformdemo/__init__.py:2086 deformdemo/__init__.py:2097
+#: deformdemo/__init__.py:2099
 #, python-format
 msgid "A number between ${min} and ${max}"
 msgstr "Un número entre ${min} y ${max}"
 
-#: deformdemo/__init__.py:2233 deformdemo/__init__.py:2237
-#: deformdemo/__init__.py:2241 deformdemo/__init__.py:2261
-#: deformdemo/__init__.py:2265 deformdemo/__init__.py:2269
+#: deformdemo/__init__.py:2244 deformdemo/__init__.py:2248
+#: deformdemo/__init__.py:2252 deformdemo/__init__.py:2272
+#: deformdemo/__init__.py:2276 deformdemo/__init__.py:2280
 #, python-format
 msgid "Error ${num}"
+msgstr ""
+
+#: deformdemo/templates/main.pt:12
+msgid "Deform 2 Demo Site"
+msgstr ""
+
+#: deformdemo/templates/main.pt:64
+msgid "Deform 2 Demo"
 msgstr ""
