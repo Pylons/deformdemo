@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: deformsite 0.0\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
 "POT-Creation-Date: 2017-02-09 16:37+0100\n"
-"PO-Revision-Date: 2017-02-09 15:42+0100\n"
+"PO-Revision-Date: 2017-02-09 18:11+0100\n"
 "Last-Translator: Hans-Peter Jansen <hpj@urpla.net>\n"
 "Language-Team: de <LL@li.org>\n"
 "Language: de\n"
@@ -62,7 +62,7 @@ msgstr "Deform 2 Beispielseite"
 
 #: deformdemo/templates/main.pt:64
 msgid "Deform 2 Demo"
-msgstr "Deform 2 Beispiele"
+msgstr "Deform 2 Demonstration"
 
 #~ msgid "<dynamic element> Deform 2 Demo"
 #~ msgstr "<dynamic element> Deform 2 Vorführung"
