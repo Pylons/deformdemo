@@ -12,6 +12,8 @@ import csv
 import pprint
 import logging
 
+from deform.renderer import configure_zpt_renderer
+
 log = logging.getLogger(__name__)
 
 try:
@@ -53,15 +55,6 @@ _ = TranslationStringFactory('deformdemo')
 
 formatter = HtmlFormatter(nowrap=True)
 css = formatter.get_style_defs()
-
-def translator(term):
-    return get_localizer(get_current_request()).translate(term)
-
-deform_template_dir = resource_filename('deform', 'templates/')
-deformdemo_template_dir = resource_filename('deformdemo', 'custom_widgets/')
-
-zpt_renderer = deform.ZPTRendererFactory(
-    (deformdemo_template_dir, deform_template_dir,), translator=translator)
 
 # the zpt_renderer above is referred to within the demo.ini file by dotted name
 
@@ -2747,7 +2740,6 @@ def main(global_config, **settings):
     # paster serve entry point
     settings['debug_templates'] = 'true'
 
-    renderer = settings['deformdemo.renderer']
     session_factory = UnencryptedCookieSessionFactoryConfig('seekrit!')
     config = Configurator(settings=settings, session_factory=session_factory)
     config.add_translation_dirs(
@@ -2757,8 +2749,17 @@ def main(global_config, **settings):
         )
 
     config.include('pyramid_chameleon')
-    renderer = config.maybe_dotted(renderer)
-    deform.Form.set_default_renderer(renderer)
+
+    #
+    # Set up Chameleon templates (ZTP) rendering paths
+    #
+
+    def translator(term):
+        # i18n localizing function
+        return get_localizer(get_current_request()).translate(term)
+
+    # Configure renderer
+    configure_zpt_renderer(("deformdemo:custom_widgets",), translator)
 
     config.add_static_view('static_deform', 'deform:static')
     config.add_static_view('static_demo', 'deformdemo:static')
