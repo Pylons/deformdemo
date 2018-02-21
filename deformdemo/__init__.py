@@ -21,7 +21,7 @@ try:
 except ImportError:
     from io import StringIO
 
-from colander import iso8601
+from iso8601 import iso8601
 
 PY3 = sys.version_info[0] == 3
 
@@ -1445,7 +1445,7 @@ class DeformDemo(object):
                 colander.DateTime(),
                 validator=colander.Range(
                     min=datetime.datetime(
-                        2010, 5, 5, 12, 30, tzinfo=iso8601.Utc()),
+                        2010, 5, 5, 12, 30, tzinfo=iso8601.UTC),
                     min_err=_('${val} is earlier than earliest datetime ${min}')
                     )
                 )
