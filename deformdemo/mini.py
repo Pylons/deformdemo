@@ -1,25 +1,23 @@
 """Self-contained Deform demo example."""
 from __future__ import print_function
 
-from pyramid.config import Configurator
-from pyramid.session import UnencryptedCookieSessionFactoryConfig
-from pyramid.httpexceptions import HTTPFound
-
+# Pyramid
 import colander
+from pyramid.config import Configurator
+from pyramid.httpexceptions import HTTPFound
+from pyramid.session import UnencryptedCookieSessionFactoryConfig
+
+# Deform
 import deform
 
 
 class ExampleSchema(deform.schema.CSRFSchema):
 
-    name = colander.SchemaNode(
-        colander.String(),
-        title="Name")
+    name = colander.SchemaNode(colander.String(), title="Name")
 
     age = colander.SchemaNode(
-        colander.Int(),
-        default=18,
-        title="Age",
-        description="Your age in years")
+        colander.Int(), default=18, title="Age", description="Your age in years"
+    )
 
 
 def mini_example(request):
@@ -28,12 +26,12 @@ def mini_example(request):
     schema = ExampleSchema().bind(request=request)
 
     # Create a styled button with some extra Bootstrap 3 CSS classes
-    process_btn = deform.form.Button(name='process', title="Process")
+    process_btn = deform.form.Button(name="process", title="Process")
     form = deform.form.Form(schema, buttons=(process_btn,))
 
     # User submitted this form
     if request.method == "POST":
-        if 'process' in request.POST:
+        if "process" in request.POST:
 
             try:
                 appstruct = form.validate(request.POST.items())
@@ -43,7 +41,7 @@ def mini_example(request):
                 print("Your age:", appstruct["age"])
 
                 # Thank user and take him/her to the next page
-                request.session.flash('Thank you for the submission.')
+                request.session.flash("Thank you for the submission.")
 
                 # Redirect to the page shows after succesful form submission
                 return HTTPFound("/")
@@ -59,17 +57,19 @@ def mini_example(request):
     return {
         # This is just rendered HTML in a string
         # and can be embedded in any template language
-        "rendered_form": rendered_form,
+        "rendered_form": rendered_form
     }
 
 
 def main(global_config, **settings):
     """pserve entry point"""
-    session_factory = UnencryptedCookieSessionFactoryConfig('seekrit!')
+    session_factory = UnencryptedCookieSessionFactoryConfig("seekrit!")
     config = Configurator(settings=settings, session_factory=session_factory)
-    config.include('pyramid_chameleon')
+    config.include("pyramid_chameleon")
     deform.renderer.configure_zpt_renderer()
-    config.add_static_view('static_deform', 'deform:static')
-    config.add_route('mini_example', path='/')
-    config.add_view(mini_example, route_name="mini_example", renderer="templates/mini.pt")
+    config.add_static_view("static_deform", "deform:static")
+    config.add_route("mini_example", path="/")
+    config.add_view(
+        mini_example, route_name="mini_example", renderer="templates/mini.pt"
+    )
     return config.make_wsgi_app()
