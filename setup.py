@@ -12,45 +12,47 @@
 #
 ##############################################################################
 
+# Standard Library
 import os
 import sys
 
-from setuptools import setup
 from setuptools import find_packages
+from setuptools import setup
+
 
 here = os.path.abspath(os.path.dirname(__file__))
 
 try:
-    README = open(os.path.join(here, 'README.rst')).read()
-    CHANGES = open(os.path.join(here, 'CHANGES.txt')).read()
-except:
-    README = ''
-    CHANGES = ''
+    README = open(os.path.join(here, "README.rst")).read()
+    CHANGES = open(os.path.join(here, "CHANGES.txt")).read()
+except Exception:
+    README = ""
+    CHANGES = ""
 
 PY3 = sys.version_info[0] == 3
 
-requires = ['deform>=2.0dev',
-            'pyramid>=1.5a1', # route_name argument to resource_url
-            'pyramid_chameleon',
-            'pygments',
-            'waitress']
+requires = [
+    "deform>=2.0dev",
+    "pyramid>=1.5a1",  # route_name argument to resource_url
+    "pyramid_chameleon",
+    "pygments",
+    "six",
+    "waitress",
+]
 
 if not PY3:
-    requires.extend((
-            'Babel',
-            'lingua',
-            ))
+    requires.extend(("Babel", "lingua"))
 
 setupkw = dict(
-    name='deformdemo',
-    version='0.0',
-    description='Demonstration application for Deform form library',
-    long_description=README + '\n\n' + CHANGES,
+    name="deformdemo",
+    version="0.0",
+    description="Demonstration application for Deform form library",
+    long_description=README + "\n\n" + CHANGES,
     classifiers=[
         "Intended Audience :: Developers",
         "Programming Language :: Python",
-        ],
-    keywords='web forms form generation schema validation',
+    ],
+    keywords="web forms form generation schema validation",
     author="Chris McDonough, Agendaless Consulting",
     author_email="pylons-discuss@googlegroups.com",
     url="http://pylonsproject.org",
@@ -59,18 +61,28 @@ setupkw = dict(
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
-    extras_require = {
-        'testing': ['nose', 'selenium<3.0', 'nose-selecttests'],
+    extras_require={
+        "testing": [
+            "black",
+            "flake8",
+            "flake8-bugbear",
+            "flake8-builtins",
+            "flake8-isort",
+            "flake8_docstrings",
+            "isort",
+            "nose",
+            "nose-selecttests",
+            "selenium<3.0",
+        ]
     },
-    entry_points = """\
+    entry_points="""\
     [paste.app_factory]
     demo = deformdemo:main
     mini= deformdemo.mini:main
     """,
-    message_extractors = { '.': [
-        ('**.py',   'lingua_python', None ),
-        ('**.pt',   'lingua_xml', None ),
-        ]},
-    )
+    message_extractors={
+        ".": [("**.py", "lingua_python", None), ("**.pt", "lingua_xml", None)]
+    },
+)
 
 setup(**setupkw)

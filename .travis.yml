@@ -1,10 +1,12 @@
 language: python
+python:
+  - "3.6"
 
 addons:
   firefox: "45.0"
 
 install: 
-  - python setup.py dev
+  - pip install -e ".[testing]"
   - pip install git+https://github.com/Pylons/deform.git
   - pip install git+https://github.com/Pylons/colander.git
   - pip install "selenium<3"
