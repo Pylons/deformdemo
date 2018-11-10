@@ -108,3 +108,4 @@ Contributors
 - Calvin Hendryx-Parker, 2013/09/03
 - Mikko Ohtamaa 2016/06/01
 - Martin Peeters 2016/10/22
+- Érico Andrei 2018/11/10
