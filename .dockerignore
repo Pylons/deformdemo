@@ -5,6 +5,7 @@
 *.pt.py
 *.txt.py
 *~
+*.log
 .python-version
 env26/
 env25/
