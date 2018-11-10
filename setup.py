@@ -45,14 +45,21 @@ if not PY3:
 
 setupkw = dict(
     name="deformdemo",
-    version="0.0",
+    version="1.0a1",
     description="Demonstration application for Deform form library",
     long_description=README + "\n\n" + CHANGES,
     classifiers=[
         "Intended Audience :: Developers",
         "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
+        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: Implementation :: CPython",
     ],
-    keywords="web forms form generation schema validation",
+    keywords="web forms form generation schema validation deform",
     author="Chris McDonough, Agendaless Consulting",
     author_email="pylons-discuss@googlegroups.com",
     url="http://pylonsproject.org",
