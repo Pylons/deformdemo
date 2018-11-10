@@ -5,7 +5,7 @@ Deform Demo
            :target: https://travis-ci.org/Pylons/deformdemo
 
 Demonstration application for the `Deform
-<https://docs.pylonsproject.org/projects/deform/>`_ Python HTML form
+<https://docs.pylonsproject.org/projects/deform/en/latest>`_ Python HTML form
 library.
 
 
@@ -31,10 +31,10 @@ Then, in your browser, visit http://localhost:8080
 From source
 -----------
 
-This application supports Python versions 2.7, 3.4, 3.5, 3.6 and 3.7, but
- we strongly recommend you to use it Python >=3.5.
+This application supports Python versions 2.7, 3.4, 3.5, 3.6, and 3.7, but
+ we strongly recommend you use Python >=3.5.
 
-- Create a virtualenv::
+- Create a virtual environment::
 
     $ python3 -m venv /path/to/my/venv
 
