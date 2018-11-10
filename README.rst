@@ -36,9 +36,9 @@ This application supports Python versions 2.7, 3.4, 3.5, 3.6, and 3.7, but
 
 - Create a virtual environment::
 
-    $ python3 -m venv /path/to/my/venv
+    $ python3 -m venv /path/to/my/env
 
-  Hereafter ``/path/to/my/venv`` will be referred to as $VENV in steps
+  Hereafter ``/path/to/my/env`` will be referred to as $VENV in steps
   below.
 
 - Get a checkout of deformdemo::
@@ -49,7 +49,7 @@ This application supports Python versions 2.7, 3.4, 3.5, 3.6, and 3.7, but
 
     $ cd deformdemo
 
-- Run ``pip install -e .`` using the virtualenv's ``python`` command::
+- Run ``pip install -e .`` using the virtual environment's ``python`` command::
 
     $ $VENV/bin/pip install -e .
 
@@ -78,9 +78,9 @@ wise to run these tests before submitting a patch.  Here's how:
 
     $ cd /path/to/my/deformdemo/checkout
 
-- Run ``pip install -e .`` using the virtualenv's ``python`` command, but this time install the testing requirements::
+- Run ``pip install -e ".[testing]"`` using the virtual environment's ``python`` command, but this time install the testing requirements::
 
-    $ $VENV/bin/pip install -e ".[testing]'
+    $ $VENV/bin/pip install -e ".[testing]"
 
 - Run the tests::
 
