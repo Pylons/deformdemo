@@ -232,7 +232,9 @@ class DeformDemo(object):
     @demonstrate("Text Input Widget (with CSS class)")
     def textinput_with_css_class(self):
 
-        css_widget = deform.widget.TextInputWidget(css_class="deform-widget-with-style")
+        css_widget = deform.widget.TextInputWidget(
+            css_class="deform-widget-with-style"
+        )
 
         class Schema(colander.Schema):
             text = colander.SchemaNode(
@@ -252,7 +254,8 @@ class DeformDemo(object):
     def textinput_readonly(self):
         class Schema(colander.Schema):
             text = colander.SchemaNode(
-                colander.String(), widget=deform.widget.TextInputWidget(readonly=True)
+                colander.String(),
+                widget=deform.widget.TextInputWidget(readonly=True),
             )
 
         schema = Schema()
@@ -268,7 +271,9 @@ class DeformDemo(object):
 
         class Schema(colander.Schema):
             greenbacks = colander.SchemaNode(
-                colander.Decimal(), widget=widget, description="Enter some money"
+                colander.Decimal(),
+                widget=widget,
+                description="Enter some money",
             )
 
         schema = Schema()
@@ -281,7 +286,9 @@ class DeformDemo(object):
     def autocomplete_input(self):
 
         choices = ["bar", "baz", "two", "three"]
-        widget = deform.widget.AutocompleteInputWidget(values=choices, min_length=1)
+        widget = deform.widget.AutocompleteInputWidget(
+            values=choices, min_length=1
+        )
 
         class Schema(colander.Schema):
             text = colander.SchemaNode(
@@ -296,7 +303,9 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
-    @view_config(renderer="templates/form.pt", name="autocomplete_remote_input")
+    @view_config(
+        renderer="templates/form.pt", name="autocomplete_remote_input"
+    )
     @demonstrate("Autocomplete Input Widget (with Remote Data Source)")
     def autocomplete_remote_input(self):
 
@@ -323,7 +332,9 @@ class DeformDemo(object):
     @view_config(renderer="json", name="autocomplete_input_values")
     def autocomplete_input_values(self):
         text = self.request.params.get("term", "")
-        return [x for x in ["bar", "baz", "two", "three"] if x.startswith(text)]
+        return [
+            x for x in ["bar", "baz", "two", "three"] if x.startswith(text)
+        ]
 
     @view_config(renderer="templates/form.pt", name="textarea")
     @demonstrate("Text Area Widget")
@@ -395,7 +406,9 @@ class DeformDemo(object):
             )
 
         schema = Schema()
-        form = deform.Form(schema, buttons=[deform.Button("submit", _("Submit"))])
+        form = deform.Form(
+            schema, buttons=[deform.Button("submit", _("Submit"))]
+        )
         return self.render_form(form, is_i18n=True)
 
     @view_config(renderer="templates/form.pt", name="delayed_richtext")
@@ -418,7 +431,8 @@ class DeformDemo(object):
     def richtext_readonly(self):
         class Schema(colander.Schema):
             text = colander.SchemaNode(
-                colander.String(), widget=deform.widget.RichTextWidget(readonly=True)
+                colander.String(),
+                widget=deform.widget.RichTextWidget(readonly=True),
             )
 
         schema = Schema()
@@ -493,8 +507,8 @@ class DeformDemo(object):
         in ``poup_example.pt``.
         We need to automatically open the pop up on a validation error.
 
-        Template registration: See ``deformdemo.main`` how we register a template path
-        ``custom_widgets`` where the custom form template lies.
+        Template registration: See ``deformdemo.main`` how we register a
+        template path ``custom_widgets`` where the custom form template lies.
         See also :ref:`templates` in Deform documentation for more information.
 
         Source code:
@@ -594,7 +608,9 @@ class DeformDemo(object):
             pepper = colander.SchemaNode(
                 colander.String(),
                 validator=colander.OneOf([x[0] for x in choices]),
-                widget=deform.widget.RadioChoiceWidget(values=choices, inline=True),
+                widget=deform.widget.RadioChoiceWidget(
+                    values=choices, inline=True
+                ),
                 title="Choose your pepper",
                 description="Select a Pepper",
             )
@@ -636,7 +652,9 @@ class DeformDemo(object):
         class Schema(colander.Schema):
             pepper = colander.SchemaNode(
                 colander.String(),
-                widget=deform.widget.RadioChoiceWidget(values=choices, readonly=True),
+                widget=deform.widget.RadioChoiceWidget(
+                    values=choices, readonly=True
+                ),
             )
 
         schema = Schema()
@@ -704,7 +722,9 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
-    @view_config(renderer="templates/form.pt", name="checkedpassword_redisplay")
+    @view_config(
+        renderer="templates/form.pt", name="checkedpassword_redisplay"
+    )
     @demonstrate("Checked Password Widget (redisplay on validation failure)")
     def checkedpassword_redisplay(self):
         class Schema(colander.Schema):
@@ -784,8 +804,8 @@ class DeformDemo(object):
                 #
                 # When schema is bound you are free to post-process any fields:
                 # Hide fields, change widgets or dynamically add more fields.
-                # You can read request, request.session and other variables here to
-                # fulfill conditions.
+                # You can read request, request.session and other variables
+                # here to fulfill conditions.
                 #
                 # More abount binding:
                 #
@@ -820,7 +840,9 @@ class DeformDemo(object):
     @demonstrate("Mapping Widget")
     def mapping(self):
         class Mapping(colander.Schema):
-            name = colander.SchemaNode(colander.String(), description="Content name")
+            name = colander.SchemaNode(
+                colander.String(), description="Content name"
+            )
             date = colander.SchemaNode(
                 colander.Date(),
                 widget=deform.widget.DatePartsWidget(),
@@ -849,7 +871,9 @@ class DeformDemo(object):
         """
 
         class Mapping(colander.Schema):
-            name = colander.SchemaNode(colander.String(), description="Content name")
+            name = colander.SchemaNode(
+                colander.String(), description="Content name"
+            )
             date = colander.SchemaNode(
                 colander.Date(),
                 widget=deform.widget.DatePartsWidget(),
@@ -882,7 +906,9 @@ class DeformDemo(object):
     @demonstrate("AJAX form submission (inline success)")
     def ajaxform(self):
         class Mapping(colander.Schema):
-            name = colander.SchemaNode(colander.String(), description="Content name")
+            name = colander.SchemaNode(
+                colander.String(), description="Content name"
+            )
             date = colander.SchemaNode(
                 colander.Date(),
                 widget=deform.widget.DatePartsWidget(),
@@ -908,7 +934,9 @@ class DeformDemo(object):
     @demonstrate("AJAX form submission (redirect on success)")
     def ajaxform_redirect(self):
         class Mapping(colander.Schema):
-            name = colander.SchemaNode(colander.String(), description="Content name")
+            name = colander.SchemaNode(
+                colander.String(), description="Content name"
+            )
             date = colander.SchemaNode(
                 colander.Date(),
                 widget=deform.widget.DatePartsWidget(),
@@ -941,7 +969,10 @@ class DeformDemo(object):
             # used to be required under JQuery 1.4.
             return Response(
                 "<div>hurr</div>",
-                headers=[("X-Relocate", location), ("Content-Type", "text/html")],
+                headers=[
+                    ("X-Relocate", location),
+                    ("Content-Type", "text/html"),
+                ],
             )
 
         form = deform.Form(
@@ -977,7 +1008,9 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
-    @view_config(renderer="templates/form.pt", name="sequence_of_autocompletes")
+    @view_config(
+        renderer="templates/form.pt", name="sequence_of_autocompletes"
+    )
     @demonstrate("Sequence of Autocomplete Widgets")
     def sequence_of_autocompletes(self):
         choices = ["bar", "baz", "two", "three"]
@@ -1047,7 +1080,9 @@ class DeformDemo(object):
             )
 
         schema = Schema()
-        form = deform.Form(schema, buttons=[deform.Button("submit", _("Submit"))])
+        form = deform.Form(
+            schema, buttons=[deform.Button("submit", _("Submit"))]
+        )
 
         return self.render_form(form, is_i18n=True)
 
@@ -1069,7 +1104,9 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
-    @view_config(renderer="templates/form.pt", name="sequence_of_masked_textinputs")
+    @view_config(
+        renderer="templates/form.pt", name="sequence_of_masked_textinputs"
+    )
     @demonstrate("Sequence of Masked Text Inputs")
     def sequence_of_masked_textinputs(self):
         class Sequence(colander.SequenceSchema):
@@ -1091,7 +1128,8 @@ class DeformDemo(object):
     def sequence_of_fileuploads(self):
         class Sequence(colander.SequenceSchema):
             upload = colander.SchemaNode(
-                deform.FileData(), widget=deform.widget.FileUploadWidget(tmpstore)
+                deform.FileData(),
+                widget=deform.widget.FileUploadWidget(tmpstore),
             )
 
         class Schema(colander.Schema):
@@ -1103,13 +1141,15 @@ class DeformDemo(object):
         return self.render_form(form, success=tmpstore.clear)
 
     @view_config(
-        renderer="templates/form.pt", name="sequence_of_fileuploads_with_initial_item"
+        renderer="templates/form.pt",
+        name="sequence_of_fileuploads_with_initial_item",
     )
     @demonstrate("Sequence of File Upload Widgets (with Initial Item)")
     def sequence_of_fileuploads_with_initial_item(self):
         class Sequence(colander.SequenceSchema):
             upload = colander.SchemaNode(
-                deform.FileData(), widget=deform.widget.FileUploadWidget(tmpstore)
+                deform.FileData(),
+                widget=deform.widget.FileUploadWidget(tmpstore),
             )
 
         class Schema(colander.Schema):
@@ -1142,7 +1182,8 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(
-        renderer="templates/form.pt", name="sequence_of_mappings_with_initial_item"
+        renderer="templates/form.pt",
+        name="sequence_of_mappings_with_initial_item",
     )
     @demonstrate("Sequence of Mapping Widgets (with Initial Item)")
     def sequence_of_mappings_with_initial_item(self):
@@ -1164,7 +1205,9 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
-    @view_config(renderer="templates/form.pt", name="readonly_sequence_of_mappings")
+    @view_config(
+        renderer="templates/form.pt", name="readonly_sequence_of_mappings"
+    )
     @demonstrate("Sequence of Mappings (read-only)")
     def readonly_sequence_of_mappings(self):
         class Person(colander.Schema):
@@ -1185,7 +1228,10 @@ class DeformDemo(object):
         return self.render_form(
             form,
             appstruct={
-                "people": [{"name": "name1", "age": 23}, {"name": "name2", "age": 25}]
+                "people": [
+                    {"name": "name1", "age": 23},
+                    {"name": "name2", "age": 25},
+                ]
             },
             readonly=True,
         )
@@ -1212,11 +1258,15 @@ class DeformDemo(object):
         form = deform.Form(schema, buttons=("submit",))
         outer = form["names_and_titles_sequence"]
         outer.widget = deform.widget.SequenceWidget(min_len=1)
-        outer["names_and_titles"].widget = deform.widget.SequenceWidget(min_len=1)
+        outer["names_and_titles"].widget = deform.widget.SequenceWidget(
+            min_len=1
+        )
 
         return self.render_form(form)
 
-    @view_config(renderer="templates/form.pt", name="sequence_of_defaulted_selects")
+    @view_config(
+        renderer="templates/form.pt", name="sequence_of_defaulted_selects"
+    )
     @demonstrate("Sequence of Defaulted Selects")
     def sequence_of_defaulted_selects(self):
         # See https://github.com/Pylons/deform/pull/79
@@ -1278,7 +1328,9 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
-    @view_config(renderer="templates/form.pt", name="sequence_of_constrained_len")
+    @view_config(
+        renderer="templates/form.pt", name="sequence_of_constrained_len"
+    )
     @demonstrate("Sequence of Constrained Min and Max Lengths")
     def sequence_of_constrained_len(self):
         class Names(colander.SequenceSchema):
@@ -1309,7 +1361,9 @@ class DeformDemo(object):
             person = Person()
 
         class Schema(colander.Schema):
-            people = People(widget=deform.widget.SequenceWidget(orderable=True))
+            people = People(
+                widget=deform.widget.SequenceWidget(orderable=True)
+            )
 
         schema = Schema()
         form = deform.Form(schema, buttons=("submit",))
@@ -1321,7 +1375,8 @@ class DeformDemo(object):
     def file(self):
         class Schema(colander.Schema):
             upload = colander.SchemaNode(
-                deform.FileData(), widget=deform.widget.FileUploadWidget(tmpstore)
+                deform.FileData(),
+                widget=deform.widget.FileUploadWidget(tmpstore),
             )
 
         schema = Schema()
@@ -1343,7 +1398,9 @@ class DeformDemo(object):
 
         appstruct = {"upload": {"uid": "123", "filename": "leavesofgrass.png"}}
 
-        return self.render_form(form, appstruct=appstruct, success=tmpstore.clear)
+        return self.render_form(
+            form, appstruct=appstruct, success=tmpstore.clear
+        )
 
     @view_config(renderer="templates/form.pt", name="dateparts")
     @demonstrate("Date Parts Widget")
@@ -1372,13 +1429,16 @@ class DeformDemo(object):
 
         class Schema(colander.Schema):
             date = colander.SchemaNode(
-                colander.Date(), widget=deform.widget.DatePartsWidget(readonly=True)
+                colander.Date(),
+                widget=deform.widget.DatePartsWidget(readonly=True),
             )
 
         schema = Schema()
         form = deform.Form(schema, buttons=("submit",))
 
-        return self.render_form(form, appstruct={"date": datetime.date(2010, 5, 5)})
+        return self.render_form(
+            form, appstruct={"date": datetime.date(2010, 5, 5)}
+        )
 
     @view_config(renderer="templates/form.pt", name="dateinput")
     @demonstrate("Date Input Widget")
@@ -1429,8 +1489,12 @@ class DeformDemo(object):
             date_time = colander.SchemaNode(
                 colander.DateTime(),
                 validator=colander.Range(
-                    min=datetime.datetime(2010, 5, 5, 12, 30, tzinfo=iso8601.UTC),
-                    min_err=_("${val} is earlier than earliest datetime ${min}"),
+                    min=datetime.datetime(
+                        2010, 5, 5, 12, 30, tzinfo=iso8601.UTC
+                    ),
+                    min_err=_(
+                        "${val} is earlier than earliest datetime ${min}"
+                    ),
                 ),
             )
 
@@ -1463,7 +1527,9 @@ class DeformDemo(object):
         import datetime
 
         class Mapping(colander.Schema):
-            name = colander.SchemaNode(colander.String(), description="Content name")
+            name = colander.SchemaNode(
+                colander.String(), description="Content name"
+            )
             date = colander.SchemaNode(
                 colander.Date(),
                 widget=deform.widget.DatePartsWidget(),
@@ -1480,7 +1546,10 @@ class DeformDemo(object):
         # for an initial rendering, only the ones the app actually has
         # values for.  Notice below that we don't pass the ``name``
         # value specified by the ``Mapping`` schema.
-        appstruct = {"number": 42, "mapping": {"date": datetime.date(2010, 4, 9)}}
+        appstruct = {
+            "number": 42,
+            "mapping": {"date": datetime.date(2010, 4, 9)},
+        }
 
         return self.render_form(form, appstruct=appstruct)
 
@@ -1488,7 +1557,9 @@ class DeformDemo(object):
     @demonstrate("Inter-Field Validation")
     def interfield(self):
         class Schema(colander.Schema):
-            name = colander.SchemaNode(colander.String(), description="Content name")
+            name = colander.SchemaNode(
+                colander.String(), description="Content name"
+            )
             title = colander.SchemaNode(
                 colander.String(),
                 description="Content title (must start with content name)",
@@ -1515,7 +1586,9 @@ class DeformDemo(object):
             album = colander.SchemaNode(
                 colander.String(), default="Just Like the Fambly Cat"
             )
-            song = colander.SchemaNode(colander.String(), description="Song name")
+            song = colander.SchemaNode(
+                colander.String(), description="Song name"
+            )
 
         schema = Schema()
         form = deform.Form(schema, buttons=("submit",))
@@ -1530,7 +1603,9 @@ class DeformDemo(object):
                 colander.String(), description="Required Field"
             )
             notrequired = colander.SchemaNode(
-                colander.String(), missing=unicode(""), description="Unrequired Field"
+                colander.String(),
+                missing=unicode(""),
+                description="Unrequired Field",
             )
 
         schema = Schema()
@@ -1538,11 +1613,15 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
-    @view_config(renderer="templates/form.pt", name="nonrequired_number_fields")
+    @view_config(
+        renderer="templates/form.pt", name="nonrequired_number_fields"
+    )
     @demonstrate("Non-Required Number Fields")
     def nonrequired_number_fields(self):
         class Schema(colander.Schema):
-            required = colander.SchemaNode(colander.Int(), description="Required Field")
+            required = colander.SchemaNode(
+                colander.Int(), description="Required Field"
+            )
             notrequired = colander.SchemaNode(
                 colander.Float(), missing=0, description="Unrequired Field"
             )
@@ -1583,7 +1662,8 @@ class DeformDemo(object):
 
         class Schema(colander.Schema):
             pepper = colander.SchemaNode(
-                colander.String(), widget=deform.widget.SelectWidget(values=choices)
+                colander.String(),
+                widget=deform.widget.SelectWidget(values=choices),
             )
 
         schema = Schema()
@@ -1626,7 +1706,8 @@ class DeformDemo(object):
 
         class Schema(colander.Schema):
             pepper = colander.SchemaNode(
-                colander.String(), widget=deform.widget.SelectWidget(values=choices)
+                colander.String(),
+                widget=deform.widget.SelectWidget(values=choices),
             )
 
         schema = Schema()
@@ -1670,7 +1751,9 @@ class DeformDemo(object):
         class Schema(colander.Schema):
             pepper = colander.SchemaNode(
                 colander.Set(),
-                widget=deform.widget.SelectWidget(values=choices, multiple=True),
+                widget=deform.widget.SelectWidget(
+                    values=choices, multiple=True
+                ),
             )
 
         schema = Schema()
@@ -1679,7 +1762,8 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(
-        renderer="templates/form.pt", name="select_with_multiple_default_integers"
+        renderer="templates/form.pt",
+        name="select_with_multiple_default_integers",
     )
     @demonstrate("Select Widget (with multiple default integers)")
     def select_with_multiple_default_integers(self):
@@ -1690,7 +1774,9 @@ class DeformDemo(object):
             pepper = colander.SchemaNode(
                 colander.Set(),
                 default=[1, 2],
-                widget=deform.widget.SelectWidget(values=choices, multiple=True),
+                widget=deform.widget.SelectWidget(
+                    values=choices, multiple=True
+                ),
             )
 
         schema = Schema()
@@ -1737,7 +1823,8 @@ class DeformDemo(object):
 
         class Schema(colander.Schema):
             number = colander.SchemaNode(
-                colander.Integer(), widget=deform.widget.SelectWidget(values=choices)
+                colander.Integer(),
+                widget=deform.widget.SelectWidget(values=choices),
             )
 
         schema = Schema()
@@ -1752,13 +1839,22 @@ class DeformDemo(object):
 
         choices = (
             ("", "Select your favorite musician"),
-            OptGroup("Guitarists", ("page", "Jimmy Page"), ("hendrix", "Jimi Hendrix")),
-            OptGroup("Drummers", ("cobham", "Billy Cobham"), ("bonham", "John Bonham")),
+            OptGroup(
+                "Guitarists",
+                ("page", "Jimmy Page"),
+                ("hendrix", "Jimi Hendrix"),
+            ),
+            OptGroup(
+                "Drummers",
+                ("cobham", "Billy Cobham"),
+                ("bonham", "John Bonham"),
+            ),
         )
 
         class Schema(colander.Schema):
             musician = colander.SchemaNode(
-                colander.String(), widget=deform.widget.SelectWidget(values=choices)
+                colander.String(),
+                widget=deform.widget.SelectWidget(values=choices),
             )
 
         schema = Schema()
@@ -1767,7 +1863,8 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(
-        renderer="templates/form.pt", name="select_with_optgroup_and_label_attributes"
+        renderer="templates/form.pt",
+        name="select_with_optgroup_and_label_attributes",
     )
     @demonstrate("Select Widget (with optgroup and label attributes)")
     def select_with_optgroup_and_label_attributes(self):
@@ -1779,11 +1876,21 @@ class DeformDemo(object):
 
         choices = (
             ("", "Select your favorite musician"),
-            OptGroup("Guitarists", ("page", "Jimmy Page"), ("hendrix", "Jimi Hendrix")),
-            OptGroup("Drummers", ("cobham", "Billy Cobham"), ("bonham", "John Bonham")),
+            OptGroup(
+                "Guitarists",
+                ("page", "Jimmy Page"),
+                ("hendrix", "Jimi Hendrix"),
+            ),
+            OptGroup(
+                "Drummers",
+                ("cobham", "Billy Cobham"),
+                ("bonham", "John Bonham"),
+            ),
         )
 
-        long_label_gener = lambda group, label: " - ".join((group, label))  # noQA
+        long_label_gener = lambda group, label: " - ".join(  # noQA
+            (group, label)
+        )
 
         class Schema(colander.Schema):
             musician = colander.SchemaNode(
@@ -1805,14 +1912,24 @@ class DeformDemo(object):
 
         choices = (
             ("", "Select your favorite musician"),
-            OptGroup("Guitarists", ("page", "Jimmy Page"), ("hendrix", "Jimi Hendrix")),
-            OptGroup("Drummers", ("cobham", "Billy Cobham"), ("bonham", "John Bonham")),
+            OptGroup(
+                "Guitarists",
+                ("page", "Jimmy Page"),
+                ("hendrix", "Jimi Hendrix"),
+            ),
+            OptGroup(
+                "Drummers",
+                ("cobham", "Billy Cobham"),
+                ("bonham", "John Bonham"),
+            ),
         )
 
         class Schema(colander.Schema):
             musician = colander.SchemaNode(
                 colander.String(),
-                widget=deform.widget.SelectWidget(values=choices, readonly=True),
+                widget=deform.widget.SelectWidget(
+                    values=choices, readonly=True
+                ),
             )
             multiple_musicians = colander.SchemaNode(
                 colander.Set(),
@@ -1824,7 +1941,10 @@ class DeformDemo(object):
         schema = Schema()
         form = deform.Form(schema, buttons=("submit",))
 
-        appstruct = {"musician": "cobham", "multiple_musicians": ["cobham", "page"]}
+        appstruct = {
+            "musician": "cobham",
+            "multiple_musicians": ["cobham", "page"],
+        }
 
         return self.render_form(form, appstruct=appstruct)
 
@@ -1841,7 +1961,8 @@ class DeformDemo(object):
 
         class Schema(colander.Schema):
             pepper = colander.SchemaNode(
-                colander.String(), widget=deform.widget.Select2Widget(values=choices)
+                colander.String(),
+                widget=deform.widget.Select2Widget(values=choices),
             )
 
         schema = Schema()
@@ -1862,7 +1983,9 @@ class DeformDemo(object):
         class Schema(colander.Schema):
             pepper = colander.SchemaNode(
                 colander.Set(),
-                widget=deform.widget.Select2Widget(values=choices, multiple=True),
+                widget=deform.widget.Select2Widget(
+                    values=choices, multiple=True
+                ),
             )
 
         schema = Schema()
@@ -1877,13 +2000,22 @@ class DeformDemo(object):
 
         choices = (
             ("", "Select your favorite musician"),
-            OptGroup("Guitarists", ("page", "Jimmy Page"), ("hendrix", "Jimi Hendrix")),
-            OptGroup("Drummers", ("cobham", "Billy Cobham"), ("bonham", "John Bonham")),
+            OptGroup(
+                "Guitarists",
+                ("page", "Jimmy Page"),
+                ("hendrix", "Jimi Hendrix"),
+            ),
+            OptGroup(
+                "Drummers",
+                ("cobham", "Billy Cobham"),
+                ("bonham", "John Bonham"),
+            ),
         )
 
         class Schema(colander.Schema):
             musician = colander.SchemaNode(
-                colander.String(), widget=deform.widget.Select2Widget(values=choices)
+                colander.String(),
+                widget=deform.widget.Select2Widget(values=choices),
             )
 
         schema = Schema()
@@ -1926,7 +2058,9 @@ class DeformDemo(object):
         class Schema(colander.Schema):
             pepper = colander.SchemaNode(
                 colander.Set(),
-                widget=deform.widget.CheckboxChoiceWidget(values=choices, inline=True),
+                widget=deform.widget.CheckboxChoiceWidget(
+                    values=choices, inline=True
+                ),
                 validator=colander.Length(min=1),
             )
 
@@ -1982,7 +2116,9 @@ class DeformDemo(object):
         schema = Schema()
         form = deform.Form(schema, buttons=("submit",))
 
-        return self.render_form(form, appstruct={"pepper": ["chipotle", "jalapeno"]})
+        return self.render_form(
+            form, appstruct={"pepper": ["chipotle", "jalapeno"]}
+        )
 
     @view_config(renderer="templates/form.pt", name="i18n")
     @demonstrate("Internationalization")
@@ -1995,7 +2131,9 @@ class DeformDemo(object):
             number = colander.SchemaNode(
                 colander.Integer(),
                 title=_("A number between ${min} and ${max}", mapping=minmax),
-                description=_("A number between ${min} and ${max}", mapping=minmax),
+                description=_(
+                    "A number between ${min} and ${max}", mapping=minmax
+                ),
                 validator=colander.Range(1, 10),
             )
             _LOCALE_ = colander.SchemaNode(
@@ -2005,7 +2143,9 @@ class DeformDemo(object):
             )
 
         schema = Schema()
-        form = deform.Form(schema, buttons=[deform.Button("submit", _("Submit"))])
+        form = deform.Form(
+            schema, buttons=[deform.Button("submit", _("Submit"))]
+        )
 
         return self.render_form(form, is_i18n=True)
 
@@ -2014,7 +2154,9 @@ class DeformDemo(object):
     def hidden_field(self):
         class Schema(colander.Schema):
             sneaky = colander.SchemaNode(
-                colander.Boolean(), widget=deform.widget.HiddenWidget(), default=True
+                colander.Boolean(),
+                widget=deform.widget.HiddenWidget(),
+                default=True,
             )
 
         schema = Schema()
@@ -2125,7 +2267,9 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
-    @view_config(renderer="templates/form.pt", name="multiple_error_messages_mapping")
+    @view_config(
+        renderer="templates/form.pt", name="multiple_error_messages_mapping"
+    )
     @demonstrate("Multiple Error Messages For a Single Widget (Mapping)")
     def multiple_error_messages_mapping(self):
         def v1(node, value):
@@ -2152,7 +2296,9 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
-    @view_config(renderer="templates/form.pt", name="multiple_error_messages_seq")
+    @view_config(
+        renderer="templates/form.pt", name="multiple_error_messages_seq"
+    )
     @demonstrate("Multiple Error Messages For a Single Widget (Sequence)")
     def multiple_error_messages_seq(self):
         def v1(node, value):
@@ -2446,14 +2592,16 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(
-        renderer="templates/form.pt", name="sequence_with_prototype_that_has_no_name"
+        renderer="templates/form.pt",
+        name="sequence_with_prototype_that_has_no_name",
     )
     @demonstrate("Sequence With Prototype that Has No Name")
     def sequence_with_prototype_that_has_no_name(self):
         class EmailMessage(colander.Schema):
             subject = colander.SchemaNode(colander.String())
             to = colander.SchemaNode(
-                colander.Sequence(), colander.SchemaNode(colander.String(), name="foo")
+                colander.Sequence(),
+                colander.SchemaNode(colander.String(), name="foo"),
             )
 
         schema = EmailMessage()
@@ -2461,7 +2609,9 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
-    @view_config(renderer="templates/form.pt", name="readonly_value_nonvalidation")
+    @view_config(
+        renderer="templates/form.pt", name="readonly_value_nonvalidation"
+    )
     @demonstrate("Dont Validate Readonly Fields")
     def readonly_value_nonvalidation(self):
         @colander.deferred
@@ -2503,7 +2653,8 @@ class DeformDemo(object):
             single_select = colander.SchemaNode(
                 colander.String(),
                 widget=deform.widget.SelectWidget(
-                    values=[("a", "The letter a"), ("b", "The letter b")], readonly=True
+                    values=[("a", "The letter a"), ("b", "The letter b")],
+                    readonly=True,
                 ),
                 missing=colander.null,
                 description="A letter",
@@ -2554,7 +2705,8 @@ class DeformDemo(object):
         return self.render_form(form, appstruct=appstruct)
 
     @view_config(
-        renderer="templates/form.pt", name="custom_classes_on_outermost_html_element"
+        renderer="templates/form.pt",
+        name="custom_classes_on_outermost_html_element",
     )
     @demonstrate("Custom classes on outermost html element of Widgets")
     def custom_classes_on_outermost_html_element(self):
@@ -2619,7 +2771,9 @@ class SequenceToTextWidgetAdapter(object):
             writer = csv.writer(outfile)
             writer.writerows(cstruct)
             textrows = outfile.getvalue()
-        return self.widget.serialize(field, cstruct=textrows, readonly=readonly)
+        return self.widget.serialize(
+            field, cstruct=textrows, readonly=readonly
+        )
 
     def deserialize(self, field, pstruct):
         text = self.widget.deserialize(field, pstruct)
@@ -2652,7 +2806,9 @@ def main(global_config, **settings):
 
     session_factory = UnencryptedCookieSessionFactoryConfig("seekrit!")
     config = Configurator(settings=settings, session_factory=session_factory)
-    config.add_translation_dirs("colander:locale", "deform:locale", "deformdemo:locale")
+    config.add_translation_dirs(
+        "colander:locale", "deform:locale", "deformdemo:locale"
+    )
 
     config.include("pyramid_chameleon")
 

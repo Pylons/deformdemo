@@ -16,7 +16,10 @@ class ExampleSchema(deform.schema.CSRFSchema):
     name = colander.SchemaNode(colander.String(), title="Name")
 
     age = colander.SchemaNode(
-        colander.Int(), default=18, title="Age", description="Your age in years"
+        colander.Int(),
+        default=18,
+        title="Age",
+        description="Your age in years",
     )
 
 
@@ -47,8 +50,8 @@ def mini_example(request):
                 return HTTPFound("/")
 
             except deform.exception.ValidationFailure as e:
-                # Render a form version where errors are visible next to the fields,
-                # and the submitted values are posted back
+                # Render a form version where errors are visible next to the
+                # fields and the submitted values are posted back.
                 rendered_form = e.render()
     else:
         # Render a form with initial default values

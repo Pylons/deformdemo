@@ -38,12 +38,16 @@ def validate(data):
     if errorsOnly:
         url = url + "&level=error"
 
-    while (status == 302 or status == 301 or status == 307) and redirectCount < 10:
+    while (
+        status == 302 or status == 301 or status == 307
+    ) and redirectCount < 10:
         if redirectCount > 0:
             url = response.getheader("Location")
         parsed = urlparse.urlsplit(url)
         if parsed[0] != "http":
-            sys.stderr.write("URI scheme {0} not supported.\n".format(parsed[0]))
+            sys.stderr.write(
+                "URI scheme {0} not supported.\n".format(parsed[0])
+            )
             sys.exit(7)
         if redirectCount > 0:
             connection.close()  # previous connection
@@ -57,7 +61,9 @@ def validate(data):
         connection = httplib.HTTPConnection(parsed[1])
         connection.connect()
         connection.putrequest(
-            "POST", "{0}?{1}".format(parsed[2], parsed[3]), skip_accept_encoding=1
+            "POST",
+            "{0}?{1}".format(parsed[2], parsed[3]),
+            skip_accept_encoding=1,
         )
         connection.putheader("Accept-Encoding", "gzip")
         connection.putheader("Content-Type", contentType)

@@ -134,12 +134,15 @@ elif fileName:
     m = extPat.match(fileName)
     if m:
         ext = m.group(1)
-        ext = ext.translate(maketrans(string.ascii_uppercase, string.ascii_lowercase))
+        ext = ext.translate(
+            maketrans(string.ascii_uppercase, string.ascii_lowercase)
+        )
         if ext in extDict:
             contentType = extDict[ext]
         else:
             sys.stderr.write(
-                "Unable to guess Content-Type from file name. Please force the type.\n"
+                "Unable to guess Content-Type from file name. "
+                "Please force the type.\n"
             )
             sys.exit(3)
     else:
@@ -201,7 +204,8 @@ while status in (302, 301, 307) and redirectCount < 10:
         connection.close()  # previous connection
         print("Redirecting to %s" % url)
         print(
-            "Please press enter to continue or type 'stop' followed by enter to stop."
+            "Please press enter to continue or type 'stop' "
+            "followed by enter to stop."
         )
         if input() != "":
             sys.exit(0)

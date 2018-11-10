@@ -48,7 +48,10 @@ setupkw = dict(
     version="0.0",
     description="Demonstration application for Deform form library",
     long_description=README + "\n\n" + CHANGES,
-    classifiers=["Intended Audience :: Developers", "Programming Language :: Python"],
+    classifiers=[
+        "Intended Audience :: Developers",
+        "Programming Language :: Python",
+    ],
     keywords="web forms form generation schema validation",
     author="Chris McDonough, Agendaless Consulting",
     author_email="pylons-discuss@googlegroups.com",
@@ -62,14 +65,14 @@ setupkw = dict(
         "testing": [
             "black",
             "flake8",
-            "flake8-builtins",
-            "nose",
-            "selenium<3.0",
-            "nose-selecttests",
             "flake8-bugbear",
-            "flake8_docstrings",
+            "flake8-builtins",
             "flake8-isort",
+            "flake8_docstrings",
             "isort",
+            "nose",
+            "nose-selecttests",
+            "selenium<3.0",
         ]
     },
     entry_points="""\
