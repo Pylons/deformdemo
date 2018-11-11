@@ -71,6 +71,7 @@ setupkw = dict(
     extras_require={
         "lint": [
             "black",
+            "check-manifest",
             "flake8",
             "flake8-bugbear",
             "flake8-builtins",

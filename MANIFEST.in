@@ -1,1 +1,14 @@
-recursive-include deformdemo *
+graft deformdemo
+graft dockerfiles
+
+include *.py
+include *.sh
+include *.toml
+include *.txt
+include .isort.cfg .flake8 .dockerignore
+include buildout.cfg
+include demo.ini
+include mini.ini
+include tox.ini
+
+global-exclude __pycache__ *.py[cod]
