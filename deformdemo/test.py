@@ -2759,7 +2759,7 @@ class UnicodeEverywhereTests(Base, unittest.TestCase):
     url = test_url("/unicodeeverywhere/")
 
     def test_render_default(self):
-        description = u"子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？ " "人不知而不慍，不亦君子乎？」"
+        description = u"子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？ " u"人不知而不慍，不亦君子乎？」"
 
         self.assertTrue(u"По оживлённым берегам" in browser.page_source)
         self.assertEqual(findcss(".help-block").text, description)
@@ -2767,7 +2767,7 @@ class UnicodeEverywhereTests(Base, unittest.TestCase):
             findid_view("deformField1").get_attribute("name"), "field"
         )
         self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), "☃"
+            findid_view("deformField1").get_attribute("value"), u"☃"
         )
         self.assertEqual(findid("captured").text, "None")
 
