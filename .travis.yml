@@ -11,6 +11,8 @@ matrix:
       env: TOXENV=py27
     - python: "3.6"
       env: TOXENV=py36
+    - python: "3.6"
+      env: TOXENV=lint
 
 install:
   - travis_retry pip install tox
@@ -26,7 +28,6 @@ before_script:
   - tar -xjf /tmp/firefox-45.0.tar.bz2 --directory /tmp
   - export PATH="/tmp/firefox:$PATH"
   - echo "Using firefox version `firefox --version`"
-  - pserve demo.ini &
 
 script:
   - travis_retry tox
