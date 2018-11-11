@@ -76,6 +76,7 @@ setupkw = dict(
             "flake8-builtins",
             "flake8-isort",
             "isort",
+            "readme_renderer",
         ],
         "testing": ["nose", "nose-selecttests", "selenium<3.0"],
     },
