@@ -1481,7 +1481,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         browser.get("%s?_LOCALE_=ru" % self.url)
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
         self.assertEqual(findcss("label").text, u"Число между 1 и 10")
-        self.assertEqual(findid("deformsubmit").text, "отправить")
+        self.assertEqual(findid("deformsubmit").text, u"отправить")
 
     def test_submit_empty_en(self):
         browser.get("%s?_LOCALE_=en" % self.url)
@@ -1504,7 +1504,7 @@ class InternationalizationTests(Base, unittest.TestCase):
         )
         self.assertEqual(findid("error-deformField1").text, u"Требуется")
         self.assertEqual(findcss("label").text, u"Число между 1 и 10")
-        self.assertEqual(findid("deformsubmit").text, "отправить")
+        self.assertEqual(findid("deformsubmit").text, u"отправить")
 
     def test_submit_toolow_en(self):
         browser.get("%s?_LOCALE_=en" % self.url)
