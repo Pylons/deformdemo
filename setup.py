@@ -75,7 +75,6 @@ setupkw = dict(
             "flake8-bugbear",
             "flake8-builtins",
             "flake8-isort",
-            "flake8_docstrings",
             "isort",
             "nose",
             "nose-selecttests",
