@@ -75,13 +75,9 @@ setupkw = dict(
             "flake8-bugbear",
             "flake8-builtins",
             "flake8-isort",
-            "isort"
+            "isort",
         ],
-        "testing": [
-            "nose",
-            "nose-selecttests",
-            "selenium<3.0",
-        ]
+        "testing": ["nose", "nose-selecttests", "selenium<3.0"],
     },
     entry_points="""\
     [paste.app_factory]
