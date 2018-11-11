@@ -12,6 +12,8 @@ import time
 import unittest
 from decimal import Decimal
 
+# Test Support
+from flaky import flaky
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
@@ -20,9 +22,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
-
-# Deform Demo
-from flaky import flaky
 
 
 browser = None
@@ -1481,8 +1480,8 @@ class InternationalizationTests(Base, unittest.TestCase):
     def test_render_ru(self):
         browser.get("%s?_LOCALE_=ru" % self.url)
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
-        self.assertEqual(findcss("label").text, "Число между 1 и 10")
-        self.assertEqual(findid("deformsubmit").text, "отправить")
+        self.assertEqual(findcss("label").text, u"Число между 1 и 10")
+        self.assertEqual(findid("deformsubmit").text, u"отправить")
 
     def test_submit_empty_en(self):
         browser.get("%s?_LOCALE_=en" % self.url)
@@ -1501,11 +1500,11 @@ class InternationalizationTests(Base, unittest.TestCase):
         wait_to_click("#deformsubmit")
         self.assertEqual(
             findcss(".alert-danger .error-msg-lbl").text,
-            "Данные которые вы предоставили содержат ошибку",
+            u"Данные которые вы предоставили содержат ошибку",
         )
-        self.assertEqual(findid("error-deformField1").text, "Требуется")
-        self.assertEqual(findcss("label").text, "Число между 1 и 10")
-        self.assertEqual(findid("deformsubmit").text, "отправить")
+        self.assertEqual(findid("error-deformField1").text, u"Требуется")
+        self.assertEqual(findcss("label").text, u"Число между 1 и 10")
+        self.assertEqual(findid("deformsubmit").text, u"отправить")
 
     def test_submit_toolow_en(self):
         browser.get("%s?_LOCALE_=en" % self.url)
@@ -1528,11 +1527,11 @@ class InternationalizationTests(Base, unittest.TestCase):
         wait_to_click("#deformsubmit")
         self.assertEqual(
             findcss(".alert-danger .error-msg-lbl").text,
-            "Данные которые вы предоставили содержат ошибку",
+            u"Данные которые вы предоставили содержат ошибку",
         )
-        self.assertEqual(findid("error-deformField1").text, "0 меньше чем 1")
-        self.assertEqual(findcss("label").text, "Число между 1 и 10")
-        self.assertEqual(findid("deformsubmit").text, "отправить")
+        self.assertEqual(findid("error-deformField1").text, u"0 меньше чем 1")
+        self.assertEqual(findcss("label").text, u"Число между 1 и 10")
+        self.assertEqual(findid("deformsubmit").text, u"отправить")
 
 
 class PasswordWidgetTests(Base, unittest.TestCase):
@@ -2744,7 +2743,7 @@ class RichTextWidgetInternationalized(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Text" in browser.page_source)
-        self.assertTrue("Формат" in browser.page_source)
+        self.assertTrue(u"Формат" in browser.page_source)
 
 
 class RichTextReadonlyTests(Base, unittest.TestCase):
@@ -2760,15 +2759,15 @@ class UnicodeEverywhereTests(Base, unittest.TestCase):
     url = test_url("/unicodeeverywhere/")
 
     def test_render_default(self):
-        description = "子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？ " "人不知而不慍，不亦君子乎？」"
+        description = u"子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？ " u"人不知而不慍，不亦君子乎？」"
 
-        self.assertTrue("По оживлённым берегам" in browser.page_source)
+        self.assertTrue(u"По оживлённым берегам" in browser.page_source)
         self.assertEqual(findcss(".help-block").text, description)
         self.assertEqual(
             findid_view("deformField1").get_attribute("name"), "field"
         )
         self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), "☃"
+            findid_view("deformField1").get_attribute("value"), u"☃"
         )
         self.assertEqual(findid("captured").text, "None")
 
@@ -2776,7 +2775,7 @@ class UnicodeEverywhereTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
         self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), "☃"
+            findid_view("deformField1").get_attribute("value"), u"☃"
         )
         captured = findid("captured").text
         self.assertTrue(

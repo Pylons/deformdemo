@@ -69,18 +69,17 @@ setupkw = dict(
     zip_safe=False,
     install_requires=requires,
     extras_require={
-        "testing": [
+        "lint": [
             "black",
+            "check-manifest",
             "flake8",
             "flake8-bugbear",
             "flake8-builtins",
             "flake8-isort",
-            "flake8_docstrings",
             "isort",
-            "nose",
-            "nose-selecttests",
-            "selenium<3.0",
-        ]
+            "readme_renderer",
+        ],
+        "testing": ["nose", "nose-selecttests", "selenium<3.0"],
     },
     entry_points="""\
     [paste.app_factory]
