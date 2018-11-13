@@ -7,7 +7,6 @@ import datetime
 import logging
 import os
 import re
-import sys
 import time
 import unittest
 from decimal import Decimal
@@ -1304,7 +1303,6 @@ class HiddenmissingTests(Base, unittest.TestCase):
         )
 
 
-@unittest.skipIf(sys.version[0] == "3", "Does not work on Python 3 yet")
 class FileUploadTests(Base, unittest.TestCase):
     url = test_url("/file/")
 
@@ -1362,7 +1360,6 @@ class FileUploadTests(Base, unittest.TestCase):
         self.assertTrue(uid in findid("captured").text)
 
 
-@unittest.skipIf(sys.version[0] == "3", "Does not work on Python 3 yet")
 class FileUploadReadonlyTests(Base, unittest.TestCase):
     url = test_url("/file_readonly/")
 
@@ -1758,7 +1755,6 @@ class SequenceOfDefaultedSelectsWithInitialItemTests(Base, unittest.TestCase):
         )
 
 
-@unittest.skipIf(sys.version[0] == "3", "Does not work on Python 3 yet")
 class SequenceOfFileUploadsTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_fileuploads/")
 
@@ -1852,7 +1848,6 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
         self.assertEqual(len(upload_filenames), 1)
 
 
-@unittest.skipIf(sys.version[0] == "3", "Does not work on Python 3 yet")
 class SequenceOfFileUploadsWithInitialItemTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_fileuploads_with_initial_item/")
 
