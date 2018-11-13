@@ -1,34 +1,28 @@
-from pyramid.paster import bootstrap
-from deformdemo import DeformDemo
-import unittest
-import httplib
-import sys
-import re
-import urlparse
+# Standard Library
 import gzip
-import StringIO
+import httplib
 import json
+import StringIO
+import sys
+import unittest
+import urlparse
+
+# Pyramid
+from pyramid.paster import bootstrap
+
+from six.moves import input
+
+# Deform Demo
+from deformdemo import DeformDemo
 
 
 def validate(data):
-
-    extPat = re.compile(r'^.*\.([A-Za-z]+)$')
-    extDict = {
-        "html": "text/html",
-        "htm": "text/html",
-        "xhtml": "application/xhtml+xml",
-        "xht": "application/xhtml+xml",
-        "xml": "application/xml",
-    }
-
-
     errorsOnly = 0
-    encoding = None
     contentType = "text/html"
-    service = 'http://html5.validator.nu/'
+    service = "http://html5.validator.nu/"
 
     buf = StringIO.StringIO()
-    gzipper = gzip.GzipFile(fileobj=buf, mode='wb')
+    gzipper = gzip.GzipFile(fileobj=buf, mode="wb")
     gzipper.write(data)
     gzipper.close()
     gzippeddata = buf.getvalue()
@@ -39,30 +33,41 @@ def validate(data):
     status = 302
     redirectCount = 0
 
-    url = service + '?out=json'
-    url = service + '?out=text'
+    url = service + "?out=json"
+    url = service + "?out=text"
     if errorsOnly:
-        url = url + '&level=error'
+        url = url + "&level=error"
 
-    while (status == 302 or status == 301 or status == 307) and redirectCount < 10:
+    while (
+        status == 302 or status == 301 or status == 307
+    ) and redirectCount < 10:
         if redirectCount > 0:
-            url = response.getheader('Location')
+            url = response.getheader("Location")
         parsed = urlparse.urlsplit(url)
-        if parsed[0] != 'http':
-            sys.stderr.write('URI scheme %s not supported.\n' % parsed[0])
+        if parsed[0] != "http":
+            sys.stderr.write(
+                "URI scheme {0} not supported.\n".format(parsed[0])
+            )
             sys.exit(7)
         if redirectCount > 0:
-            connection.close() # previous connection
-            print 'Redirecting to %s' % url
-            print 'Please press enter to continue or type "stop" followed by enter to stop.'
-            if raw_input() != "":
+            connection.close()  # previous connection
+            print("Redirecting to {0}".format(url))
+            print(
+                "Please press enter to continue or type 'stop' "
+                "followed by enter to stop."
+            )
+            if input() != "":
                 sys.exit(0)
         connection = httplib.HTTPConnection(parsed[1])
         connection.connect()
-        connection.putrequest("POST", "%s?%s" % (parsed[2], parsed[3]), skip_accept_encoding=1)
-        connection.putheader("Accept-Encoding", 'gzip')
+        connection.putrequest(
+            "POST",
+            "{0}?{1}".format(parsed[2], parsed[3]),
+            skip_accept_encoding=1,
+        )
+        connection.putheader("Accept-Encoding", "gzip")
         connection.putheader("Content-Type", contentType)
-        connection.putheader("Content-Encoding", 'gzip')
+        connection.putheader("Content-Encoding", "gzip")
         connection.putheader("Content-Length", len(gzippeddata))
         connection.endheaders()
         connection.send(gzippeddata)
@@ -71,10 +76,10 @@ def validate(data):
         redirectCount += 1
 
     if status != 200:
-        sys.stderr.write('%s %s\n' % (status, response.reason))
+        sys.stderr.write("%s %s\n" % (status, response.reason))
         sys.exit(5)
 
-    if response.getheader('Content-Encoding', 'identity').lower() == 'gzip':
+    if response.getheader("Content-Encoding", "identity").lower() == "gzip":
         response = gzip.GzipFile(fileobj=StringIO.StringIO(response.read()))
 
     connection.close()
@@ -83,13 +88,13 @@ def validate(data):
     return result
 
 
-
 class FunctionalTests(unittest.TestCase):
     def setUp(self):
-        bs = bootstrap('demo.ini')
-        app = bs['app']
-        self.request = bs['request']
+        bs = bootstrap("demo.ini")
+        app = bs["app"]
+        self.request = bs["request"]
         from webtest import TestApp
+
         self.testapp = TestApp(app)
         self.demos = DeformDemo(self.request)
 
@@ -99,16 +104,17 @@ class FunctionalTests(unittest.TestCase):
         for demo in demos_urls:
             res = self.testapp.get(demo[1], status=200)
             check = validate(res.body)
-            #import pdb; pdb.set_trace()  # NOQA
+            # import pdb; pdb.set_trace()  # NOQA
             try:
                 self.assertFalse(check)
-                print demo[0], "."
-            except AssertionError, e:
+                print(demo[0], ".")
+            except AssertionError:
                 errors.append((demo[0], check))
-                print demo[0], "E"
-                print check
-                print
-        #self.assertFalse(errors)
+                print(demo[0], "E")
+                print(check)
+                print("")
+        # self.assertFalse(errors)
 
-if __name__ == '__main__':
+
+if __name__ == "__main__":
     unittest.main()

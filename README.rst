@@ -5,18 +5,40 @@ Deform Demo
            :target: https://travis-ci.org/Pylons/deformdemo
 
 Demonstration application for the `Deform
-<http://docs.pylonsproject.org/projects/deform/dev/>`_ Python HTML form
-library.  Please see http://deformdemo.repoze.org for a running version
-of this application.
+<https://docs.pylonsproject.org/projects/deform/en/latest>`_ Python HTML form
+library.
 
-Running the Demo
-----------------
 
-- Create a virtualenv::
+Online version
+--------------
 
-    $ virtualenv2.7 --no-site-packages /path/to/my/venv
+Visit https://deformdemo.pylonsproject.org
 
-  Hereafter ``/path/to/my/venv`` will be referred to as $VENV in steps
+
+Docker version
+--------------
+
+Run the latest version of this application with Docker.
+
+.. code-block:: console
+
+    docker run -d -p 8000:8522 pylons/deformdemo:latest
+
+
+Then, in your browser, visit http://localhost:8080
+
+
+From source
+-----------
+
+This application supports Python versions 2.7, 3.4, 3.5, 3.6, and 3.7, but
+ we strongly recommend you use Python >=3.5.
+
+- Create a virtual environment::
+
+    $ python3 -m venv /path/to/my/env
+
+  Hereafter ``/path/to/my/env`` will be referred to as $VENV in steps
   below.
 
 - Get a checkout of deformdemo::
@@ -27,16 +49,17 @@ Running the Demo
 
     $ cd deformdemo
 
-- Run ``setup.py dev`` using the virtualenv's ``python`` command::
+- Run ``pip install -e .`` using the virtual environment's ``python`` command::
 
-    $ $VENV/bin/python setup.py dev
+    $ $VENV/bin/pip install -e .
 
 - While your working directory is still ``deformdemo``, start the demo
   application::
 
     $ $VENV/bin/pserve demo.ini
 
-- Visit http://localhost:8522 in a browser to see the demo.
+- Visit http://localhost:8000 in a browser to see the demo.
+
 
 Running the Demo's Selenium Tests
 ---------------------------------
@@ -53,7 +76,11 @@ wise to run these tests before submitting a patch.  Here's how:
 - In the other terminal window, cd to the "deformdemo" checkout directory
   you created above in "Running the Demo"::
 
-   $ cd /path/to/my/deformdemo/checkout
+    $ cd /path/to/my/deformdemo/checkout
+
+- Run ``pip install -e ".[testing]"`` using the virtual environment's ``python`` command, but this time install the testing requirements::
+
+    $ $VENV/bin/pip install -e ".[testing]"
 
 - Run the tests::
 
@@ -72,6 +99,7 @@ wise to run these tests before submitting a patch.  Here's how:
 
 - Fix any errors by modifying your code or by modifying the tests to
   expect the changes you've made.
+
 
 Testing an Alternate Renderer Implementation
 --------------------------------------------
