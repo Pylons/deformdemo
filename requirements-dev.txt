@@ -1,5 +1,5 @@
-git+https://github.com/Pylons/deform.git#egg=deform
-git+https://github.com/Pylons/colander.git#egg=colander
+-e git+https://github.com/Pylons/deform.git#egg=deform
+-e git+https://github.com/Pylons/colander.git#egg=colander
 selenium<3
 flaky
 -e ".[testing]"
