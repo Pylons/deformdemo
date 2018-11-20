@@ -22,7 +22,7 @@ Run the latest version of this application with Docker.
 
 .. code-block:: console
 
-    docker run -d -p 8000:8522 pylons/deformdemo:latest
+    docker run -d -p 8000:8522 pylons/deformdemo:v2.0.7
 
 
 Then, in your browser, visit http://localhost:8080

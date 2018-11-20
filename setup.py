@@ -45,7 +45,7 @@ if not PY3:
 
 setupkw = dict(
     name="deformdemo",
-    version="1.0a1",
+    version="2.0.7",
     description="Demonstration application for Deform form library",
     long_description=README + "\n\n" + CHANGES,
     classifiers=[
