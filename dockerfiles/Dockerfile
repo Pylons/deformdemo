@@ -31,6 +31,6 @@ WORKDIR /app
 COPY demo.ini mini.ini /app/
 COPY dockerfiles/entrypoint.sh /usr/local/bin/entrypoint.sh
 
-ENTRYPOINT ["/sbin/tini", "--", "/usr/local/bin/entrypoint.sh"]
-
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["pserve", "/app/demo.ini"]
 EXPOSE 8522
