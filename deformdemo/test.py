@@ -81,6 +81,18 @@ def give_selenium_some_time(func):
     return inner
 
 
+def action_chains_on_id(eid):
+    return ActionChains(browser).move_to_element(WebDriverWait(
+                browser, SELENIUM_IMPLICIT_WAIT).until(
+                    EC.element_to_be_clickable((By.ID, eid))))
+
+
+def action_chains_on_xpath(expath):
+    return ActionChains(browser).move_to_element(WebDriverWait(
+                browser, SELENIUM_IMPLICIT_WAIT).until(
+                    EC.element_to_be_clickable((By.XPATH, expath))))
+
+
 @give_selenium_some_time
 def findid(elid, clickable=True):
     """Find Selenium element by CSS id.
@@ -503,7 +515,7 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
 
         # Ensure the masked input has a focus and ### mask
         # has kicked in
-        findid("deformField1").send_keys("0")
+        action_chains_on_id("deformField1").send_keys("0").perform()
 
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), "0##-##-####"
@@ -526,12 +538,15 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
             in ("", "###-##-####")
         )
 
-    def test_submit_success(self):
-        findid("deformField1").send_keys("140118866")
+        action_chains_on_id("deformField1").send_keys("140118866").perform()
+
         browser.execute_script(
             'document.getElementById("deformField1-confirm").focus();'
         )
-        findid("deformField1-confirm").send_keys("140118866")
+
+        action_chains_on_id("deformField1-confirm").\
+            send_keys("140118866").perform()
+
         wait_to_click("#deformsubmit")
         time.sleep(1)  # SUPER FLAKY
         text = findid_view("captured").text
@@ -2150,10 +2165,12 @@ class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
 
     def test_submit_one_filled(self):
         browser.get(self.url)
-        findid("deformField1-seqAdd").click()
-        textbox = findxpaths('//input[@name="text"]')[0]
-        textbox.click()
-        textbox.send_keys("140118866")
+        action_chains_on_id("deformField1-seqAdd").click().perform()
+
+        action_chains_on_xpath('//input[@name="text"]').click().\
+            send_keys(Keys.HOME).send_keys(
+                "140118866").perform()
+
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
         captured = findid("captured").text
@@ -2562,9 +2579,15 @@ class MoneyInputWidgetTests(Base, unittest.TestCase):
         )
 
     def test_submit_filled(self):
-        findid("deformField1").send_keys("1")
-        findid("deformField1").send_keys(5 * Keys.ARROW_LEFT)
-        findid("deformField1").send_keys("10")
+        action_chains_on_id("deformField1").send_keys(
+                          "1").perform()
+
+        action_chains_on_id("deformField1").send_keys(
+                          5 * Keys.ARROW_LEFT).perform()
+
+        action_chains_on_id("deformField1").send_keys(
+                          "10").perform()
+
         findid("deformsubmit").click()
         self.assertEqual(
             findid("captured").text, "{'greenbacks': Decimal('100.01')}"
@@ -2633,11 +2656,15 @@ class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_filled(self):
-        findid("deformField1").send_keys("t")
+        action_chains_on_id("deformField1").\
+            send_keys(Keys.HOME).send_keys("t").perform()
+
         time.sleep(2)
         self.assertTrue(findxpath('//p[text()="two"]').is_displayed())
         self.assertTrue(findxpath('//p[text()="three"]').is_displayed())
-        findcss(".tt-suggestion").click()
+
+        action_chains_on_xpath('//p[text()="two"]').click().perform()
+
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
 
@@ -3113,9 +3140,8 @@ class TextInputMaskTests(Base, unittest.TestCase):
     url = test_url("/text_input_masks/")
 
     def test_render_default(self):
-        findid("deformField1").click()
-        findid("deformField1").send_keys(11 * Keys.ARROW_LEFT)
-        findid("deformField1").send_keys("0")
+        action_chains_on_id("deformField1").\
+            send_keys(Keys.HOME).send_keys("0").perform()
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), "0__-__-____"
         )
@@ -3127,26 +3153,25 @@ class TextInputMaskTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
 
     def test_type_bad_input(self):
-        findid("deformField1").click()
-        findid("deformField1").send_keys(11 * Keys.ARROW_LEFT)
-        findid("deformField1").send_keys("0a")
+        action_chains_on_id("deformField1").\
+            send_keys(Keys.HOME).send_keys("0a").perform()
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), "0__-__-____"
         )
-        findid("deformField2").click()
-        findid("deformField2").send_keys("0a")
-
+        action_chains_on_id("deformField2").click().\
+            send_keys(Keys.HOME).send_keys("0a").perform()
         self.assertEqual(
             findid("deformField2").get_attribute("value"), "0_/__/____"
         )
 
     def test_submit_success(self):
-        findid("deformField1").send_keys("")
-        findid("deformField1").send_keys("140118866")
+        action_chains_on_id("deformField1").\
+            send_keys(Keys.HOME).send_keys("140118866").perform()
         browser.execute_script(
             'document.getElementById("deformField2").focus();'
         )
-        findid("deformField2").send_keys("10102010")
+        action_chains_on_id("deformField2").\
+            send_keys(Keys.HOME).send_keys("10102010").perform()
         wait_to_click("#deformsubmit")
         self.assertEqual(
             eval(findid("captured").text),
