@@ -2863,43 +2863,52 @@ class SequenceOrderableTests(Base, unittest.TestCase):
         self.assertEqual(findid("deformField1-addtext").text, "Add Person")
 
     def test_submit_complex_interaction(self):
-        findid("deformField1-seqAdd").click()
+        action_chains_on_id("deformField1-seqAdd").click().perform()
 
         # A single item shouldn't have an active reorder button.
         self.assertEqual(len(findcsses(".deform-order-button")), 1)
         self.assertFalse(findcsses(".deform-order-button")[0].is_displayed())
 
         # add a second
-        findid("deformField1-seqAdd").click()
+        action_chains_on_id("deformField1-seqAdd").click().perform()
         # Now there should be 2 active reorder buttons.
         self.assertEqual(len(findcsses(".deform-order-button")), 2)
-        self.assertTrue(findcsses(".deform-order-button")[0].is_displayed())
-        self.assertTrue(findcsses(".deform-order-button")[1].is_displayed())
 
         # add a third
-        findid("deformField1-seqAdd").click()
-        findxpaths('//input[@name="name"]')[0].send_keys("Name1")
-        findxpaths('//input[@name="age"]')[0].send_keys("11")
-        findxpaths('//input[@name="name"]')[1].send_keys("Name2")
-        findxpaths('//input[@name="age"]')[1].send_keys("22")
-        findxpaths('//input[@name="name"]')[2].send_keys("Name3")
-        findxpaths('//input[@name="age"]')[2].send_keys("33")
+        action_chains_on_id("deformField1-seqAdd").click().perform()
+        time.sleep(2)
+        input_ages = browser.find_elements_by_xpath('//input[@name="age"]')
+        input_names = browser.find_elements_by_xpath('//input[@name="name"]')
 
-        order1_id = findcsses(".deform-order-button")[0].get_attribute("id")
-        order3_id = findcsses(".deform-order-button")[2].get_attribute("id")
+        ActionChains(browser).move_to_element(
+            input_names[0]).click().send_keys("Name1").perform()
+        ActionChains(browser).move_to_element(
+            input_ages[0]).click().send_keys("11").perform()
+
+        ActionChains(browser).move_to_element(
+            input_names[1]).click().send_keys("Name2").perform()
+        ActionChains(browser).move_to_element(
+            input_ages[1]).click().send_keys("22").perform()
+
+        ActionChains(browser).move_to_element(
+            input_names[2]).click().send_keys("Name3").perform()
+        ActionChains(browser).move_to_element(
+            input_ages[2]).click().send_keys("33").perform()
+
         seq_height = findcss(".deform-seq-item").size["height"]
 
+        persons = browser.find_elements_by_xpath(
+            '//div[@class="panel-heading"][contains(text(), "Person")]')
+
         # Move item 3 up two
-        actions = ActionChains(browser)
-        actions.drag_and_drop_by_offset(
-            findid(order3_id), 0, -seq_height * 2.5
+        ActionChains(browser).drag_and_drop_by_offset(
+            persons[2], 0, -seq_height * 2.5
         ).perform()
 
         # Move item 1 down one slot (actually a little more than 1 is
         # needed to trigger jQuery Sortable when dragging down, so use 1.5).
-        actions = ActionChains(browser)
-        actions.drag_and_drop_by_offset(
-            findid(order1_id), 0, seq_height * 1.5
+        ActionChains(browser).drag_and_drop_by_offset(
+            persons[0], 0, seq_height * 1.5
         ).perform()
 
         findid("deformsubmit").click()
