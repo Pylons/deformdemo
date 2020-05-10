@@ -97,6 +97,12 @@ def action_chains_on_xpath(expath):
     )
 
 
+def action_chains_xpath_on_select(option_xpath):
+    return ActionChains(browser).move_to_element(
+           browser.find_element_by_xpath(option_xpath)
+           )
+
+
 @give_selenium_some_time
 def findid(elid, clickable=True):
     """Find Selenium element by CSS id.
@@ -2024,19 +2030,16 @@ class SequenceOfAutocompletes(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_two_filled(self):
-        findid("deformField1-seqAdd").click()
-        self.assertEqual(
-            findxpaths('//input[@name="text"]')[0].get_attribute("class"),
-            "form-control  tt-query",
-        )
-        findxpaths('//input[@name="text"]')[0].send_keys("bar")
-
-        findid("deformField1-seqAdd").click()
-        self.assertEqual(
-            findxpaths('//input[@name="text"]')[1].get_attribute("class"),
-            "form-control  tt-query",
-        )
-        findxpaths('//input[@name="text"]')[1].send_keys("baz")
+        action_chains_on_id("deformField1-seqAdd").click().perform()
+        input_text = browser.find_elements_by_xpath('//input[@name="text"]')
+        ActionChains(browser).move_to_element(
+            input_text[0]
+        ).click().send_keys("bar").send_keys(Keys.TAB).perform()
+        action_chains_on_id("deformField1-seqAdd").click().perform()
+        input_text = browser.find_elements_by_xpath('//input[@name="text"]')
+        ActionChains(browser).move_to_element(
+            input_text[1]
+        ).click().send_keys("baz").click().perform()
         wait_to_click("#deformsubmit")
         self.assertEqual(
             eval(findid("captured").text), {"texts": ["bar", "baz"]}
@@ -2067,8 +2070,8 @@ class SequenceOfDateInputs(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_one_filled(self):
-        wait_to_click("#deformField1-seqAdd")
-        wait_to_click('input[type="date"]')
+        action_chains_on_id("deformField1-seqAdd").click().perform()
+        action_chains_on_xpath('//input[@name="date"]').click().perform()
         wait_picker_to_show_up()
         findcss(".picker__button--today").click()
         submit_date_picker_safe()
@@ -2387,10 +2390,8 @@ class SelectReadonlyTests(Base, unittest.TestCase):
 
 class Select2WidgetTests(Base, unittest.TestCase):
     url = test_url("/select2/")
-    submit_selected_captured = (
-        "{'pepper': u'habanero'}",
-        "{'pepper': 'habanero'}",
-    )
+    first_selected_captured = ("{'pepper': 'habanero'}")
+    second_selected_captured = ("{'pepper': 'jalapeno'}")
 
     def test_render_default(self):
         self.assertTrue("Pepper" in browser.page_source)
@@ -2417,18 +2418,21 @@ class Select2WidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_selected(self):
-        select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
-        options[1].click()
+        action_chains_xpath_on_select("//select[@name='pepper']/option").\
+            click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
-        select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
-        # TODO: The form state is not hold over POST in demo
-        # and disabled for now
-        # self.assertTrue(options[1].is_selected())
         self.assertTrue(
-            findid("captured").text in self.submit_selected_captured
+            findid("captured").text in self.first_selected_captured
+        )
+
+        action_chains_xpath_on_select(
+            "//select[@name='pepper']/option[@selected='selected']").\
+            click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+        findid("deformsubmit").click()
+        self.assertTrue(
+            findid("captured").text in self.second_selected_captured
         )
 
 
@@ -2436,11 +2440,15 @@ class Select2WidgetMultipleTests(Base, unittest.TestCase):
     url = test_url("/select2_with_multiple/")
 
     def test_submit_selected(self):
-        select = findid("deformField1")
-        self.assertTrue(select.get_attribute("multiple"))
-        options = select.find_elements_by_tag_name("option")
-        options[0].click()
-        options[2].click()
+        action_chains_xpath_on_select("//select[@name='pepper']/option").\
+            click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ARROW_DOWN).\
+            send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+
+        time.sleep(1)
+
+        action_chains_xpath_on_select("//select[@name='pepper']/option").\
+            click().send_keys(Keys.ARROW_UP).send_keys(Keys.ARROW_UP).\
+            send_keys(Keys.ARROW_UP).send_keys(Keys.ENTER).perform()
 
         findid("deformsubmit").click()
 
@@ -2451,6 +2459,9 @@ class Select2WidgetMultipleTests(Base, unittest.TestCase):
 
 class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
     url = test_url("/select2_with_optgroup/")
+
+    first_selected_captured = ("{'musician': 'page'}")
+    second_selected_captured = ("{'musician': 'bonham'}")
 
     def test_render_default(self):
         self.assertTrue("Musician" in browser.page_source)
@@ -2474,18 +2485,24 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
         self.assertEqual(len(findxpaths("//optgroup")), 2)
 
     def test_submit_selected(self):
-        select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
-        options[1].click()
+        action_chains_xpath_on_select("//select[@name='musician']/option").\
+            click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
-        select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
-        # TODO: The form state is not carried over POST in demo and
-        # this cannot be tested anymore
-        # self.assertTrue(options[1].is_selected())
         captured = findid("captured").text
-        self.assertSimilarRepr(captured, "{'musician': 'page'}")
+        self.assertSimilarRepr(captured, self.first_selected_captured)
+
+        time.sleep(1)
+
+        action_chains_xpath_on_select(
+            "//option[contains(text(), 'Page')]").\
+            click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ARROW_DOWN).\
+            send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+        findid("deformsubmit").click()
+        self.assertTrue(
+            findid("captured").text in self.second_selected_captured
+        )
 
 
 class SelectWithDefaultTests(Base, unittest.TestCase):
