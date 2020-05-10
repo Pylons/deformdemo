@@ -527,8 +527,8 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
 
     def test_type_bad_input(self):
-        findid("deformField1").send_keys("a")
-        findid("deformField1-confirm").send_keys("a")
+        action_chains_on_id("deformField1").send_keys("a")
+        action_chains_on_id("deformField1-confirm").send_keys("a")
         self.assertTrue(
             findid_view("deformField1").get_attribute("value")
             in ("", "###-##-####")
