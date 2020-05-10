@@ -3121,27 +3121,34 @@ class AjaxFormTests(Base, unittest.TestCase):
         findid("deformField4").send_keys("2010")
         findid("deformField4-month").send_keys("1")
         findid("deformField4-day").send_keys("1")
-        browser.switch_to_frame(browser.find_element_by_tag_name("iframe"))
+        browser.switch_to.frame(browser.find_element_by_tag_name("iframe"))
         findid("tinymce").send_keys("yo")
-        browser.switch_to_default_content()
+        browser.switch_to.default_content()
         source = browser.page_source
         wait_to_click("#deformsubmit")
         wait_for_ajax(source)
-        self.assertEquals(findid("thanks").text, "Thanks!")
+        self.assertEqual(findid("thanks").text, "Thanks!")
 
 
 class RedirectingAjaxFormTests(AjaxFormTests):
     url = test_url("/ajaxform_redirect/")
 
     def test_submit_success(self):
-        findid("deformField1").send_keys("1")
-        findid("deformField3").send_keys("name")
-        findid("deformField4").send_keys("2010")
-        findid("deformField4-month").send_keys("1")
-        findid("deformField4-day").send_keys("1")
+        action_chains_on_id("deformField1").\
+            click().send_keys("1").perform()
+        action_chains_on_id("deformField3").\
+            click().send_keys("name").perform()
+        action_chains_on_id("deformField4").\
+            click().send_keys("2010").perform()
+        action_chains_on_id("deformField4-month").\
+            click().send_keys("1").perform()
+        action_chains_on_id("deformField4-day").\
+            click().send_keys("1").perform()
         source = browser.page_source
         wait_to_click("#deformsubmit")
         wait_for_ajax(source)
+        WebDriverWait(browser, 10).until(
+            EC.url_contains("thanks.html"))
         self.assertTrue(browser.current_url.endswith("thanks.html"))
 
 
