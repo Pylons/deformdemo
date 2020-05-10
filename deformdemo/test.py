@@ -3163,21 +3163,19 @@ class RedirectingAjaxFormTests(AjaxFormTests):
     url = test_url("/ajaxform_redirect/")
 
     def test_submit_success(self):
-        action_chains_on_id("deformField1").\
-            click().send_keys("1").perform()
-        action_chains_on_id("deformField3").\
-            click().send_keys("name").perform()
-        action_chains_on_id("deformField4").\
-            click().send_keys("2010").perform()
-        action_chains_on_id("deformField4-month").\
-            click().send_keys("1").perform()
-        action_chains_on_id("deformField4-day").\
-            click().send_keys("1").perform()
+        action_chains_on_id("deformField1").click().send_keys("1").perform()
+        action_chains_on_id("deformField3").click().send_keys("name").perform()
+        action_chains_on_id("deformField4").click().send_keys("2010").perform()
+        action_chains_on_id("deformField4-month").click().send_keys(
+            "1"
+        ).perform()
+        action_chains_on_id("deformField4-day").click().send_keys(
+            "1"
+        ).perform()
         source = browser.page_source
         wait_to_click("#deformsubmit")
         wait_for_ajax(source)
-        WebDriverWait(browser, 10).until(
-            EC.url_contains("thanks.html"))
+        WebDriverWait(browser, 10).until(EC.url_contains("thanks.html"))
         self.assertTrue(browser.current_url.endswith("thanks.html"))
 
 
