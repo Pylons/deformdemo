@@ -99,8 +99,8 @@ def action_chains_on_xpath(expath):
 
 def action_chains_xpath_on_select(option_xpath):
     return ActionChains(browser).move_to_element(
-           browser.find_element_by_xpath(option_xpath)
-           )
+        browser.find_element_by_xpath(option_xpath)
+    )
 
 
 @give_selenium_some_time
@@ -2032,14 +2032,14 @@ class SequenceOfAutocompletes(Base, unittest.TestCase):
     def test_submit_two_filled(self):
         action_chains_on_id("deformField1-seqAdd").click().perform()
         input_text = browser.find_elements_by_xpath('//input[@name="text"]')
-        ActionChains(browser).move_to_element(
-            input_text[0]
-        ).click().send_keys("bar").send_keys(Keys.TAB).perform()
+        ActionChains(browser).move_to_element(input_text[0]).click().send_keys(
+            "bar"
+        ).send_keys(Keys.TAB).perform()
         action_chains_on_id("deformField1-seqAdd").click().perform()
         input_text = browser.find_elements_by_xpath('//input[@name="text"]')
-        ActionChains(browser).move_to_element(
-            input_text[1]
-        ).click().send_keys("baz").click().perform()
+        ActionChains(browser).move_to_element(input_text[1]).click().send_keys(
+            "baz"
+        ).click().perform()
         wait_to_click("#deformsubmit")
         self.assertEqual(
             eval(findid("captured").text), {"texts": ["bar", "baz"]}
@@ -2390,8 +2390,8 @@ class SelectReadonlyTests(Base, unittest.TestCase):
 
 class Select2WidgetTests(Base, unittest.TestCase):
     url = test_url("/select2/")
-    first_selected_captured = ("{'pepper': 'habanero'}")
-    second_selected_captured = ("{'pepper': 'jalapeno'}")
+    first_selected_captured = "{'pepper': 'habanero'}"
+    second_selected_captured = "{'pepper': 'jalapeno'}"
 
     def test_render_default(self):
         self.assertTrue("Pepper" in browser.page_source)
@@ -2418,8 +2418,9 @@ class Select2WidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_selected(self):
-        action_chains_xpath_on_select("//select[@name='pepper']/option").\
-            click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+        action_chains_xpath_on_select(
+            "//select[@name='pepper']/option"
+        ).click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
 
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
@@ -2428,8 +2429,8 @@ class Select2WidgetTests(Base, unittest.TestCase):
         )
 
         action_chains_xpath_on_select(
-            "//select[@name='pepper']/option[@selected='selected']").\
-            click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+            "//select[@name='pepper']/option[@selected='selected']"
+        ).click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
         findid("deformsubmit").click()
         self.assertTrue(
             findid("captured").text in self.second_selected_captured
@@ -2440,15 +2441,25 @@ class Select2WidgetMultipleTests(Base, unittest.TestCase):
     url = test_url("/select2_with_multiple/")
 
     def test_submit_selected(self):
-        action_chains_xpath_on_select("//select[@name='pepper']/option").\
-            click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ARROW_DOWN).\
-            send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+        action_chains_xpath_on_select(
+            "//select[@name='pepper']/option"
+        ).click().send_keys(Keys.ARROW_DOWN).send_keys(
+            Keys.ARROW_DOWN
+        ).send_keys(
+            Keys.ARROW_DOWN
+        ).send_keys(
+            Keys.ENTER
+        ).perform()
 
         time.sleep(1)
 
-        action_chains_xpath_on_select("//select[@name='pepper']/option").\
-            click().send_keys(Keys.ARROW_UP).send_keys(Keys.ARROW_UP).\
-            send_keys(Keys.ARROW_UP).send_keys(Keys.ENTER).perform()
+        action_chains_xpath_on_select(
+            "//select[@name='pepper']/option"
+        ).click().send_keys(Keys.ARROW_UP).send_keys(Keys.ARROW_UP).send_keys(
+            Keys.ARROW_UP
+        ).send_keys(
+            Keys.ENTER
+        ).perform()
 
         findid("deformsubmit").click()
 
@@ -2460,8 +2471,8 @@ class Select2WidgetMultipleTests(Base, unittest.TestCase):
 class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
     url = test_url("/select2_with_optgroup/")
 
-    first_selected_captured = ("{'musician': 'page'}")
-    second_selected_captured = ("{'musician': 'bonham'}")
+    first_selected_captured = "{'musician': 'page'}"
+    second_selected_captured = "{'musician': 'bonham'}"
 
     def test_render_default(self):
         self.assertTrue("Musician" in browser.page_source)
@@ -2485,8 +2496,9 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
         self.assertEqual(len(findxpaths("//optgroup")), 2)
 
     def test_submit_selected(self):
-        action_chains_xpath_on_select("//select[@name='musician']/option").\
-            click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+        action_chains_xpath_on_select(
+            "//select[@name='musician']/option"
+        ).click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
 
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
@@ -2496,9 +2508,14 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
         time.sleep(1)
 
         action_chains_xpath_on_select(
-            "//option[contains(text(), 'Page')]").\
-            click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ARROW_DOWN).\
-            send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+            "//option[contains(text(), 'Page')]"
+        ).click().send_keys(Keys.ARROW_DOWN).send_keys(
+            Keys.ARROW_DOWN
+        ).send_keys(
+            Keys.ARROW_DOWN
+        ).send_keys(
+            Keys.ENTER
+        ).perform()
         findid("deformsubmit").click()
         self.assertTrue(
             findid("captured").text in self.second_selected_captured
