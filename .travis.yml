@@ -2,7 +2,7 @@
 language: python
 
 addons:
-  firefox: "45.0"
+  firefox: latest
 
 services:
   - xvfb
@@ -15,6 +15,7 @@ matrix:
       env: TOXENV=lint
 
 install:
+  - pip install selenium
   - travis_retry pip install tox
 
 # For Selenium
@@ -24,9 +25,6 @@ install:
 before_script:
   - "export DISPLAY=:99.0"
   - sleep 3 # give xvfb some time to start
-  - echo "Extracting firefox and setting PATH variable..."
-  - tar -xjf /tmp/firefox-45.0.tar.bz2 --directory /tmp
-  - export PATH="/tmp/firefox:$PATH"
   - echo "Using firefox version `firefox --version`"
 
 script:
