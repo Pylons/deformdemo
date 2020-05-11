@@ -81,6 +81,28 @@ def give_selenium_some_time(func):
     return inner
 
 
+def action_chains_on_id(eid):
+    return ActionChains(browser).move_to_element(
+        WebDriverWait(browser, SELENIUM_IMPLICIT_WAIT).until(
+            EC.element_to_be_clickable((By.ID, eid))
+        )
+    )
+
+
+def action_chains_on_xpath(expath):
+    return ActionChains(browser).move_to_element(
+        WebDriverWait(browser, SELENIUM_IMPLICIT_WAIT).until(
+            EC.element_to_be_clickable((By.XPATH, expath))
+        )
+    )
+
+
+def action_chains_xpath_on_select(option_xpath):
+    return ActionChains(browser).move_to_element(
+        browser.find_element_by_xpath(option_xpath)
+    )
+
+
 @give_selenium_some_time
 def findid(elid, clickable=True):
     """Find Selenium element by CSS id.
@@ -233,6 +255,7 @@ def setUpModule():
         )
         try:
             browser = Firefox(firefox_binary=binary)
+            browser.set_window_size(1920, 1080)
         except WebDriverException:
             if os.path.exists(BROKEN_SELENIUM_LOG_FILE):
                 print("Selenium says no")
@@ -503,7 +526,7 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
 
         # Ensure the masked input has a focus and ### mask
         # has kicked in
-        findid("deformField1").send_keys("0")
+        action_chains_on_id("deformField1").send_keys("0").perform()
 
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), "0##-##-####"
@@ -515,8 +538,8 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
 
     def test_type_bad_input(self):
-        findid("deformField1").send_keys("a")
-        findid("deformField1-confirm").send_keys("a")
+        action_chains_on_id("deformField1").send_keys("a").perform()
+        action_chains_on_id("deformField1-confirm").send_keys("a").perform()
         self.assertTrue(
             findid_view("deformField1").get_attribute("value")
             in ("", "###-##-####")
@@ -526,12 +549,16 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
             in ("", "###-##-####")
         )
 
-    def test_submit_success(self):
-        findid("deformField1").send_keys("140118866")
+        action_chains_on_id("deformField1").send_keys("140118866").perform()
+
         browser.execute_script(
             'document.getElementById("deformField1-confirm").focus();'
         )
-        findid("deformField1-confirm").send_keys("140118866")
+
+        action_chains_on_id("deformField1-confirm").send_keys(
+            "140118866"
+        ).perform()
+
         wait_to_click("#deformsubmit")
         time.sleep(1)  # SUPER FLAKY
         text = findid_view("captured").text
@@ -2004,19 +2031,16 @@ class SequenceOfAutocompletes(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_two_filled(self):
-        findid("deformField1-seqAdd").click()
-        self.assertEqual(
-            findxpaths('//input[@name="text"]')[0].get_attribute("class"),
-            "form-control  tt-query",
-        )
-        findxpaths('//input[@name="text"]')[0].send_keys("bar")
-
-        findid("deformField1-seqAdd").click()
-        self.assertEqual(
-            findxpaths('//input[@name="text"]')[1].get_attribute("class"),
-            "form-control  tt-query",
-        )
-        findxpaths('//input[@name="text"]')[1].send_keys("baz")
+        action_chains_on_id("deformField1-seqAdd").click().perform()
+        input_text = browser.find_elements_by_xpath('//input[@name="text"]')
+        ActionChains(browser).move_to_element(input_text[0]).click().send_keys(
+            "bar"
+        ).send_keys(Keys.TAB).perform()
+        action_chains_on_id("deformField1-seqAdd").click().perform()
+        input_text = browser.find_elements_by_xpath('//input[@name="text"]')
+        ActionChains(browser).move_to_element(input_text[1]).click().send_keys(
+            "baz"
+        ).click().perform()
         wait_to_click("#deformsubmit")
         self.assertEqual(
             eval(findid("captured").text), {"texts": ["bar", "baz"]}
@@ -2047,8 +2071,8 @@ class SequenceOfDateInputs(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_one_filled(self):
-        wait_to_click("#deformField1-seqAdd")
-        wait_to_click('input[type="date"]')
+        action_chains_on_id("deformField1-seqAdd").click().perform()
+        action_chains_on_xpath('//input[@name="date"]').click().perform()
         wait_picker_to_show_up()
         findcss(".picker__button--today").click()
         submit_date_picker_safe()
@@ -2150,10 +2174,12 @@ class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
 
     def test_submit_one_filled(self):
         browser.get(self.url)
-        findid("deformField1-seqAdd").click()
-        textbox = findxpaths('//input[@name="text"]')[0]
-        textbox.click()
-        textbox.send_keys("140118866")
+        action_chains_on_id("deformField1-seqAdd").click().perform()
+
+        action_chains_on_xpath('//input[@name="text"]').click().send_keys(
+            Keys.HOME
+        ).send_keys("140118866").perform()
+
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
         captured = findid("captured").text
@@ -2365,10 +2391,8 @@ class SelectReadonlyTests(Base, unittest.TestCase):
 
 class Select2WidgetTests(Base, unittest.TestCase):
     url = test_url("/select2/")
-    submit_selected_captured = (
-        "{'pepper': u'habanero'}",
-        "{'pepper': 'habanero'}",
-    )
+    first_selected_captured = "{'pepper': 'habanero'}"
+    second_selected_captured = "{'pepper': 'jalapeno'}"
 
     def test_render_default(self):
         self.assertTrue("Pepper" in browser.page_source)
@@ -2395,18 +2419,22 @@ class Select2WidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_selected(self):
-        select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
-        options[1].click()
+        action_chains_xpath_on_select(
+            "//select[@name='pepper']/option"
+        ).click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
-        select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
-        # TODO: The form state is not hold over POST in demo
-        # and disabled for now
-        # self.assertTrue(options[1].is_selected())
         self.assertTrue(
-            findid("captured").text in self.submit_selected_captured
+            findid("captured").text in self.first_selected_captured
+        )
+
+        action_chains_xpath_on_select(
+            "//select[@name='pepper']/option[@selected='selected']"
+        ).click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+        findid("deformsubmit").click()
+        self.assertTrue(
+            findid("captured").text in self.second_selected_captured
         )
 
 
@@ -2414,11 +2442,25 @@ class Select2WidgetMultipleTests(Base, unittest.TestCase):
     url = test_url("/select2_with_multiple/")
 
     def test_submit_selected(self):
-        select = findid("deformField1")
-        self.assertTrue(select.get_attribute("multiple"))
-        options = select.find_elements_by_tag_name("option")
-        options[0].click()
-        options[2].click()
+        action_chains_xpath_on_select(
+            "//select[@name='pepper']/option"
+        ).click().send_keys(Keys.ARROW_DOWN).send_keys(
+            Keys.ARROW_DOWN
+        ).send_keys(
+            Keys.ARROW_DOWN
+        ).send_keys(
+            Keys.ENTER
+        ).perform()
+
+        time.sleep(1)
+
+        action_chains_xpath_on_select(
+            "//option[contains(text(), 'Chipotle')]"
+        ).click().send_keys(Keys.ARROW_UP).send_keys(Keys.ARROW_UP).send_keys(
+            Keys.ARROW_UP
+        ).send_keys(
+            Keys.ENTER
+        ).perform()
 
         findid("deformsubmit").click()
 
@@ -2429,6 +2471,9 @@ class Select2WidgetMultipleTests(Base, unittest.TestCase):
 
 class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
     url = test_url("/select2_with_optgroup/")
+
+    first_selected_captured = "{'musician': 'page'}"
+    second_selected_captured = "{'musician': 'bonham'}"
 
     def test_render_default(self):
         self.assertTrue("Musician" in browser.page_source)
@@ -2452,18 +2497,30 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
         self.assertEqual(len(findxpaths("//optgroup")), 2)
 
     def test_submit_selected(self):
-        select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
-        options[1].click()
+        action_chains_xpath_on_select(
+            "//select[@name='musician']/option"
+        ).click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
-        select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
-        # TODO: The form state is not carried over POST in demo and
-        # this cannot be tested anymore
-        # self.assertTrue(options[1].is_selected())
         captured = findid("captured").text
-        self.assertSimilarRepr(captured, "{'musician': 'page'}")
+        self.assertSimilarRepr(captured, self.first_selected_captured)
+
+        time.sleep(1)
+
+        action_chains_xpath_on_select(
+            "//option[contains(text(), 'Page')]"
+        ).click().send_keys(Keys.ARROW_DOWN).send_keys(
+            Keys.ARROW_DOWN
+        ).send_keys(
+            Keys.ARROW_DOWN
+        ).send_keys(
+            Keys.ENTER
+        ).perform()
+        findid("deformsubmit").click()
+        self.assertTrue(
+            findid("captured").text in self.second_selected_captured
+        )
 
 
 class SelectWithDefaultTests(Base, unittest.TestCase):
@@ -2562,9 +2619,14 @@ class MoneyInputWidgetTests(Base, unittest.TestCase):
         )
 
     def test_submit_filled(self):
-        findid("deformField1").send_keys("1")
-        findid("deformField1").send_keys(5 * Keys.ARROW_LEFT)
-        findid("deformField1").send_keys("10")
+        action_chains_on_id("deformField1").send_keys("1").perform()
+
+        action_chains_on_id("deformField1").send_keys(
+            5 * Keys.ARROW_LEFT
+        ).perform()
+
+        action_chains_on_id("deformField1").send_keys("10").perform()
+
         findid("deformsubmit").click()
         self.assertEqual(
             findid("captured").text, "{'greenbacks': Decimal('100.01')}"
@@ -2633,11 +2695,16 @@ class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_filled(self):
-        findid("deformField1").send_keys("t")
+        action_chains_on_id("deformField1").send_keys(Keys.HOME).send_keys(
+            "t"
+        ).perform()
+
         time.sleep(2)
         self.assertTrue(findxpath('//p[text()="two"]').is_displayed())
         self.assertTrue(findxpath('//p[text()="three"]').is_displayed())
-        findcss(".tt-suggestion").click()
+
+        action_chains_on_xpath('//p[text()="two"]').click().perform()
+
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
 
@@ -2836,43 +2903,59 @@ class SequenceOrderableTests(Base, unittest.TestCase):
         self.assertEqual(findid("deformField1-addtext").text, "Add Person")
 
     def test_submit_complex_interaction(self):
-        findid("deformField1-seqAdd").click()
+        action_chains_on_id("deformField1-seqAdd").click().perform()
 
         # A single item shouldn't have an active reorder button.
         self.assertEqual(len(findcsses(".deform-order-button")), 1)
         self.assertFalse(findcsses(".deform-order-button")[0].is_displayed())
 
         # add a second
-        findid("deformField1-seqAdd").click()
+        action_chains_on_id("deformField1-seqAdd").click().perform()
         # Now there should be 2 active reorder buttons.
         self.assertEqual(len(findcsses(".deform-order-button")), 2)
-        self.assertTrue(findcsses(".deform-order-button")[0].is_displayed())
-        self.assertTrue(findcsses(".deform-order-button")[1].is_displayed())
 
         # add a third
-        findid("deformField1-seqAdd").click()
-        findxpaths('//input[@name="name"]')[0].send_keys("Name1")
-        findxpaths('//input[@name="age"]')[0].send_keys("11")
-        findxpaths('//input[@name="name"]')[1].send_keys("Name2")
-        findxpaths('//input[@name="age"]')[1].send_keys("22")
-        findxpaths('//input[@name="name"]')[2].send_keys("Name3")
-        findxpaths('//input[@name="age"]')[2].send_keys("33")
+        action_chains_on_id("deformField1-seqAdd").click().perform()
+        time.sleep(2)
+        input_ages = browser.find_elements_by_xpath('//input[@name="age"]')
+        input_names = browser.find_elements_by_xpath('//input[@name="name"]')
 
-        order1_id = findcsses(".deform-order-button")[0].get_attribute("id")
-        order3_id = findcsses(".deform-order-button")[2].get_attribute("id")
+        ActionChains(browser).move_to_element(
+            input_names[0]
+        ).click().send_keys("Name1").perform()
+        ActionChains(browser).move_to_element(input_ages[0]).click().send_keys(
+            "11"
+        ).perform()
+
+        ActionChains(browser).move_to_element(
+            input_names[1]
+        ).click().send_keys("Name2").perform()
+        ActionChains(browser).move_to_element(input_ages[1]).click().send_keys(
+            "22"
+        ).perform()
+
+        ActionChains(browser).move_to_element(
+            input_names[2]
+        ).click().send_keys("Name3").perform()
+        ActionChains(browser).move_to_element(input_ages[2]).click().send_keys(
+            "33"
+        ).perform()
+
         seq_height = findcss(".deform-seq-item").size["height"]
 
+        persons = browser.find_elements_by_xpath(
+            '//div[@class="panel-heading"][contains(text(), "Person")]'
+        )
+
         # Move item 3 up two
-        actions = ActionChains(browser)
-        actions.drag_and_drop_by_offset(
-            findid(order3_id), 0, -seq_height * 2.5
+        ActionChains(browser).drag_and_drop_by_offset(
+            persons[2], 0, -seq_height * 2.5
         ).perform()
 
         # Move item 1 down one slot (actually a little more than 1 is
         # needed to trigger jQuery Sortable when dragging down, so use 1.5).
-        actions = ActionChains(browser)
-        actions.drag_and_drop_by_offset(
-            findid(order1_id), 0, seq_height * 1.5
+        ActionChains(browser).drag_and_drop_by_offset(
+            persons[0], 0, seq_height * 1.5
         ).perform()
 
         findid("deformsubmit").click()
@@ -3085,27 +3168,32 @@ class AjaxFormTests(Base, unittest.TestCase):
         findid("deformField4").send_keys("2010")
         findid("deformField4-month").send_keys("1")
         findid("deformField4-day").send_keys("1")
-        browser.switch_to_frame(browser.find_element_by_tag_name("iframe"))
+        browser.switch_to.frame(browser.find_element_by_tag_name("iframe"))
         findid("tinymce").send_keys("yo")
-        browser.switch_to_default_content()
+        browser.switch_to.default_content()
         source = browser.page_source
         wait_to_click("#deformsubmit")
         wait_for_ajax(source)
-        self.assertEquals(findid("thanks").text, "Thanks!")
+        self.assertEqual(findid("thanks").text, "Thanks!")
 
 
 class RedirectingAjaxFormTests(AjaxFormTests):
     url = test_url("/ajaxform_redirect/")
 
     def test_submit_success(self):
-        findid("deformField1").send_keys("1")
-        findid("deformField3").send_keys("name")
-        findid("deformField4").send_keys("2010")
-        findid("deformField4-month").send_keys("1")
-        findid("deformField4-day").send_keys("1")
+        action_chains_on_id("deformField1").click().send_keys("1").perform()
+        action_chains_on_id("deformField3").click().send_keys("name").perform()
+        action_chains_on_id("deformField4").click().send_keys("2010").perform()
+        action_chains_on_id("deformField4-month").click().send_keys(
+            "1"
+        ).perform()
+        action_chains_on_id("deformField4-day").click().send_keys(
+            "1"
+        ).perform()
         source = browser.page_source
         wait_to_click("#deformsubmit")
         wait_for_ajax(source)
+        WebDriverWait(browser, 10).until(EC.url_contains("thanks.html"))
         self.assertTrue(browser.current_url.endswith("thanks.html"))
 
 
@@ -3113,9 +3201,9 @@ class TextInputMaskTests(Base, unittest.TestCase):
     url = test_url("/text_input_masks/")
 
     def test_render_default(self):
-        findid("deformField1").click()
-        findid("deformField1").send_keys(11 * Keys.ARROW_LEFT)
-        findid("deformField1").send_keys("0")
+        action_chains_on_id("deformField1").send_keys(Keys.HOME).send_keys(
+            "0"
+        ).perform()
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), "0__-__-____"
         )
@@ -3127,26 +3215,29 @@ class TextInputMaskTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
 
     def test_type_bad_input(self):
-        findid("deformField1").click()
-        findid("deformField1").send_keys(11 * Keys.ARROW_LEFT)
-        findid("deformField1").send_keys("0a")
+        action_chains_on_id("deformField1").send_keys(Keys.HOME).send_keys(
+            "0a"
+        ).perform()
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), "0__-__-____"
         )
-        findid("deformField2").click()
-        findid("deformField2").send_keys("0a")
-
+        action_chains_on_id("deformField2").click().send_keys(
+            Keys.HOME
+        ).send_keys("0a").perform()
         self.assertEqual(
             findid("deformField2").get_attribute("value"), "0_/__/____"
         )
 
     def test_submit_success(self):
-        findid("deformField1").send_keys("")
-        findid("deformField1").send_keys("140118866")
+        action_chains_on_id("deformField1").send_keys(Keys.HOME).send_keys(
+            "140118866"
+        ).perform()
         browser.execute_script(
             'document.getElementById("deformField2").focus();'
         )
-        findid("deformField2").send_keys("10102010")
+        action_chains_on_id("deformField2").send_keys(Keys.HOME).send_keys(
+            "10102010"
+        ).perform()
         wait_to_click("#deformsubmit")
         self.assertEqual(
             eval(findid("captured").text),
