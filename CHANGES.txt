@@ -3,6 +3,12 @@
 
 - Drop support of Python 2.7 and 3.4. Add support of Python 3.8.
 
+- Fix many broken functional tests.
+
+- Use firefox-latest and geckodriver, dropping obsolete Firefox version.
+
+- Use master branch of deform and colander on GitHub.
+
 
 2.0.7 (2018-11-20)
 ------------------
