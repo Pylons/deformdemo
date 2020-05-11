@@ -255,6 +255,7 @@ def setUpModule():
         )
         try:
             browser = Firefox(firefox_binary=binary)
+            browser.set_window_size(1920, 1080)
         except WebDriverException:
             if os.path.exists(BROKEN_SELENIUM_LOG_FILE):
                 print("Selenium says no")
@@ -2902,7 +2903,6 @@ class SequenceOrderableTests(Base, unittest.TestCase):
         self.assertEqual(findid("deformField1-addtext").text, "Add Person")
 
     def test_submit_complex_interaction(self):
-        browser.set_window_size(1024, 1024)
         action_chains_on_id("deformField1-seqAdd").click().perform()
 
         # A single item shouldn't have an active reorder button.
