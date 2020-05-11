@@ -12,6 +12,6 @@ SERVER_PID=$!
 trap "kill $SERVER_PID" EXIT
 
 # Run functional test suite against test server
-nosetests  --with-flaky --max-runs=4
+nosetests "$@"
 
 exit 0
