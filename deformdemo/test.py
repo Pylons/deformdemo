@@ -255,6 +255,7 @@ def setUpModule():
         )
         try:
             browser = Firefox(firefox_binary=binary)
+            browser.set_window_size(1920, 1080)
         except WebDriverException:
             if os.path.exists(BROKEN_SELENIUM_LOG_FILE):
                 print("Selenium says no")
@@ -2454,7 +2455,7 @@ class Select2WidgetMultipleTests(Base, unittest.TestCase):
         time.sleep(1)
 
         action_chains_xpath_on_select(
-            "//select[@name='pepper']/option"
+            "//option[contains(text(), 'Chipotle')]"
         ).click().send_keys(Keys.ARROW_UP).send_keys(Keys.ARROW_UP).send_keys(
             Keys.ARROW_UP
         ).send_keys(
