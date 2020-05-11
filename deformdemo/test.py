@@ -2177,8 +2177,7 @@ class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
         action_chains_on_id("deformField1-seqAdd").click().perform()
 
         action_chains_on_xpath('//input[@name="text"]').click().send_keys(
-            Keys.HOME
-        ).send_keys("140118866").perform()
+            Keys.HOME).send_keys(Keys.HOME).send_keys("140118866").perform()
 
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
