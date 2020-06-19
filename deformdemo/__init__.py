@@ -74,7 +74,12 @@ class demonstrate(object):
 def my_safe_repr(obj, context, maxlevels, level, sort_dicts=True):
     if type(obj) == unicode:
         obj = obj.encode("utf-8")
-    return pprint._safe_repr(obj, context, maxlevels, level, sort_dicts)
+    from inspect import signature
+    sig=signature(pprint._safe_repr)
+    if(len(sig.parameters)==5):
+        return pprint._safe_repr(obj, context, maxlevels, level, sort_dicts)
+    else:
+        return pprint._safe_repr(obj, context, maxlevels, level)
 
 
 @view_defaults(route_name="deformdemo")
