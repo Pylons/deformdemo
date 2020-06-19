@@ -72,9 +72,12 @@ class demonstrate(object):
 # http://stackoverflow.com/a/16888673/315168
 # eliminate u''
 def my_safe_repr(obj, context, maxlevels, level, sort_dicts=True):
+
+    from inspect import signature
+
     if type(obj) == unicode:
         obj = obj.encode("utf-8")
-    from inspect import signature
+
     sig = signature(pprint._safe_repr)
     if len(sig.parameters) == 5:
         return pprint._safe_repr(obj, context, maxlevels, level, sort_dicts)
