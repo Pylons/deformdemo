@@ -71,10 +71,21 @@ class demonstrate(object):
 # Py2/Py3 compat
 # http://stackoverflow.com/a/16888673/315168
 # eliminate u''
-def my_safe_repr(obj, context, maxlevels, level):
+def my_safe_repr(obj, context, maxlevels, level, sort_dicts=True):
+
+    from inspect import signature
+
     if type(obj) == unicode:
         obj = obj.encode("utf-8")
-    return pprint._safe_repr(obj, context, maxlevels, level)
+
+    # Python 3.8 changed the call signature of pprint._safe_repr.
+    # In order to support both Python 3.8 and earlier versions
+    # we have to check its signature before calling
+    sig = signature(pprint._safe_repr)
+    if len(sig.parameters) == 5:
+        return pprint._safe_repr(obj, context, maxlevels, level, sort_dicts)
+    else:
+        return pprint._safe_repr(obj, context, maxlevels, level)
 
 
 @view_defaults(route_name="deformdemo")
