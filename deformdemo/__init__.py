@@ -78,6 +78,9 @@ def my_safe_repr(obj, context, maxlevels, level, sort_dicts=True):
     if type(obj) == unicode:
         obj = obj.encode("utf-8")
 
+    # Python 3.8 changed the call signature of pprint._safe_repr.
+    # In order to support both Python 3.8 and earlier versions
+    # we have to check its signature before calling
     sig = signature(pprint._safe_repr)
     if len(sig.parameters) == 5:
         return pprint._safe_repr(obj, context, maxlevels, level, sort_dicts)
