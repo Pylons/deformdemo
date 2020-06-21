@@ -4,9 +4,10 @@ Deform Demo
 .. image:: https://travis-ci.org/Pylons/deformdemo.png?branch=master
            :target: https://travis-ci.org/Pylons/deformdemo
 
-Demonstration application for the `Deform
-<https://docs.pylonsproject.org/projects/deform/en/latest>`_ Python HTML form
-library.
+Demonstration application for the `Deform <https://docs.pylonsproject.org/projects/deform/en/latest>`_ Python HTML form library.
+
+This application is tested on Python versions 3.5, 3.6, 3.7, and 3.8, and PyPy3.
+It is also tested on Python 3.9-dev but allowed to fail.
 
 
 Online version
@@ -20,96 +21,211 @@ Docker version
 
 Run the latest version of this application with Docker.
 
-.. code-block:: console
+.. code-block:: bash
 
     docker run -d -p 8000:8522 pylons/deformdemo:v2.0.7
 
+Then in your browser, visit http://localhost:8000
 
-Then, in your browser, visit http://localhost:8000
+To stop the docker container, find its ``NAME`` and issue the ``stop`` command.
+
+.. code-block:: bash
+
+    docker ps -a
+    docker stop <value_from_NAMES_column>
 
 
 From source
 -----------
 
-This application supports Python versions 2.7, 3.4, 3.5, 3.6, and 3.7, but
- we strongly recommend you use Python >=3.5.
+-   Create a virtual environment.
 
-- Create a virtual environment::
+    .. code-block:: bash
 
-    $ python3 -m venv /path/to/my/env
+        python3 -m venv /path/to/my/env
 
-  Hereafter ``/path/to/my/env`` will be referred to as $VENV in steps
-  below.
+    Hereafter ``/path/to/my/env`` will be referred to as ``$VENV`` in the following steps.
 
-- Get a checkout of deformdemo::
+-   Clone deformdemo.
 
-    $ git clone git://github.com/Pylons/deformdemo.git
+    .. code-block:: bash
 
-- ``cd`` to the newly checked out deformdemo package::
+        git clone git://github.com/Pylons/deformdemo.git
 
-    $ cd deformdemo
+-   ``cd`` to the newly checked out deformdemo package.
 
-- Run ``pip install -e .`` using the virtual environment's ``python`` command::
+    .. code-block:: bash
 
-    $ $VENV/bin/pip install -e .
+        cd deformdemo
 
-- While your working directory is still ``deformdemo``, start the demo
-  application::
+-   Run ``pip install -e .`` using the virtual environment's ``python`` command.
 
-    $ $VENV/bin/pserve demo.ini
+    .. code-block:: bash
 
-- Visit http://localhost:8000 in a browser to see the demo.
+        $VENV/bin/pip install -e .
+
+-   While your working directory is still ``deformdemo``, start the demo application.
+
+    .. code-block:: bash
+
+        $VENV/bin/pserve demo.ini
+
+-   Visit http://localhost:8522 in a browser to see the demo.
 
 
-Running the Demo's Selenium Tests
----------------------------------
+Install functional test requirements
+------------------------------------
 
-The ``deformdemo`` application serves as a target for functional
-testing during Deform's development.  A suite of Selenium tests may be
-run against a local instance of the demonstration application.  It is
-wise to run these tests before submitting a patch.  Here's how:
+The ``deformdemo`` application serves as a target for functional testing during Deform's development.
+A suite of Selenium tests may be run against a local instance of the demonstration application.
+It is wise to run these tests using the following steps before submitting a pull request.
 
-- Start the ``deformdemo`` application as described above in "Running
-  the Demo".  Leave the terminal window running this application open,
-  and open another terminal window to perform the below steps.
+First prepare the functional test environment by installing requirements.
+We will assume that you put your projects in your user directory, although you can put them anywhere.
 
-- In the other terminal window, cd to the "deformdemo" checkout directory
-  you created above in "Running the Demo"::
+    .. code-block:: bash
 
-    $ cd /path/to/my/deformdemo/checkout
+        cd ~/projects/deformdemo/
 
-- Run ``pip install -e ".[testing]"`` using the virtual environment's ``python`` command, but this time install the testing requirements::
 
-    $ $VENV/bin/pip install -e ".[testing]"
+Install Python testing requirements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-- Run the tests::
+.. code-block:: bash
 
-   $ $VENV/bin/nosetests
+    $VENV/bin/pip install -e ".[testing]"
 
-  ``$VENV`` is defined as it was in "Running the Demo" above.
 
-- You will (hopefully) see Firefox pop up and it will begin to display in quick
-  succession the loading of pages in the bottom window and some test output in
-  the top window.  The tests will run for five or ten minutes.
+Install Firefox latest
+^^^^^^^^^^^^^^^^^^^^^^
 
-- Test success means that the console window on which you ran
-  ``nosetests`` shows a bunch of dots, a test summary, then ``OK``.  If
-  it shows a traceback, ``FAILED``, or anything other than a straight
-  line of dots, it means there was an error.
+macOS
+"""""
 
-- Fix any errors by modifying your code or by modifying the tests to
-  expect the changes you've made.
+`Download the latest version of Firefox for your platform <https://www.mozilla.org/en-US/firefox/all/>`_.
+
+Open the ``.dmg`` (macOS), and drag the Firefox icon to:
+
+    .. code-block:: console
+
+        ~/projects/deformdemo/
+
+Linux (Debian)
+""""""""""""""
+
+Use cURL or wget.
+See the `Firefox download README.txt <https://ftp.mozilla.org/pub/firefox/releases/latest/README.txt>`_ for instructions.
+For example on Linux:
+
+    .. code-block:: bash
+
+        cd ~/projects/deformdemo/
+        wget -O firefox-latest.tar.bz2 \
+        "https://download.mozilla.org/?product=firefox-latest&os=linux64&lang=en-US"
+
+Decompress the downloaded file.
+
+    .. code-block:: bash
+
+        tar -xjf firefox-latest.tar.bz2
+
+
+geckodriver
+^^^^^^^^^^^
+
+Install the `latest release of geckodriver <https://github.com/mozilla/geckodriver/releases>`_.
+
+.. code-block:: bash
+
+    # macOS
+    wget https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-macos.tar.gz
+    tar -xzf geckodriver-v0.26.0-macos.tar.gz
+
+    # Linux (Debian)
+    wget https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz
+    tar -xzf geckodriver-v0.26.0-linux64.tar.gz
+
+
+gettext
+^^^^^^^
+
+The functional tests require the installation of the GNU ``gettext`` utilities, specifically ``msgmerge`` and ``msgfmt``.
+Use your package manager to install these requirements.
+
+macOS
+"""""
+
+Use `Homebrew <https://brew.sh/>`_.
+
+.. code-block:: bash
+
+        brew install gettext
+        brew link gettext --force
+
+If you ever have problems building packages, you can always unlink it.
+
+.. code-block:: bash
+
+        brew unlink gettext
+
+Linux (Debian)
+""""""""""""""
+
+.. code-block:: bash
+
+        apt-get install gettext
+        apt-get install gettext-base
+
+
+Selenium
+""""""""
+
+Selenium was already installed via ``pip install -e .["testing"]``.
+
+
+Running the Demo's Functional Tests
+-----------------------------------
+
+-   Start the ``deformdemo`` application as described above in "Running the Demo".
+    Leave the terminal window running this application open, and open a second terminal window to perform the below steps.
+
+-   In the second terminal window, go to the "deformdemo" checkout directory you created above in "Running the Demo".
+
+    .. code-block:: bash
+
+        cd ~/projects/deformdemo
+
+-   Set an environment variable to add your local checkout of Deform to your ``PATH``.
+    It must to be set before running tox or nosetest, otherwise Firefox or Chrome will not start and will return an error message such as ``'geckodriver' executable needs to be in PATH.``
+
+    .. code-block:: bash
+
+        export PATH=~/projects/deform:$PATH
+
+-   Run the tests.
+
+    .. code-block:: bash
+
+        $VENV/bin/nosetests
+
+    ``$VENV`` is defined as it was in "Running the Demo" above.
+
+-   You will (hopefully) see Firefox pop up and it will begin to display in quick succession the loading of pages.
+    The tests will run for five or ten minutes.
+
+-   Test success means that the console window on which you ran ``nosetests`` shows a bunch of dots, a test summary, then ``OK``.
+    If it shows a traceback, ``FAILED``, or anything other than a straight line of dots, it means there was an error.
+
+-   Fix any errors by modifying your code or by modifying the tests to expect the changes you've made.
 
 
 Testing an Alternate Renderer Implementation
 --------------------------------------------
 
-- Copy the ``demo.ini`` file from this demo package to your renderer's
-  package.
+-   Copy the ``demo.ini`` file from this demo package to your renderer's package.
 
-- Change the ``deform.renderer`` key in the ``demo.ini`` copy to point at
-  your renderer (it's a Python dotted name).
+-   Change the ``deform.renderer`` key in the ``demo.ini`` copy to point at your renderer (it's a Python dotted name).
 
-- Run ``pserve /path/to/your/copy/of/demo.ini``.
+-   Run ``pserve /path/to/your/copy/of/demo.ini``.
 
-- Run the selenium tests as above.
+-   Run the Selenium tests as above.
