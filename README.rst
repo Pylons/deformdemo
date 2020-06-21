@@ -88,12 +88,15 @@ We will assume that you put your projects in your user directory, although you c
         cd ~/projects/deformdemo/
 
 
-Install Python testing requirements
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Install Python development and testing requirements
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+The following command will install requirements for development and testing of deformdemo.
+It performs editable installs of Colander and Deform into your virtual environment's ``src`` directory, and deformdemo's testing requirements into ``lib/<python.version>/site-packages`` directory.
 
 .. code-block:: bash
 
-    $VENV/bin/pip install -e ".[testing]"
+    $VENV/bin/pip install -Ur requirements-dev.txt
 
 
 Install Firefox latest
