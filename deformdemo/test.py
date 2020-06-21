@@ -2149,6 +2149,7 @@ class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
         )
 
 
+@flaky
 class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
     url = test_url("/sequence_of_masked_textinputs/")
 

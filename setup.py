@@ -78,7 +78,7 @@ setupkw = dict(
             "isort",
             "readme_renderer",
         ],
-        "testing": ["nose", "nose-selecttests", "selenium>=3.0"],
+        "testing": ["flaky", "nose", "selenium>=3.0"],
     },
     entry_points="""\
     [paste.app_factory]
