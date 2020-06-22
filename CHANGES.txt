@@ -1,16 +1,46 @@
 3.0.0 (unreleased)
 ------------------
 
-- Drop support of Python 2.7 and 3.4. Add support of Python 3.8.
+- Drop support of Python 2.7 and 3.4. Add support of Python 3.8 and PyPy3. Add
+  testing of Python 3.9-dev. [stevepiercy]
 
-- Fix many broken functional tests.
+- Update to Bootstrap 4 and its dependencies. [sydoluciani]
+
+- Fix many broken functional tests. [sydoluciani]
 
 - Use firefox-latest and geckodriver, dropping obsolete Firefox version.
+  [sydoluciani]
 
-- Use master branch of deform and colander on GitHub.
+- Use master branch of Deform and Colander on GitHub. [sydoluciani]
 
+- Overhaul README.rst, tox, and requirements to be easier to get started.
+  [stevepiercy]
+
+- Add examples of using ``tags`` options on ``Select2Widget``. [enkidulan]
+  https://github.com/Pylons/deformdemo/pull/52
+
+- Added ``sort_dicts`` argument to ``my_safe_repr``. Python 3.8 changed the
+  call signature of ``pprint._safe_repr``. [jhaiduce]
+  https://github.com/Pylons/deformdemo/pull/67
+
+- Bump up the thread count from the default 4 to 8 threads. This removes noise
+  of Waitress's "Task queue depth is 1" warnings in the test output on Travis.
+  [stevepiercy]
+  https://github.com/Pylons/deformdemo/pull/62
 
 2.0.7 (2018-11-20)
 ------------------
 
 - Use release 2.0.7 of deform.
+
+- Add Docker image as an option to use deformdemo. [ericof]
+  https://github.com/Pylons/deformdemo/pull/55
+
+- Apply black to the codebase. [ericof]
+  https://github.com/Pylons/deformdemo/pull/54
+
+- Make iso8601 usage compatible with versions 0.1.11 and 0.1.12. [rbu]
+  https://github.com/Pylons/deformdemo/pull/51
+
+- Don't skip FileUpload tests on Python 3 anymore. [disko]
+  https://github.com/Pylons/deformdemo/pull/50
