@@ -183,7 +183,7 @@ Linux (Debian)
 Selenium
 """"""""
 
-Selenium was already installed via ``pip install -e .["testing"]``.
+Selenium was already installed via ``$VENV/bin/pip install -Ur requirements-dev.txt``.
 
 
 Running the Demo's Functional Tests
