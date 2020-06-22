@@ -2034,6 +2034,44 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer="templates/form.pt", name="select2_with_tags")
+    @demonstrate("Select2 Widget (with tags)")
+    def select2_with_tags(self):
+
+        choices = ()
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.Select2Widget(values=choices, tags=True),
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form)
+
+    @view_config(
+        renderer="templates/form.pt", name="select2_with_tags_and_multiple"
+    )
+    @demonstrate("Select2 Widget (with tags and multiple)")
+    def select2_with_tags_and_multiple(self):
+
+        choices = ()
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.Set(),
+                widget=deform.widget.Select2Widget(
+                    values=choices, multiple=True, tags=True
+                ),
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form)
+
     @view_config(renderer="templates/form.pt", name="checkboxchoice")
     @demonstrate("Checkbox Choice Widget")
     def checkboxchoice(self):
