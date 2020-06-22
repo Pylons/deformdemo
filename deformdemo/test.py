@@ -2524,6 +2524,65 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
         )
 
 
+class Select2TagsWidgetTests(Base, unittest.TestCase):
+    url = test_url("/select2_with_tags/")
+
+    def test_submit_new_option(self):
+        # open select search field
+        findcss(".select2-container").click()
+
+        # options list is empty
+        self.assertSimilarRepr(
+            findid("select2-deformField1-results").text, "No results found"
+        )
+
+        # type a value in selec2 search
+        (
+            findid("public")
+            .find_element_by_css_selector(".select2-search__field")
+            .send_keys("hello\n")
+        )
+
+        # after form submission typed value appear in captured
+        findid("deformsubmit").click()
+        captured = findid("captured").text
+        self.assertSimilarRepr(
+            captured, "{'pepper': 'hello'}",
+        )
+
+
+class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
+    url = test_url("/select2_with_tags_and_multiple/")
+
+    def test_submit_new_options(self):
+        # multiple submission is activated
+        self.assertTrue(findid("deformField1").get_attribute("multiple"))
+
+        # options list is empty
+        findid("item-deformField1").click()
+        self.assertSimilarRepr(
+            findid("select2-deformField1-results").text, "No results found"
+        )
+
+        # adding values to select field
+        for value in ("hello", "qwerty", "hello"):
+            # open select search field
+            findid("item-deformField1").click()
+            # type values in selec2 search
+            (
+                findid("public")
+                .find_element_by_css_selector(".select2-search__field")
+                .send_keys(value + "\n")
+            )
+
+        # after form submission typed value appear in captured
+        findid("deformsubmit").click()
+        captured = findid("captured").text
+        self.assertSimilarRepr(
+            captured, "{'pepper': {'hello', 'qwerty'} }",
+        )
+
+
 class SelectWithDefaultTests(Base, unittest.TestCase):
 
     url = test_url("/select_with_default/")
