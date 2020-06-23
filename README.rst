@@ -19,11 +19,18 @@ Visit https://deformdemo.pylonsproject.org
 Docker version
 --------------
 
-Run the latest version of this application with Docker.
+Build the Docker image for deformdemo and tag it.
 
 .. code-block:: bash
 
-    docker run -d -p 8000:8522 pylons/deformdemo:v2.0.7
+    # docker build --tag pylons/deformdemo:<version> .
+    docker build --tag pylons/deformdemo:2.0.8 .
+
+Run the built image with Docker.
+
+.. code-block:: bash
+
+    docker run -d -p 8000:8522 pylons/deformdemo:2.0.8
 
 Then in your browser, visit http://localhost:8000
 
