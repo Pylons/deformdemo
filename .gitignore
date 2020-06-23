@@ -1,26 +1,9 @@
+# Do not add personal preferences for virtual environments, IDEs, apps, OSes,
+# and other chaff to the project. Instead update your user global .gitignore.
 *.egg
 *.egg-info
+.eggs/
 *.pyc
-*$py.class
-*.pt.py
-*.txt.py
-*~
-.python-version
-env26/
-env25/
-env24/
-env27/
-jyenv/
-pypyenv/
-2xenv/
-build/
-dist/
-.installed.cfg
-.mr.developer.cfg
-bin/
-develop-eggs/
-include/
-lib/
-src/
-
-geckodriver.log
+.tox/
+[Ff]irefox*
+geckodriver*
