@@ -65,12 +65,12 @@ msgid "Error ${num}"
 msgstr "Fehler ${num}"
 
 #: deformdemo/templates/main.pt:12
-msgid "Deform 2 Demo Site"
-msgstr "Deform 2 Beispielseite"
+msgid "Deform Demo Site"
+msgstr "Deform Beispielseite"
 
 #: deformdemo/templates/main.pt:64
-msgid "Deform 2 Demo"
-msgstr "Deform 2 Demonstration"
+msgid "Deform Demo"
+msgstr "Deform Demonstration"
 
-#~ msgid "<dynamic element> Deform 2 Demo"
-#~ msgstr "<dynamic element> Deform 2 Vorführung"
+#~ msgid "<dynamic element> Deform Demo"
+#~ msgstr "<dynamic element> Deform Vorführung"

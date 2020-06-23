@@ -10,7 +10,7 @@
         <meta name="viewport"
               content="width=device-width, initial-scale=1.0">
         <title i18n:translate="">
-            Deform 2 Demo Site
+            Deform Demo Site
         </title>
 
         <link rel="stylesheet"
@@ -61,7 +61,7 @@
     <div class="navbar navbar-default" role="navigation">
         <div class="container">
             <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-info-sign"></span>
-                                             <span i18n:translate=""> Deform 2 Demo</span>
+                                             <span i18n:translate=""> Deform Demo</span>
             </a>
         </div>
     </div>

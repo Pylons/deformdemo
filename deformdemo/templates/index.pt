@@ -2,7 +2,7 @@
 <div metal:use-macro="view.macros['master']">
   <div metal:fill-slot="main" tal:omit-tag="">
     <div class="page-header">
-      <h1><a href="http://docs.pylonsproject.org/projects/deform/en/master/">Deform</a> is a Python lib for generating HTML
+      <h1><a href="https://docs.pylonsproject.org/projects/deform/en/latest/">Deform</a> is a Python library for generating HTML
         forms<br/><small>Each link on the left demonstrates a capability</small>
       </h1>
     </div>
@@ -11,18 +11,17 @@
 
       <p>
         This demo is written using <a
-        href="http://pylonsproject.org/">Pyramid</a>. But please note
-        that Deform does not depend on any particular web framework,
-        we just had to write a demo application in
-        <i>something</i>. If, for some unfathomable reason, you'd like
-        to run this demo application locally, please read the <a
-        href="https://github.com/Pylons/deformdemo"
-        >README file for installation of this application</a>.
+        href="https://trypyramid.com/">Pyramid</a>. Note that Deform does
+        not depend on any particular web framework,
+        we just had to write a demo application in <em>something</em>.
+        If you would like to run this demo application locally,
+        please read the <a href="https://github.com/Pylons/deformdemo">README
+        file for installation of this application</a>.
       </p>
 
       <p>
         For further information, see
-        the <a href="http://docs.pylonsproject.org/projects/deform/en/master/">Deform documentation</a>.
+        the <a href="https://docs.pylonsproject.org/projects/deform/en/latest/">Deform documentation</a>.
       </p>
 
     </div>

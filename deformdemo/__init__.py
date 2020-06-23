@@ -2873,7 +2873,6 @@ def main(global_config, **settings):
     configure_zpt_renderer(("deformdemo:custom_widgets",), translator)
 
     config.add_static_view("static_deform", "deform:static")
-    config.add_static_view("static_demo", "deformdemo:static")
     config.add_route("deformdemo", "*traverse")
 
     def onerror(*arg):

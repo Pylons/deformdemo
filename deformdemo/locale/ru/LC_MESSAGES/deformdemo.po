@@ -65,9 +65,9 @@ msgid "Error ${num}"
 msgstr ""
 
 #: deformdemo/templates/main.pt:12
-msgid "Deform 2 Demo Site"
+msgid "Deform Demo Site"
 msgstr ""
 
 #: deformdemo/templates/main.pt:64
-msgid "Deform 2 Demo"
+msgid "Deform Demo"
 msgstr ""
