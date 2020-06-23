@@ -1,5 +1,4 @@
 graft deformdemo
-graft dockerfiles
 
 include *.py
 include *.sh
@@ -8,6 +7,7 @@ include *.txt
 include .isort.cfg .flake8 .dockerignore
 include buildout.cfg
 include demo.ini
+include Dockerfile
 include mini.ini
 include tox.ini
 
