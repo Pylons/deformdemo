@@ -6,7 +6,7 @@
 *.txt.py
 *~
 *.log
-.python-version
+.noseids
 .tox/
 env/
 build/
