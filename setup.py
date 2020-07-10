@@ -45,7 +45,7 @@ if not PY3:
 
 setupkw = dict(
     name="deformdemo",
-    version="2.0.8.dev0",
+    version="2.0.11.dev0",
     description="Demonstration application for Deform form library",
     long_description=README + "\n\n" + CHANGES,
     classifiers=[
@@ -60,7 +60,7 @@ setupkw = dict(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: Implementation :: CPython",
-        "Programming Language :: Python :: Implementation :: PyPy",
+        "Programming Language :: Python :: Implementation :: PyPy3",
         "Topic :: Internet :: WWW/HTTP",
     ],
     keywords="web forms form generation schema validation deform",

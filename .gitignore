@@ -4,6 +4,7 @@
 *.egg-info
 .eggs/
 *.pyc
+.noseids
 .tox/
 [Ff]irefox*
 geckodriver*
