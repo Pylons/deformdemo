@@ -759,10 +759,11 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         today = datetime.date.today()
         num_months = diff_month(today, tooearly)
         time.sleep(2.0)
+        self.assertTrue(findcss(".picker__nav--prev"))
         for _x in range(num_months):
             findcss(".picker__nav--prev").click()
             # Freaking manual timing here again
-            time.sleep(0.1)
+            time.sleep(0.2)
 
         wait_to_click(".picker__day")
         wait_to_click("#deformsubmit")
