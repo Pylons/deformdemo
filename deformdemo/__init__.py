@@ -1553,7 +1553,7 @@ class DeformDemo(object):
 
         schema = Schema()
         form = deform.Form(schema, buttons=("submit",))
-        # We don't need to suppy all the values required by the schema
+        # We don't need to supply all the values required by the schema
         # for an initial rendering, only the ones the app actually has
         # values for.  Notice below that we don't pass the ``name``
         # value specified by the ``Mapping`` schema.
@@ -2383,7 +2383,7 @@ class DeformDemo(object):
         import itertools
 
         # We need to make sure the form field identifiers for the two
-        # forms do not overlap so accessibility features continue work
+        # forms do not overlap so accessibility features continue to work,
         # such as focusing the field related to a legend when the
         # legend is clicked on.
 
@@ -2451,8 +2451,8 @@ class DeformDemo(object):
     @demonstrate("Widget Adapter")
     def widget_adapter(self):
         # Formish allows you to pair a widget against a type that
-        # doesn't "natively" lend itself to being representible by the
-        # widget; for example, it allows you to use a text area widget
+        # doesn't "natively" lend itself to being representable by the
+        # widget. For example, it allows you to use a textarea widget
         # against a sequence type.  To provide this feature, Formish
         # uses an adapter to convert the sequence data to text during
         # serialization and from text back to a sequence during
@@ -2464,7 +2464,7 @@ class DeformDemo(object):
         # it, you can add yourself as necessary using an adapter
         # pattern.
         #
-        # In the demo method below, we adapt a "normal" text area
+        # In the demo method below, we adapt a "normal" textarea
         # widget for use against a sequence.  The resulting browser UI
         # is the same as if we had used a TextAreaCSVWidget against
         # the sequence as in the "textareacsv" test method.
@@ -2474,7 +2474,7 @@ class DeformDemo(object):
         # Instead, we just construct an adapter manually.  Adding an
         # abstraction to the lookup based on the widget and schema
         # types being adapted is easy enough, but trying to follow the
-        # codepath of the abstraction becomes brainbending.
+        # code path of the abstraction becomes brain bending.
         # Therefore, we don't bother to show it.
 
         class Row(colander.TupleSchema):
@@ -2861,9 +2861,7 @@ def main(global_config, **settings):
 
     config.include("pyramid_chameleon")
 
-    #
     # Set up Chameleon templates (ZTP) rendering paths
-    #
 
     def translator(term):
         # i18n localizing function
