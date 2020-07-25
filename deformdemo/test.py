@@ -806,6 +806,7 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
 
     def test_submit_empty(self):
+        clear_autofocused_picker()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".has-error"))
         self.assertEqual(findid_view("error-deformField1").text, "Required")
