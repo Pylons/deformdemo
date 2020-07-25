@@ -744,9 +744,9 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         wait_picker_to_show_up()
 
         def diff_month(d1, d2):
-            return (d1.year - d2.year) * 12 + d1.month - d2.month
+            return (d1.year - d2.year) * 12 + d1.month - d2.month + 1
 
-        tooearly = datetime.date(2010, 1, 1)
+        tooearly = datetime.date(datetime.date.today().year, 1, 1)
         today = datetime.date.today()
         num_months = diff_month(today, tooearly)
         time.sleep(2)

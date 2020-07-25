@@ -1460,7 +1460,7 @@ class DeformDemo(object):
             somedate = colander.SchemaNode(
                 colander.Date(),
                 validator=colander.Range(
-                    min=datetime.date(2010, 5, 5),
+                    min=datetime.date(datetime.date.today().year, 1, 1),
                     min_err=_("${val} is earlier than earliest date ${min}"),
                 ),
                 title="Date",
