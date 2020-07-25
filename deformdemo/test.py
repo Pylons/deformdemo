@@ -217,6 +217,19 @@ def submit_date_picker_safe():
     wait_to_click("#deformsubmit")
 
 
+def clear_autofocused_picker():
+    """
+    Dismisses a date or time picker by sending an ESCAPE key.
+
+    With the introduction of autofocus feature in Deform 3.0.0, the first field
+    is assigned autofocus by default. When there is only one field that is a
+    picker in the form, the pickadate by default uses the HTML5 attribute
+    ``autofocus`` to trigger the display of the picker. See
+    https://www.jqueryscript.net/demo/Lightweight-jQuery-Date-Input-Picker/docs.htm#api_open_close
+    """
+    ActionChains(browser).send_keys(Keys.ESCAPE).perform()
+
+
 def setUpModule():
 
     global browser
@@ -723,6 +736,7 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
 
     def test_submit_empty(self):
+        clear_autofocused_picker()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".has-error"))
         self.assertEqual(findid_view("error-deformField1").text, "Required")
@@ -732,7 +746,8 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid_view("captured").text, "None")
 
     def test_submit_tooearly(self):
-        findid("deformField1").click()
+        clear_autofocused_picker()
+        wait_to_click("#deformsubmit")
 
         def diff_month(d1, d2):
             return (d1.year - d2.year) * 12 + d1.month - d2.month + 1
