@@ -762,7 +762,7 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         for _x in range(num_months):
             findcss(".picker__nav--prev").click()
             # Freaking manual timing here again
-            time.sleep(0.02)
+            time.sleep(0.1)
 
         wait_to_click(".picker__day")
         wait_to_click("#deformsubmit")
