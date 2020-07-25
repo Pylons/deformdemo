@@ -2756,11 +2756,9 @@ class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_filled(self):
-        action_chains_on_id("deformField1").send_keys(Keys.HOME).send_keys(
-            "t"
-        ).perform()
+        findid("deformField1").send_keys("t")
 
-        time.sleep(2)
+        time.sleep(0.2)
         self.assertTrue(findxpath('//p[text()="two"]').is_displayed())
         self.assertTrue(findxpath('//p[text()="three"]').is_displayed())
 
