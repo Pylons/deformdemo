@@ -212,14 +212,6 @@ def pick_today():
     time.sleep(1)
 
 
-def wait_picker_to_show_up():
-    # TODO: This tests uses explicit waits to make it run on a modern browsers.
-    # The waits could be replaced by calling picker JS API directly
-    # inside Selenium browser
-    # TODO: This is caused by animation. Disable animations for tests.
-    time.sleep(1.0)
-
-
 def submit_date_picker_safe():
     """Delays caused by animation."""
     wait_to_click("#deformsubmit")
@@ -741,7 +733,6 @@ class DateInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_tooearly(self):
         findid("deformField1").click()
-        wait_picker_to_show_up()
 
         def diff_month(d1, d2):
             return (d1.year - d2.year) * 12 + d1.month - d2.month + 1
@@ -768,7 +759,6 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         # inside Selenium browser
         today = datetime.date.today()
         wait_to_click("#deformField1")
-        wait_picker_to_show_up()
         pick_today()
         wait_to_click("#deformsubmit")
 
@@ -813,7 +803,6 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_tooearly(self):
         wait_to_click("#deformField1")
-        wait_picker_to_show_up()
         wait_to_click('li[data-pick="0"]')
         submit_date_picker_safe()
         self.assertTrue(findcss(".has-error"))
@@ -822,7 +811,6 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_success(self):
         wait_to_click("#deformField1")
-        wait_picker_to_show_up()
         findxpath('//li[@data-pick="900"]').click()
         submit_date_picker_safe()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
@@ -2073,7 +2061,6 @@ class SequenceOfDateInputs(Base, unittest.TestCase):
     def test_submit_one_filled(self):
         action_chains_on_id("deformField1-seqAdd").click().perform()
         action_chains_on_xpath('//input[@name="date"]').click().perform()
-        wait_picker_to_show_up()
         findcss(".picker__button--today").click()
         submit_date_picker_safe()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
