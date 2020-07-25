@@ -30,14 +30,14 @@ BROKEN_SELENIUM_LOG_FILE = "/tmp/selenium.log"
 
 # Some sleep we assume the datetime widget takes to show or hide
 # itself properly
-DATE_PICKER_DELAY = 2.0
+DATE_PICKER_DELAY = 1.0
 
 BASE_PATH = os.environ.get("BASE_PATH", "")
 URL = os.environ.get("URL", "http://localhost:8522")
 
 
 #: Wait 2.0 seconds for some Selenium events to happen before giving up
-SELENIUM_IMPLICIT_WAIT = 2.0
+SELENIUM_IMPLICIT_WAIT = 1.0
 
 
 # Disable unnecessary Selenium trace output bloat
@@ -755,13 +755,11 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         tooearly = datetime.date(datetime.date.today().year, 1, 1)
         today = datetime.date.today()
         num_months = diff_month(today, tooearly)
-        time.sleep(2)
         for _x in range(num_months):
             findcss(".picker__nav--prev").click()
             # Freaking manual timing here again
-            time.sleep(0.2)
+            time.sleep(0.02)
 
-        time.sleep(0.5)
         wait_to_click(".picker__day")
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".has-error"))
