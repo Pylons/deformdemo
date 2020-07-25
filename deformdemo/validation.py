@@ -1,16 +1,16 @@
 # Standard Library
 import gzip
-import httplib
 import json
-import StringIO
 import sys
 import unittest
-import urlparse
 
 # Pyramid
 from pyramid.paster import bootstrap
 
+import StringIO
+import httplib
 from six.moves import input
+import urlparse
 
 # Deform Demo
 from deformdemo import DeformDemo

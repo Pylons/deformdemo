@@ -19,7 +19,7 @@
 # LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 # FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 # DEALINGS IN THE SOFTWARE.
-
+# Future
 from __future__ import print_function
 from __future__ import with_statement
 
@@ -36,16 +36,19 @@ from six.moves import input
 try:
     import httplib
 except ImportError:
+    # Standard Library
     import http.client as httplib
 
 try:
     import urlparse
 except ImportError:
+    # Standard Library
     import urllib.parse as urlparse
 
 try:
     from BytesIO import BytesIO
 except ImportError:
+    # Standard Library
     from io import BytesIO
 
 try:

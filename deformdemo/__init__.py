@@ -28,7 +28,6 @@ from pyramid.view import view_defaults
 # Deform
 import deform
 from deform.renderer import configure_zpt_renderer
-
 from iso8601 import iso8601
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
@@ -40,6 +39,7 @@ log = logging.getLogger(__name__)
 try:
     from StringIO import StringIO
 except ImportError:
+    # Standard Library
     from io import StringIO
 
 
@@ -73,6 +73,7 @@ class demonstrate(object):
 # eliminate u''
 def my_safe_repr(obj, context, maxlevels, level, sort_dicts=True):
 
+    # Standard Library
     from inspect import signature
 
     if type(obj) == unicode:
@@ -1047,6 +1048,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="sequence_of_dateinputs")
     @demonstrate("Sequence of Date Inputs")
     def sequence_of_dateinputs(self):
+        # Standard Library
         import datetime
 
         class Sequence(colander.SequenceSchema):
@@ -1068,6 +1070,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="sequence_of_i18n")
     @demonstrate("Sequence of I18N")
     def sequence_of_i18n(self):
+        # Standard Library
         import datetime
 
         locale_name = get_locale_name(self.request)
@@ -1416,6 +1419,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="dateparts")
     @demonstrate("Date Parts Widget")
     def dateparts(self):
+        # Standard Library
         import datetime
 
         class Schema(colander.Schema):
@@ -1436,6 +1440,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="dateparts_readonly")
     @demonstrate("Date Parts Widget (read-only)")
     def dateparts_readonly(self):
+        # Standard Library
         import datetime
 
         class Schema(colander.Schema):
@@ -1454,6 +1459,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="dateinput")
     @demonstrate("Date Input Widget")
     def dateinput(self):
+        # Standard Library
         import datetime
 
         class Schema(colander.Schema):
@@ -1474,6 +1480,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="timeinput")
     @demonstrate("Time Input")
     def timeinput(self):
+        # Standard Library
         import datetime
 
         class Schema(colander.Schema):
@@ -1494,6 +1501,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="datetimeinput")
     @demonstrate("DateTime Input Widget")
     def datetimeinput(self):
+        # Standard Library
         import datetime
 
         class Schema(colander.Schema):
@@ -1517,6 +1525,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="datetimeinput_readonly")
     @demonstrate("DateTime Input Widget (read-only)")
     def datetimeinput_readonly(self):
+        # Standard Library
         import datetime
 
         then = datetime.datetime(2011, 5, 5, 1, 2)
@@ -1535,6 +1544,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="edit")
     @demonstrate("Edit Form")
     def edit(self):
+        # Standard Library
         import datetime
 
         class Mapping(colander.Schema):
@@ -1846,6 +1856,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="select_with_optgroup")
     @demonstrate("Select Widget (with optgroup)")
     def select_with_optgroup(self):
+        # Deform
         from deform.widget import OptGroup
 
         choices = (
@@ -1883,6 +1894,7 @@ class DeformDemo(object):
         # One may or may not notice any difference with
         # 'select_with_optgroup' above, depending on the browser being
         # used. See widget's documentation for further details.
+        # Deform
         from deform.widget import OptGroup
 
         choices = (
@@ -1919,6 +1931,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="select_readonly")
     @demonstrate("Select Widget (read-only)")
     def select_readonly(self):
+        # Deform
         from deform.widget import OptGroup
 
         choices = (
@@ -2007,6 +2020,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="select2_with_optgroup")
     @demonstrate("Select2 Widget (with optgroup)")
     def select2_with_optgroup(self):
+        # Deform
         from deform.widget import OptGroup
 
         choices = (
@@ -2380,6 +2394,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="multiple_forms")
     @demonstrate("Multiple Forms on the Same Page")
     def multiple_forms(self):
+        # Standard Library
         import itertools
 
         # We need to make sure the form field identifiers for the two
@@ -2500,7 +2515,10 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="deferred_schema_bindings")
     @demonstrate("Deferred Schema Bindings")
     def deferred_schema_bindings(self):
+        # Standard Library
         import datetime
+
+        # Pyramid
         import colander
 
         @colander.deferred
@@ -2684,6 +2702,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="readonly_fields")
     @demonstrate("Read-Only Fields")
     def readonly_fields(self):
+        # Standard Library
         import datetime
 
         class Schema(colander.Schema):
@@ -2759,6 +2778,7 @@ class DeformDemo(object):
     )
     @demonstrate("Custom classes on outermost html element of Widgets")
     def custom_classes_on_outermost_html_element(self):
+        # Standard Library
         import datetime
 
         class Mapping(colander.Schema):
