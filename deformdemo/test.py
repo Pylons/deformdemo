@@ -755,6 +755,7 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         tooearly = datetime.date(datetime.date.today().year, 1, 1)
         today = datetime.date.today()
         num_months = diff_month(today, tooearly)
+        wait_to_click(".picker__nav--prev")
         for _x in range(num_months):
             findcss(".picker__nav--prev").click()
             # Freaking manual timing here again
