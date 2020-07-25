@@ -730,6 +730,7 @@ class DateInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/dateinput/")
 
     def test_render_default(self):
+        clear_autofocused_picker()
         self.assertTrue("Date" in browser.page_source)
         self.assertEqual(findcss(".required").text, "Date")
         self.assertEqual(findid_view("captured").text, "None")
@@ -750,7 +751,7 @@ class DateInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_tooearly(self):
         clear_autofocused_picker()
-        wait_to_click("#deformsubmit")
+        wait_to_click("#deformField1")
 
         def diff_month(d1, d2):
             return (d1.year - d2.year) * 12 + d1.month - d2.month + 1
