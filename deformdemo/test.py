@@ -1,8 +1,6 @@
 # -*- coding: utf-8 -*-
-# Future
 from __future__ import print_function
 
-# Standard Library
 import datetime
 from decimal import Decimal
 import logging
@@ -11,7 +9,6 @@ import re
 import time
 import unittest
 
-# Test Support
 from flaky import flaky
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
@@ -238,7 +235,6 @@ def setUpModule():
     driver_name = os.environ.get("WEBDRIVER")
 
     if driver_name == "chrome":
-        # Test Support
         from selenium.webdriver import Chrome
 
         browser = Chrome()
@@ -246,12 +242,10 @@ def setUpModule():
     elif driver_name == "phantomjs":
         # TODO: Test fails on Phantomjs
         # They just hang in some point
-        # Test Support
         from selenium.webdriver import PhantomJS
 
         browser = PhantomJS()
     else:
-        # Test Support
         from selenium.webdriver import Firefox
         from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
 

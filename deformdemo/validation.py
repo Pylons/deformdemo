@@ -1,10 +1,8 @@
-# Standard Library
 import gzip
 import json
 import sys
 import unittest
 
-# Pyramid
 from pyramid.paster import bootstrap
 
 import StringIO
