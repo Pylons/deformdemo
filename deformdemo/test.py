@@ -753,8 +753,7 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         tooearly = datetime.date(datetime.date.today().year, 1, 1)
         today = datetime.date.today()
         num_months = diff_month(today, tooearly)
-        time.sleep(2.0)
-        self.assertTrue(findcss(".picker__nav--prev"))
+        time.sleep(DATE_PICKER_DELAY)
         for _x in range(num_months):
             findcss(".picker__nav--prev").click()
             # Freaking manual timing here again
@@ -853,6 +852,7 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
 
     def test_submit_both_empty(self):
+        clear_autofocused_picker()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".has-error"))
         self.assertEqual(findid("error-deformField1").text, "Required")
@@ -867,6 +867,7 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_date_empty(self):
+        clear_autofocused_picker()
         wait_to_click("#deformField1-time")
         wait_to_click('li[data-pick="0"]')
         submit_date_picker_safe()
@@ -875,19 +876,24 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_tooearly(self):
+        clear_autofocused_picker()
         wait_to_click("#deformField1-time")
         wait_to_click('li[data-pick="0"]')
         wait_to_click("#deformField1-date")
 
         def diff_month(d1, d2):
-            return (d1.year - d2.year) * 12 + d1.month - d2.month
+            return (d1.year - d2.year) * 12 + d1.month - d2.month + 1
 
-        tooearly = datetime.date(2010, 1, 1)
+        tooearly = datetime.date(datetime.date.today().year, 1, 1)
         today = datetime.date.today()
         num_months = diff_month(today, tooearly)
         time.sleep(DATE_PICKER_DELAY)
-        [findcss(".picker__nav--prev").click() for x in range(num_months)]
-        findcss(".picker__day").click()
+        for _x in range(num_months):
+            findcss(".picker__nav--prev").click()
+            # Freaking manual timing here again
+            time.sleep(0.2)
+
+        wait_to_click(".picker__day")
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".has-error"))
         self.assertTrue("is earlier than" in findid("error-deformField1").text)
@@ -895,6 +901,7 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_success(self):
         now = datetime.datetime.now()
+        clear_autofocused_picker()
         wait_to_click("#deformField1-time")
         wait_to_click('li[data-pick="60"]')
         wait_to_click("#deformField1-date")

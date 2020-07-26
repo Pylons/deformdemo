@@ -1497,7 +1497,12 @@ class DeformDemo(object):
                 colander.DateTime(),
                 validator=colander.Range(
                     min=datetime.datetime(
-                        2010, 5, 5, 12, 30, tzinfo=iso8601.UTC
+                        datetime.date.today().year,
+                        1,
+                        1,
+                        12,
+                        30,
+                        tzinfo=iso8601.UTC,
                     ),
                     min_err=_(
                         "${val} is earlier than earliest datetime ${min}"
