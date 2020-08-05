@@ -2736,23 +2736,15 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         self.assertTrue("bar" in text)
 
     def test_special_chars(self):
-        browser.open(self.url)
-        browser.wait_for_page_to_load("30000")
-        browser.focus('deformField1')
-        browser.type_keys('deformField1', 'foo')
-        import time
-        time.sleep(.2)
-        self.assertTrue(browser.is_text_present('foo & bar'))
-        browser.mouse_over("//html/body/ul/li/a") # hurrr, necessary
-        browser.click("//html/body/ul/li/a")
-        browser.click('submit')
-        browser.wait_for_page_to_load("30000")
-        self.assertFalse(browser.is_element_present('css=.errorMsgLbl'))
-        self.assertEqual(browser.get_value('deformField1'), u'foo & bar')
-        captured = browser.get_text('css=#captured')
-        self.assertSimilarRepr(
-                captured,
-                "{'text': u'foo & bar'}")
+        findid('deformField1').send_keys('foo')
+        self.assertTrue(findxpath('//p[text()="foo & bar"]').is_displayed())
+        findcss(".tt-suggestion").click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, ".has-error")
+        text = findid("captured").text
+        # py2/py3 compat, py2 adds extra u prefix
+        self.assertTrue("foo & bar" in text)
+
 
 class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/autocomplete_remote_input/")
