@@ -2386,7 +2386,6 @@ class DeformDemo(object):
         # forms do not overlap so accessibility features continue to work,
         # such as focusing the field related to a legend when the
         # legend is clicked on.
-
         # We do so by creating an ``itertools.count`` object and
         # passing that object as the ``counter`` keyword argument to
         # the constructor of both forms.  As a result, the second

@@ -85,6 +85,7 @@ def action_chains_on_id(eid):
         )
     )
 
+
 def action_chains_on_xpath(expath):
     return ActionChains(browser).move_to_element(
         WebDriverWait(browser, SELENIUM_IMPLICIT_WAIT).until(
