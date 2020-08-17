@@ -2784,8 +2784,9 @@ class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
         self.assertTrue(findxpath('//p[text()="two"]').is_displayed())
         self.assertTrue(findxpath('//p[text()="three"]').is_displayed())
 
-        action_chains_on_xpath('//p[text()="two"]').click().perform()
-
+        # action_chains_on_xpath('//p[text()="two"]').click().perform()
+        findid("deformField1").send_keys(Keys.ARROW_DOWN)
+        findid("deformField1").send_keys(Keys.ENTER)
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
 
