@@ -129,7 +129,7 @@ class DeformDemo(object):
 
         reqts = form.get_widget_resources()
 
-        printer = pprint.PrettyPrinter(width=1)
+        printer = pprint.PrettyPrinter()
         printer.format = my_safe_repr
         output = printer.pformat(captured)
         captured = highlight(output, PythonLexer(), formatter)
@@ -291,8 +291,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="autocomplete_input")
     @demonstrate("Autocomplete Input Widget")
     def autocomplete_input(self):
-
-        choices = ["bar", "baz", "two", "three"]
+        choices = ["bar", "baz", "two", "three", "foo & bar", "one < two"]
         widget = deform.widget.AutocompleteInputWidget(
             values=choices, min_length=1
         )
@@ -340,7 +339,9 @@ class DeformDemo(object):
     def autocomplete_input_values(self):
         text = self.request.params.get("term", "")
         return [
-            x for x in ["bar", "baz", "two", "three"] if x.startswith(text)
+            x
+            for x in ["bar", "baz", "two", "three", "foo & bar", "one < two"]
+            if x.startswith(text)
         ]
 
     @view_config(renderer="templates/form.pt", name="textarea")
@@ -2387,7 +2388,6 @@ class DeformDemo(object):
         # forms do not overlap so accessibility features continue to work,
         # such as focusing the field related to a legend when the
         # legend is clicked on.
-
         # We do so by creating an ``itertools.count`` object and
         # passing that object as the ``counter`` keyword argument to
         # the constructor of both forms.  As a result, the second
