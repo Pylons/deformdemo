@@ -2741,7 +2741,7 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         # py2/py3 compat, py2 adds extra u prefix
         self.assertTrue("bar" in text)
 
-    def test_special_chars(self):
+    def test_ampersand(self):
         findid("deformField1").send_keys("foo")
         self.assertTrue(findxpath('//p[text()="foo & bar"]').is_displayed())
         action_chains_on_css_selector(".tt-suggestion").click().perform()
@@ -2750,6 +2750,17 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         text = findid("captured").text
         # py2/py3 compat, py2 adds extra u prefix
         self.assertTrue("foo & bar" in text)
+
+    def test_less_than(self):
+        findid("deformField1").send_keys("one")
+        self.assertTrue(findxpath('//p[text()="one < two"]').is_displayed())
+        findid("deformField1").send_keys(Keys.ARROW_DOWN)
+        findid("deformField1").send_keys(Keys.ENTER)
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, ".has-error")
+        text = findid("captured").text
+        # py2/py3 compat, py2 adds extra u prefix
+        self.assertTrue("one < two" in text)
 
 
 class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
@@ -2784,7 +2795,6 @@ class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
         self.assertTrue(findxpath('//p[text()="two"]').is_displayed())
         self.assertTrue(findxpath('//p[text()="three"]').is_displayed())
 
-        # action_chains_on_xpath('//p[text()="two"]').click().perform()
         findid("deformField1").send_keys(Keys.ARROW_DOWN)
         findid("deformField1").send_keys(Keys.ENTER)
         findid("deformsubmit").click()
