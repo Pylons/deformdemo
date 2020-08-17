@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import print_function
 
+import ast
 import datetime
 from decimal import Decimal
 import logging
@@ -354,9 +355,9 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         self.assertTrue(findid("deformField1-1").is_selected())
         self.assertTrue(findid("deformField1-2").is_selected())
         captured = findid("captured").text
-        self.assertSimilarRepr(
-            captured, "{'pepper': {'chipotle', 'habanero', 'jalapeno'}}"
-        )
+        expected = {'pepper': {'jalapeno', 'habanero', 'chipotle'}}
+        captured = ast.literal_eval(captured)
+        self.assertEqual(expected, captured)
 
 
 class CheckboxChoiceWidgetInlineTests(Base, unittest.TestCase):
@@ -400,9 +401,9 @@ class CheckboxChoiceWidgetInlineTests(Base, unittest.TestCase):
         self.assertTrue(findid("deformField1-1").is_selected())
         self.assertTrue(findid("deformField1-2").is_selected())
         captured = findid("captured").text
-        self.assertSimilarRepr(
-            captured, "{'pepper': {'chipotle', 'habanero', 'jalapeno'}}"
-        )
+        expected = {'pepper': {'jalapeno', 'habanero', 'chipotle'}}
+        captured = ast.literal_eval(captured)
+        self.assertEqual(expected, captured)
 
 
 class CheckboxChoiceReadonlyTests(Base, unittest.TestCase):
@@ -2590,9 +2591,9 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
         # after form submission typed value appear in captured
         findid("deformsubmit").click()
         captured = findid("captured").text
-        self.assertSimilarRepr(
-            captured, "{'pepper': {'hello', 'qwerty'} }",
-        )
+        captured = ast.literal_eval(captured)
+        expected = {'pepper': {'hello', 'qwerty'}}
+        self.assertEqual(expected, captured)
 
 
 class SelectWithDefaultTests(Base, unittest.TestCase):

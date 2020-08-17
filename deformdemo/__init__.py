@@ -339,7 +339,9 @@ class DeformDemo(object):
     def autocomplete_input_values(self):
         text = self.request.params.get("term", "")
         return [
-            x for x in ["bar", "baz", "two", "three", "foo & bar"] if x.startswith(text)
+            x
+            for x in ["bar", "baz", "two", "three", "foo & bar"]
+            if x.startswith(text)
         ]
 
     @view_config(renderer="templates/form.pt", name="textarea")
