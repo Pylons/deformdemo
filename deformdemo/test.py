@@ -100,6 +100,10 @@ def action_chains_xpath_on_select(option_xpath):
     )
 
 
+def action_chains_on_css_selector(css_selector):
+    return ActionChains(browser).move_to_element(findcss(css_selector))
+
+
 @give_selenium_some_time
 def findid(elid, clickable=True):
     """Find Selenium element by CSS id.
@@ -2737,9 +2741,9 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         self.assertTrue("bar" in text)
 
     def test_special_chars(self):
-        findid('deformField1').send_keys('foo')
+        findid("deformField1").send_keys("foo")
         self.assertTrue(findxpath('//p[text()="foo & bar"]').is_displayed())
-        findcss(".tt-suggestion").click()
+        action_chains_on_css_selector(".tt-suggestion").click().perform()
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
         text = findid("captured").text

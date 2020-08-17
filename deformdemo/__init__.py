@@ -129,7 +129,7 @@ class DeformDemo(object):
 
         reqts = form.get_widget_resources()
 
-        printer = pprint.PrettyPrinter(width=1)
+        printer = pprint.PrettyPrinter()
         printer.format = my_safe_repr
         output = printer.pformat(captured)
         captured = highlight(output, PythonLexer(), formatter)
@@ -339,7 +339,7 @@ class DeformDemo(object):
     def autocomplete_input_values(self):
         text = self.request.params.get("term", "")
         return [
-            x for x in ["bar", "baz", "two", "three"] if x.startswith(text)
+            x for x in ["bar", "baz", "two", "three", "foo & bar"] if x.startswith(text)
         ]
 
     @view_config(renderer="templates/form.pt", name="textarea")
