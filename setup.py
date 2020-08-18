@@ -31,7 +31,6 @@ except Exception:
 PY3 = sys.version_info[0] == 3
 
 requires = [
-    "deform==3.0.0.dev0",
     "pyramid>=1.5a1",  # route_name argument to resource_url
     "pyramid_chameleon",
     "pygments",
