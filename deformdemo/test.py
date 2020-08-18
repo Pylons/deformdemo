@@ -2916,7 +2916,7 @@ class UnicodeEverywhereTests(Base, unittest.TestCase):
         description = u"子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？ " u"人不知而不慍，不亦君子乎？」"
 
         self.assertTrue(u"По оживлённым берегам" in browser.page_source)
-        self.assertEqual(findcss(".help-block").text, description)
+        self.assertEqual(findcss(".form-text").text, description)
         self.assertEqual(
             findid_view("deformField1").get_attribute("name"), "field"
         )
