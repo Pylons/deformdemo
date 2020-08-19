@@ -7,6 +7,7 @@ from decimal import Decimal
 import logging
 import os
 import re
+import sys
 import time
 import unittest
 
@@ -32,7 +33,7 @@ DATE_PICKER_DELAY = 1.0
 
 BASE_PATH = os.environ.get("BASE_PATH", "")
 URL = os.environ.get("URL", "http://localhost:8522")
-
+PY3 = sys.version_info[0] == 3
 
 #: Wait 2.0 seconds for some Selenium events to happen before giving up
 SELENIUM_IMPLICIT_WAIT = 1.0
@@ -232,6 +233,25 @@ def clear_autofocused_picker():
     ActionChains(browser).send_keys(Keys.ESCAPE).perform()
 
 
+def sort_set_values(captured):
+    """
+    Sets have no sort order in Python 3, but strangely they do in Python 2???
+
+    Whatever.  When we drop Python 2, we don't have to do this nonsense and can
+    simply compare two sets with ast.
+
+    :param captured:
+    :type captured:
+    :return:
+    :rtype:
+    """
+    obj = ast.literal_eval(captured)
+    for _k, _v in obj.items():
+        pass
+    vs = sorted(_v)
+    return "{'" + _k + "': {'" + ("', '").join(vs) + "'}}"
+
+
 def setUpModule():
 
     global browser
@@ -355,9 +375,10 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         self.assertTrue(findid("deformField1-1").is_selected())
         self.assertTrue(findid("deformField1-2").is_selected())
         captured = findid("captured").text
-        expected = {'pepper': {'jalapeno', 'habanero', 'chipotle'}}
-        captured = ast.literal_eval(captured)
-        self.assertEqual(expected, captured)
+        if PY3:
+            captured = sort_set_values(captured)
+        expected = "{'pepper': {'chipotle', 'habanero', 'jalapeno'}}"
+        self.assertSimilarRepr(captured, expected)
 
 
 class CheckboxChoiceWidgetInlineTests(Base, unittest.TestCase):
@@ -401,9 +422,10 @@ class CheckboxChoiceWidgetInlineTests(Base, unittest.TestCase):
         self.assertTrue(findid("deformField1-1").is_selected())
         self.assertTrue(findid("deformField1-2").is_selected())
         captured = findid("captured").text
-        expected = {'pepper': {'jalapeno', 'habanero', 'chipotle'}}
-        captured = ast.literal_eval(captured)
-        self.assertEqual(expected, captured)
+        if PY3:
+            captured = sort_set_values(captured)
+        expected = "{'pepper': {'chipotle', 'habanero', 'jalapeno'}}"
+        self.assertSimilarRepr(captured, expected)
 
 
 class CheckboxChoiceReadonlyTests(Base, unittest.TestCase):
@@ -2591,9 +2613,10 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
         # after form submission typed value appear in captured
         findid("deformsubmit").click()
         captured = findid("captured").text
-        captured = ast.literal_eval(captured)
-        expected = {'pepper': {'hello', 'qwerty'}}
-        self.assertEqual(expected, captured)
+        expected = "{'pepper': {'hello', 'qwerty'}}"
+        if PY3:
+            captured = sort_set_values(captured)
+        self.assertSimilarRepr(captured, expected)
 
 
 class SelectWithDefaultTests(Base, unittest.TestCase):
