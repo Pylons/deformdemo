@@ -246,10 +246,10 @@ def sort_set_values(captured):
     :rtype:
     """
     obj = ast.literal_eval(captured)
-    for k, v in obj.items():
+    for _k, _v in obj.items():
         pass
-    vs = sorted(v)
-    return ("{'" + k + "': {'" + ("', '").join(vs) + "'}}")
+    vs = sorted(_v)
+    return "{'" + _k + "': {'" + ("', '").join(vs) + "'}}"
 
 
 def setUpModule():
