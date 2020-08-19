@@ -40,6 +40,7 @@ except ImportError:
 
 
 PY3 = sys.version_info[0] == 3
+PY38MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 8
 
 if PY3:
 
@@ -69,16 +70,12 @@ class demonstrate(object):
 # eliminate u''
 def my_safe_repr(obj, context, maxlevels, level, sort_dicts=True):
 
-    from inspect import signature
-
     if type(obj) == unicode:
         obj = obj.encode("utf-8")
 
     # Python 3.8 changed the call signature of pprint._safe_repr.
-    # In order to support both Python 3.8 and earlier versions
-    # we have to check its signature before calling
-    sig = signature(pprint._safe_repr)
-    if len(sig.parameters) == 5:
+    # by adding sort_dicts.
+    if PY38MIN:
         return pprint._safe_repr(obj, context, maxlevels, level, sort_dicts)
     else:
         return pprint._safe_repr(obj, context, maxlevels, level)
