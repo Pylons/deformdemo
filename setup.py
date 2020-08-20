@@ -12,7 +12,6 @@
 #
 ##############################################################################
 
-# Standard Library
 import os
 import sys
 
@@ -45,7 +44,7 @@ if not PY3:
 
 setupkw = dict(
     name="deformdemo",
-    version="2.0.8.dev0",
+    version="2.0.10",
     description="Demonstration application for Deform form library",
     long_description=README + "\n\n" + CHANGES,
     classifiers=[
@@ -54,13 +53,16 @@ setupkw = dict(
         "Intended Audience :: Developers",
         "License :: Repoze Public License",
         "Programming Language :: Python",
+        "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
+        "Programming Language :: Python :: Implementation :: PyPy3",
         "Topic :: Internet :: WWW/HTTP",
     ],
     keywords="web forms form generation schema validation deform",
@@ -79,7 +81,6 @@ setupkw = dict(
             "flake8",
             "flake8-bugbear",
             "flake8-builtins",
-            "flake8-isort",
             "isort",
             "readme_renderer",
         ],

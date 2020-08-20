@@ -3,7 +3,6 @@
 """ A Pyramid app that demonstrates various Deform widgets and
 capabilities and which provides a functional test suite  """
 
-# Standard Library
 import csv
 import decimal
 import inspect
@@ -12,7 +11,6 @@ import pprint
 import random
 import sys
 
-# Pyramid
 import colander
 from pyramid.config import Configurator
 from pyramid.i18n import TranslationStringFactory
@@ -25,10 +23,8 @@ from pyramid.threadlocal import get_current_request
 from pyramid.view import view_config
 from pyramid.view import view_defaults
 
-# Deform
 import deform
 from deform.renderer import configure_zpt_renderer
-
 from iso8601 import iso8601
 from pygments import highlight
 from pygments.formatters import HtmlFormatter
@@ -44,6 +40,7 @@ except ImportError:
 
 
 PY3 = sys.version_info[0] == 3
+PY38MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 8
 
 if PY3:
 
@@ -73,16 +70,12 @@ class demonstrate(object):
 # eliminate u''
 def my_safe_repr(obj, context, maxlevels, level, sort_dicts=True):
 
-    from inspect import signature
-
     if type(obj) == unicode:
         obj = obj.encode("utf-8")
 
     # Python 3.8 changed the call signature of pprint._safe_repr.
-    # In order to support both Python 3.8 and earlier versions
-    # we have to check its signature before calling
-    sig = signature(pprint._safe_repr)
-    if len(sig.parameters) == 5:
+    # by adding sort_dicts.
+    if PY38MIN:
         return pprint._safe_repr(obj, context, maxlevels, level, sort_dicts)
     else:
         return pprint._safe_repr(obj, context, maxlevels, level)
@@ -133,7 +126,7 @@ class DeformDemo(object):
 
         reqts = form.get_widget_resources()
 
-        printer = pprint.PrettyPrinter(width=1)
+        printer = pprint.PrettyPrinter()
         printer.format = my_safe_repr
         output = printer.pformat(captured)
         captured = highlight(output, PythonLexer(), formatter)
@@ -295,8 +288,7 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="autocomplete_input")
     @demonstrate("Autocomplete Input Widget")
     def autocomplete_input(self):
-
-        choices = ["bar", "baz", "two", "three"]
+        choices = ["bar", "baz", "two", "three", "foo & bar", "one < two"]
         widget = deform.widget.AutocompleteInputWidget(
             values=choices, min_length=1
         )
@@ -344,7 +336,9 @@ class DeformDemo(object):
     def autocomplete_input_values(self):
         text = self.request.params.get("term", "")
         return [
-            x for x in ["bar", "baz", "two", "three"] if x.startswith(text)
+            x
+            for x in ["bar", "baz", "two", "three", "foo & bar", "one < two"]
+            if x.startswith(text)
         ]
 
     @view_config(renderer="templates/form.pt", name="textarea")
@@ -1460,7 +1454,7 @@ class DeformDemo(object):
             somedate = colander.SchemaNode(
                 colander.Date(),
                 validator=colander.Range(
-                    min=datetime.date(2010, 5, 5),
+                    min=datetime.date(datetime.date.today().year, 1, 1),
                     min_err=_("${val} is earlier than earliest date ${min}"),
                 ),
                 title="Date",
@@ -1501,7 +1495,12 @@ class DeformDemo(object):
                 colander.DateTime(),
                 validator=colander.Range(
                     min=datetime.datetime(
-                        2010, 5, 5, 12, 30, tzinfo=iso8601.UTC
+                        datetime.date.today().year,
+                        1,
+                        1,
+                        12,
+                        30,
+                        tzinfo=iso8601.UTC,
                     ),
                     min_err=_(
                         "${val} is earlier than earliest datetime ${min}"
@@ -1553,7 +1552,7 @@ class DeformDemo(object):
 
         schema = Schema()
         form = deform.Form(schema, buttons=("submit",))
-        # We don't need to suppy all the values required by the schema
+        # We don't need to supply all the values required by the schema
         # for an initial rendering, only the ones the app actually has
         # values for.  Notice below that we don't pass the ``name``
         # value specified by the ``Mapping`` schema.
@@ -2383,10 +2382,9 @@ class DeformDemo(object):
         import itertools
 
         # We need to make sure the form field identifiers for the two
-        # forms do not overlap so accessibility features continue work
+        # forms do not overlap so accessibility features continue to work,
         # such as focusing the field related to a legend when the
         # legend is clicked on.
-
         # We do so by creating an ``itertools.count`` object and
         # passing that object as the ``counter`` keyword argument to
         # the constructor of both forms.  As a result, the second
@@ -2451,8 +2449,8 @@ class DeformDemo(object):
     @demonstrate("Widget Adapter")
     def widget_adapter(self):
         # Formish allows you to pair a widget against a type that
-        # doesn't "natively" lend itself to being representible by the
-        # widget; for example, it allows you to use a text area widget
+        # doesn't "natively" lend itself to being representable by the
+        # widget. For example, it allows you to use a textarea widget
         # against a sequence type.  To provide this feature, Formish
         # uses an adapter to convert the sequence data to text during
         # serialization and from text back to a sequence during
@@ -2464,7 +2462,7 @@ class DeformDemo(object):
         # it, you can add yourself as necessary using an adapter
         # pattern.
         #
-        # In the demo method below, we adapt a "normal" text area
+        # In the demo method below, we adapt a "normal" textarea
         # widget for use against a sequence.  The resulting browser UI
         # is the same as if we had used a TextAreaCSVWidget against
         # the sequence as in the "textareacsv" test method.
@@ -2474,7 +2472,7 @@ class DeformDemo(object):
         # Instead, we just construct an adapter manually.  Adding an
         # abstraction to the lookup based on the widget and schema
         # types being adapted is easy enough, but trying to follow the
-        # codepath of the abstraction becomes brainbending.
+        # code path of the abstraction becomes brain bending.
         # Therefore, we don't bother to show it.
 
         class Row(colander.TupleSchema):
@@ -2501,6 +2499,7 @@ class DeformDemo(object):
     @demonstrate("Deferred Schema Bindings")
     def deferred_schema_bindings(self):
         import datetime
+
         import colander
 
         @colander.deferred
@@ -2861,9 +2860,7 @@ def main(global_config, **settings):
 
     config.include("pyramid_chameleon")
 
-    #
     # Set up Chameleon templates (ZTP) rendering paths
-    #
 
     def translator(term):
         # i18n localizing function

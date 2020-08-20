@@ -1,13 +1,11 @@
 """Self-contained Deform demo example."""
 from __future__ import print_function
 
-# Pyramid
 import colander
 from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
 from pyramid.session import UnencryptedCookieSessionFactoryConfig
 
-# Deform
 import deform
 
 

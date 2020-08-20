@@ -1,17 +1,16 @@
 # -*- coding: utf-8 -*-
-
 from __future__ import print_function
 
-# Standard Library
+import ast
 import datetime
+from decimal import Decimal
 import logging
 import os
 import re
+import sys
 import time
 import unittest
-from decimal import Decimal
 
-# Test Support
 from flaky import flaky
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
@@ -30,14 +29,14 @@ BROKEN_SELENIUM_LOG_FILE = "/tmp/selenium.log"
 
 # Some sleep we assume the datetime widget takes to show or hide
 # itself properly
-DATE_PICKER_DELAY = 2.0
+DATE_PICKER_DELAY = 1.0
 
 BASE_PATH = os.environ.get("BASE_PATH", "")
 URL = os.environ.get("URL", "http://localhost:8522")
-
+PY3 = sys.version_info[0] == 3
 
 #: Wait 2.0 seconds for some Selenium events to happen before giving up
-SELENIUM_IMPLICIT_WAIT = 2.0
+SELENIUM_IMPLICIT_WAIT = 1.0
 
 
 # Disable unnecessary Selenium trace output bloat
@@ -101,6 +100,10 @@ def action_chains_xpath_on_select(option_xpath):
     return ActionChains(browser).move_to_element(
         browser.find_element_by_xpath(option_xpath)
     )
+
+
+def action_chains_on_css_selector(css_selector):
+    return ActionChains(browser).move_to_element(findcss(css_selector))
 
 
 @give_selenium_some_time
@@ -223,6 +226,25 @@ def wait_picker_to_show_up():
 def submit_date_picker_safe():
     """Delays caused by animation."""
     wait_to_click("#deformsubmit")
+
+
+def sort_set_values(captured):
+    """
+    Sets have no sort order in Python 3, but strangely they do in Python 2???
+
+    Whatever.  When we drop Python 2, we don't have to do this nonsense and can
+    simply compare two sets with ast.
+
+    :param captured:
+    :type captured:
+    :return:
+    :rtype:
+    """
+    obj = ast.literal_eval(captured)
+    for _k, _v in obj.items():
+        pass
+    vs = sorted(_v)
+    return "{'" + _k + "': {'" + ("', '").join(vs) + "'}}"
 
 
 def setUpModule():
@@ -348,9 +370,10 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         self.assertTrue(findid("deformField1-1").is_selected())
         self.assertTrue(findid("deformField1-2").is_selected())
         captured = findid("captured").text
-        self.assertSimilarRepr(
-            captured, "{'pepper': {'chipotle', 'habanero', 'jalapeno'}}"
-        )
+        if PY3:
+            captured = sort_set_values(captured)
+        expected = "{'pepper': {'chipotle', 'habanero', 'jalapeno'}}"
+        self.assertSimilarRepr(captured, expected)
 
 
 class CheckboxChoiceWidgetInlineTests(Base, unittest.TestCase):
@@ -394,9 +417,10 @@ class CheckboxChoiceWidgetInlineTests(Base, unittest.TestCase):
         self.assertTrue(findid("deformField1-1").is_selected())
         self.assertTrue(findid("deformField1-2").is_selected())
         captured = findid("captured").text
-        self.assertSimilarRepr(
-            captured, "{'pepper': {'chipotle', 'habanero', 'jalapeno'}}"
-        )
+        if PY3:
+            captured = sort_set_values(captured)
+        expected = "{'pepper': {'chipotle', 'habanero', 'jalapeno'}}"
+        self.assertSimilarRepr(captured, expected)
 
 
 class CheckboxChoiceReadonlyTests(Base, unittest.TestCase):
@@ -744,12 +768,12 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         wait_picker_to_show_up()
 
         def diff_month(d1, d2):
-            return (d1.year - d2.year) * 12 + d1.month - d2.month
+            return (d1.year - d2.year) * 12 + d1.month - d2.month + 1
 
-        tooearly = datetime.date(2010, 1, 1)
+        tooearly = datetime.date(datetime.date.today().year, 1, 1)
         today = datetime.date.today()
         num_months = diff_month(today, tooearly)
-        time.sleep(2)
+        time.sleep(DATE_PICKER_DELAY)
         for _x in range(num_months):
             findcss(".picker__nav--prev").click()
             # Freaking manual timing here again
@@ -878,14 +902,18 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         wait_to_click("#deformField1-date")
 
         def diff_month(d1, d2):
-            return (d1.year - d2.year) * 12 + d1.month - d2.month
+            return (d1.year - d2.year) * 12 + d1.month - d2.month + 1
 
-        tooearly = datetime.date(2010, 1, 1)
+        tooearly = datetime.date(datetime.date.today().year, 1, 1)
         today = datetime.date.today()
         num_months = diff_month(today, tooearly)
         time.sleep(DATE_PICKER_DELAY)
-        [findcss(".picker__nav--prev").click() for x in range(num_months)]
-        findcss(".picker__day").click()
+        for _x in range(num_months):
+            findcss(".picker__nav--prev").click()
+            # Freaking manual timing here again
+            time.sleep(0.2)
+
+        wait_to_click(".picker__day")
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".has-error"))
         self.assertTrue("is earlier than" in findid("error-deformField1").text)
@@ -2578,9 +2606,10 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
         # after form submission typed value appear in captured
         findid("deformsubmit").click()
         captured = findid("captured").text
-        self.assertSimilarRepr(
-            captured, "{'pepper': {'hello', 'qwerty'} }",
-        )
+        expected = "{'pepper': {'hello', 'qwerty'}}"
+        if PY3:
+            captured = sort_set_values(captured)
+        self.assertSimilarRepr(captured, expected)
 
 
 class SelectWithDefaultTests(Base, unittest.TestCase):
@@ -2728,6 +2757,27 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         # py2/py3 compat, py2 adds extra u prefix
         self.assertTrue("bar" in text)
 
+    def test_ampersand(self):
+        findid("deformField1").send_keys("foo")
+        self.assertTrue(findxpath('//p[text()="foo & bar"]').is_displayed())
+        action_chains_on_css_selector(".tt-suggestion").click().perform()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, ".has-error")
+        text = findid("captured").text
+        # py2/py3 compat, py2 adds extra u prefix
+        self.assertTrue("foo & bar" in text)
+
+    def test_less_than(self):
+        findid("deformField1").send_keys("one")
+        self.assertTrue(findxpath('//p[text()="one < two"]').is_displayed())
+        findid("deformField1").send_keys(Keys.ARROW_DOWN)
+        findid("deformField1").send_keys(Keys.ENTER)
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, ".has-error")
+        text = findid("captured").text
+        # py2/py3 compat, py2 adds extra u prefix
+        self.assertTrue("one < two" in text)
+
 
 class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/autocomplete_remote_input/")
@@ -2755,16 +2805,14 @@ class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_filled(self):
-        action_chains_on_id("deformField1").send_keys(Keys.HOME).send_keys(
-            "t"
-        ).perform()
+        findid("deformField1").send_keys("t")
 
-        time.sleep(2)
+        time.sleep(0.2)
         self.assertTrue(findxpath('//p[text()="two"]').is_displayed())
         self.assertTrue(findxpath('//p[text()="three"]').is_displayed())
 
-        action_chains_on_xpath('//p[text()="two"]').click().perform()
-
+        findid("deformField1").send_keys(Keys.ARROW_DOWN)
+        findid("deformField1").send_keys(Keys.ENTER)
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
 
