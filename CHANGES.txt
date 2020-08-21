@@ -1,7 +1,7 @@
 .. _2.0.11:
 
 2.0.11 (2020-08-21)
-------------------
+-------------------
 
 - Drop support of Python 3.4. Add support of Python 3.8 and PyPy3. Add testing
   of Python 3.9-dev. [stevepiercy]
