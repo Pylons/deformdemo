@@ -217,17 +217,22 @@ def pick_today():
     time.sleep(1)
 
 
-def wait_picker_to_show_up():
-    # TODO: This tests uses explicit waits to make it run on a modern browsers.
-    # The waits could be replaced by calling picker JS API directly
-    # inside Selenium browser
-    # TODO: This is caused by animation. Disable animations for tests.
-    time.sleep(1.0)
-
-
 def submit_date_picker_safe():
     """Delays caused by animation."""
     wait_to_click("#deformsubmit")
+
+
+def clear_autofocused_picker():
+    """
+    Dismisses a date or time picker by sending an ESCAPE key.
+
+    With the introduction of autofocus feature in Deform 3.0.0, the first field
+    is assigned autofocus by default. When there is only one field that is a
+    picker in the form, the pickadate by default uses the HTML5 attribute
+    ``autofocus`` to trigger the display of the picker. See
+    https://www.jqueryscript.net/demo/Lightweight-jQuery-Date-Input-Picker/docs.htm#api_open_close
+    """
+    ActionChains(browser).send_keys(Keys.ESCAPE).perform()
 
 
 def sort_set_values(captured):
@@ -751,6 +756,7 @@ class DateInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/dateinput/")
 
     def test_render_default(self):
+        clear_autofocused_picker()
         self.assertTrue("Date" in browser.page_source)
         self.assertEqual(findcss(".required").text, "Date")
         self.assertEqual(findid_view("captured").text, "None")
@@ -760,6 +766,7 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
 
     def test_submit_empty(self):
+        clear_autofocused_picker()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".has-error"))
         self.assertEqual(findid_view("error-deformField1").text, "Required")
@@ -769,8 +776,8 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid_view("captured").text, "None")
 
     def test_submit_tooearly(self):
-        findid("deformField1").click()
-        wait_picker_to_show_up()
+        clear_autofocused_picker()
+        wait_to_click("#deformField1")
 
         def diff_month(d1, d2):
             return (d1.year - d2.year) * 12 + d1.month - d2.month + 1
@@ -784,7 +791,6 @@ class DateInputWidgetTests(Base, unittest.TestCase):
             # Freaking manual timing here again
             time.sleep(0.2)
 
-        time.sleep(0.5)
         wait_to_click(".picker__day")
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".has-error"))
@@ -797,7 +803,6 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         # inside Selenium browser
         today = datetime.date.today()
         wait_to_click("#deformField1")
-        wait_picker_to_show_up()
         pick_today()
         wait_to_click("#deformsubmit")
 
@@ -832,6 +837,7 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
 
     def test_submit_empty(self):
+        clear_autofocused_picker()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".has-error"))
         self.assertEqual(findid_view("error-deformField1").text, "Required")
@@ -842,7 +848,6 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_tooearly(self):
         wait_to_click("#deformField1")
-        wait_picker_to_show_up()
         wait_to_click('li[data-pick="0"]')
         submit_date_picker_safe()
         self.assertTrue(findcss(".has-error"))
@@ -851,7 +856,6 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_success(self):
         wait_to_click("#deformField1")
-        wait_picker_to_show_up()
         findxpath('//li[@data-pick="900"]').click()
         submit_date_picker_safe()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
@@ -880,6 +884,7 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
 
     def test_submit_both_empty(self):
+        clear_autofocused_picker()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".has-error"))
         self.assertEqual(findid("error-deformField1").text, "Required")
@@ -894,6 +899,7 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_date_empty(self):
+        clear_autofocused_picker()
         wait_to_click("#deformField1-time")
         wait_to_click('li[data-pick="0"]')
         submit_date_picker_safe()
@@ -902,6 +908,7 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_tooearly(self):
+        clear_autofocused_picker()
         wait_to_click("#deformField1-time")
         wait_to_click('li[data-pick="0"]')
         wait_to_click("#deformField1-date")
@@ -926,6 +933,7 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_success(self):
         now = datetime.datetime.now()
+        clear_autofocused_picker()
         wait_to_click("#deformField1-time")
         wait_to_click('li[data-pick="60"]')
         wait_to_click("#deformField1-date")
@@ -2106,7 +2114,6 @@ class SequenceOfDateInputs(Base, unittest.TestCase):
     def test_submit_one_filled(self):
         action_chains_on_id("deformField1-seqAdd").click().perform()
         action_chains_on_xpath('//input[@name="date"]').click().perform()
-        wait_picker_to_show_up()
         findcss(".picker__button--today").click()
         submit_date_picker_safe()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
