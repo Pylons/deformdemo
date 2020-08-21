@@ -1,12 +1,12 @@
 Deform Demo
 ===========
 
-.. image:: https://travis-ci.org/Pylons/deformdemo.png?branch=master
+.. image:: https://travis-ci.org/Pylons/deformdemo.png?branch=2.0-branch
            :target: https://travis-ci.org/Pylons/deformdemo
 
 Demonstration application for the `Deform <https://docs.pylonsproject.org/projects/deform/en/latest>`_ Python HTML form library.
 
-This application is tested on Python versions 3.5, 3.6, 3.7, and 3.8, and PyPy3.
+This application is tested on Python versions 2.7, 3.5, 3.6, 3.7, and 3.8, and PyPy and PyPy3.
 It is also tested on Python 3.9-dev but allowed to fail.
 
 
@@ -24,13 +24,13 @@ Build the Docker image for deformdemo and tag it.
 .. code-block:: bash
 
     # docker build --tag pylons/deformdemo:<version> .
-    docker build --tag pylons/deformdemo:2.0.8 .
+    docker build --tag pylons/deformdemo:2.0.11 .
 
 Run the built image with Docker.
 
 .. code-block:: bash
 
-    docker run -d -p 8000:8522 pylons/deformdemo:2.0.8
+    docker run -d -p 8000:8522 pylons/deformdemo:2.0.11
 
 Then in your browser, visit http://localhost:8000
 
