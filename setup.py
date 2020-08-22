@@ -30,7 +30,7 @@ PY3 = sys.version_info[0] == 3
 
 requires = [
     "Babel",
-    "deform>=3.0.0.dev",
+    "deform>=2.0.11",
     "pyramid>=1.5a1",  # route_name argument to resource_url
     "pyramid_chameleon",
     "pygments",
