@@ -4,7 +4,7 @@
 -------------------
 
 - Drop support of Python 3.4. Add support of Python 3.8 and PyPy3. Add testing
-  of Python 3.9-dev. [stevepiercy]
+  of Python 3.9-dev with allowed failure. [stevepiercy]
 
 - Fix many broken functional tests. [sydoluciani]
 
