@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# Standard Library
 from __future__ import print_function
 
 import ast

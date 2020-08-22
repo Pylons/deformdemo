@@ -1,5 +1,4 @@
 """Self-contained Deform demo example."""
-# Pyramid
 from __future__ import print_function
 
 import colander
@@ -7,7 +6,6 @@ from pyramid.config import Configurator
 from pyramid.httpexceptions import HTTPFound
 from pyramid.session import UnencryptedCookieSessionFactoryConfig
 
-# Deform
 import deform
 
 
