@@ -1,17 +1,25 @@
 3.0.0 (unreleased)
 ------------------
 
-- Drop support of Python 2.7 and 3.4. Add support of Python 3.8 and PyPy3. Add
-  testing of Python 3.9-dev. [stevepiercy]
-
 - Update to Bootstrap 4 and its dependencies. [sydoluciani]
+
+- Use master branch of Deform and Colander on GitHub. [sydoluciani]
+
+
+.. _2.0.11:
+
+2.0.11 (2020-08-21)
+-------------------
+
+- Drop support of Python 3.4. Add support of Python 3.8 and PyPy3. Add testing
+  of Python 3.9-dev with allowed failure. [stevepiercy]
 
 - Fix many broken functional tests. [sydoluciani]
 
 - Use firefox-latest and geckodriver, dropping obsolete Firefox version.
   [sydoluciani]
 
-- Use master branch of Deform and Colander on GitHub. [sydoluciani]
+- Use 2.0-branch of Deform on GitHub. [sydoluciani]
 
 - Overhaul README.rst, tox, and requirements to be easier to get started.
   [stevepiercy]
@@ -27,6 +35,9 @@
   of Waitress's "Task queue depth is 1" warnings in the test output on Travis.
   [stevepiercy]
   https://github.com/Pylons/deformdemo/pull/62
+
+
+.. _2.0.7:
 
 2.0.7 (2018-11-20)
 ------------------

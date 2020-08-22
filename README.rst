@@ -24,13 +24,13 @@ Build the Docker image for deformdemo and tag it.
 .. code-block:: bash
 
     # docker build --tag pylons/deformdemo:<version> .
-    docker build --tag pylons/deformdemo:2.0.8 .
+    docker build --tag pylons/deformdemo:2.0.11 .
 
 Run the built image with Docker.
 
 .. code-block:: bash
 
-    docker run -d -p 8000:8522 pylons/deformdemo:2.0.8
+    docker run -d -p 8000:8522 pylons/deformdemo:2.0.11
 
 Then in your browser, visit http://localhost:8000
 

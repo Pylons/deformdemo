@@ -31,4 +31,4 @@ lines_after_imports = 2
 multi_line_output = 3
 no_lines_before = "THIRDPARTY"
 profile = "black"
-sections = "FUTURE,STDLIB,PYRAMID,DEFORM,THIRDPARTY,FIRSTPARTY,LOCALFOLDER,TESTS"
+sections = ["FUTURE","STDLIB","PYRAMID","DEFORM","THIRDPARTY","FIRSTPARTY","LOCALFOLDER","TESTS"]
