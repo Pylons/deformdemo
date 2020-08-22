@@ -11,27 +11,26 @@
 # FITNESS FOR A PARTICULAR PURPOSE
 #
 ##############################################################################
-
-import os
 import sys
 
 from setuptools import find_packages
 from setuptools import setup
 
 
-here = os.path.abspath(os.path.dirname(__file__))
+def readfile(name):
+    with open(name) as f:
+        return f.read()
 
-try:
-    README = open(os.path.join(here, "README.rst")).read()
-    CHANGES = open(os.path.join(here, "CHANGES.txt")).read()
-except Exception:
-    README = ""
-    CHANGES = ""
+
+README = readfile("README.rst")
+CHANGES = readfile("CHANGES.txt")
+VERSION = '3.0.0.dev0'
 
 PY3 = sys.version_info[0] == 3
 
 requires = [
-    "deform>=2.0dev",
+    "Babel",
+    "deform>=3.0.0.dev",
     "pyramid>=1.5a1",  # route_name argument to resource_url
     "pyramid_chameleon",
     "pygments",
@@ -39,12 +38,9 @@ requires = [
     "waitress",
 ]
 
-if not PY3:
-    requires.extend(("Babel", "lingua"))
-
-setupkw = dict(
+setup(
     name="deformdemo",
-    version="3.0.0.dev0",
+    version=VERSION,
     description="Demonstration application for Deform form library",
     long_description=README + "\n\n" + CHANGES,
     classifiers=[
@@ -92,5 +88,3 @@ setupkw = dict(
         ".": [("**.py", "lingua_python", None), ("**.pt", "lingua_xml", None)]
     },
 )
-
-setup(**setupkw)
