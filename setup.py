@@ -24,7 +24,7 @@ def readfile(name):
 
 README = readfile("README.rst")
 CHANGES = readfile("CHANGES.txt")
-VERSION = '2.0.13'
+VERSION = '2.0.14'
 
 PY3 = sys.version_info[0] == 3
 
