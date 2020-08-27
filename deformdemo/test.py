@@ -171,9 +171,7 @@ def wait_for_ajax(source):
 
 
 def wait_until_visible(selector, max_wait=5.0):
-    """Wait until something is visible.
-
-    """
+    """Wait until something is visible."""
     # http://stackoverflow.com/a/13058101/315168
     element = WebDriverWait(browser, max_wait).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, selector))
@@ -2586,7 +2584,8 @@ class Select2TagsWidgetTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         captured = findid("captured").text
         self.assertSimilarRepr(
-            captured, "{'pepper': 'hello'}",
+            captured,
+            "{'pepper': 'hello'}",
         )
 
 
@@ -2684,6 +2683,46 @@ class TextInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(element.get_attribute("value"), "hello")
         captured = findid("captured").text
         self.assertSimilarRepr(captured, "{'text': u'hello'}")
+
+
+class TextInputWidgetHtml5Tests(Base, unittest.TestCase):
+    url = test_url("/textinput_with_html5/")
+
+    def test_render_default(self):
+        self.assertTrue("Text" in browser.page_source)
+        element = findid("deformField1")
+        self.assertEqual(element.get_attribute("name"), "hours_worked")
+        self.assertEqual(element.get_attribute("type"), "number")
+        self.assertEqual(element.get_attribute("value"), "30.0")
+        self.assertEqual(element.get_attribute("step"), "0.01")
+        self.assertEqual(element.get_attribute("min"), "0")
+        self.assertEqual(element.get_attribute("max"), "99.99")
+        self.assertEqual(findcss(".required").text, "Hours Worked")
+        self.assertEqual(findid("captured").text, "None")
+
+    def test_submit_empty(self):
+        findid("deformField1").clear()
+        findid("deformsubmit").click()
+        element = findid("deformField1")
+        self.assertEqual(element.get_attribute("name"), "hours_worked")
+        self.assertEqual(element.get_attribute("type"), "number")
+        self.assertEqual(element.get_attribute("value"), "")
+        self.assertEqual(element.get_attribute("step"), "0.01")
+        self.assertEqual(element.get_attribute("min"), "0")
+        self.assertEqual(element.get_attribute("max"), "99.99")
+        self.assertEqual(findid("error-deformField1").text, "Required")
+        self.assertTrue(findcss(".has-error"))
+        self.assertEqual(findid("captured").text, "None")
+
+    def test_submit_filled(self):
+        findid("deformField1").clear()
+        findid("deformField1").send_keys("30.00")
+        findid("deformsubmit").click()
+        element = findid("deformField1")
+        self.assertRaises(NoSuchElementException, findcss, ".has-error")
+        self.assertEqual(element.get_attribute("value"), "30.00")
+        captured = findid("captured").text
+        self.assertSimilarRepr(captured, "{'hours_worked':Decimal('30.00')}")
 
 
 class TextInputWithCssClassWidgetTests(Base, unittest.TestCase):

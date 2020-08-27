@@ -232,6 +232,31 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer="templates/form.pt", name="textinput_with_html5")
+    @demonstrate("Text Input Widget (with arbitrary HTML5 attributes)")
+    def textinput_with_html5(self):
+        class Schema(colander.Schema):
+            hours_worked = colander.SchemaNode(
+                colander.Decimal(),
+                description="Enter number of hours worked",
+                default=30.00,
+                validator=colander.Range(min=0, max=decimal.Decimal("99.99")),
+                widget=deform.widget.TextInputWidget(
+                    attributes={
+                        "type": "number",
+                        "inputmode": "decimal",
+                        "step": "0.01",
+                        "min": "0",
+                        "max": "99.99",
+                    }
+                ),
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form)
+
     @view_config(renderer="templates/form.pt", name="textinput_with_css_class")
     @demonstrate("Text Input Widget (with CSS class)")
     def textinput_with_css_class(self):
@@ -2793,7 +2818,7 @@ class DeformDemo(object):
 
 
 class MemoryTmpStore(dict):
-    """ Instances of this class implement the
+    """Instances of this class implement the
     :class:`deform.interfaces.FileUploadTempStore` interface"""
 
     def preview_url(self, uid):
