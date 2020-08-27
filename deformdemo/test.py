@@ -170,9 +170,7 @@ def wait_for_ajax(source):
 
 
 def wait_until_visible(selector, max_wait=5.0):
-    """Wait until something is visible.
-
-    """
+    """Wait until something is visible."""
     # http://stackoverflow.com/a/13058101/315168
     element = WebDriverWait(browser, max_wait).until(
         EC.element_to_be_clickable((By.CSS_SELECTOR, selector))
@@ -2582,7 +2580,8 @@ class Select2TagsWidgetTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         captured = findid("captured").text
         self.assertSimilarRepr(
-            captured, "{'pepper': 'hello'}",
+            captured,
+            "{'pepper': 'hello'}",
         )
 
 
