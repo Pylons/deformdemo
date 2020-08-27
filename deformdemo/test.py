@@ -2711,7 +2711,7 @@ class TextInputWidgetHtml5Tests(Base, unittest.TestCase):
         self.assertEqual(element.get_attribute("min"), "0")
         self.assertEqual(element.get_attribute("max"), "99.99")
         self.assertEqual(findid("error-deformField1").text, "Required")
-        self.assertTrue(findcss(".is-invalid"))
+        self.assertTrue(findcss(".has-error"))
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_filled(self):
@@ -2719,7 +2719,7 @@ class TextInputWidgetHtml5Tests(Base, unittest.TestCase):
         findid("deformField1").send_keys("30.00")
         findid("deformsubmit").click()
         element = findid("deformField1")
-        self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
+        self.assertRaises(NoSuchElementException, findcss, ".has-error")
         self.assertEqual(element.get_attribute("value"), "30.00")
         captured = findid("captured").text
         self.assertSimilarRepr(captured, "{'hours_worked':Decimal('30.00')}")
