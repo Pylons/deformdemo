@@ -2818,7 +2818,7 @@ class DeformDemo(object):
 
 
 class MemoryTmpStore(dict):
-    """ Instances of this class implement the
+    """Instances of this class implement the
     :class:`deform.interfaces.FileUploadTempStore` interface"""
 
     def preview_url(self, uid):
