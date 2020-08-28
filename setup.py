@@ -29,7 +29,7 @@ VERSION = '2.0.14'
 PY3 = sys.version_info[0] == 3
 
 requires = [
-    "deform==2.0.14",
+    "deform>=2.0.11",
     "pyramid>=1.5a1",  # route_name argument to resource_url
     "pyramid_chameleon",
     "pygments",
