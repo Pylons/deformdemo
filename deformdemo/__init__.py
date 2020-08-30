@@ -2096,6 +2096,30 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer="templates/form.pt", name="select2sortable")
+    @demonstrate("Select2 Sortable Widget")
+    def select2sortable(self):
+
+        choices = (
+            ("", "- Select -"),
+            ("habanero", "Habanero"),
+            ("jalapeno", "Jalapeno"),
+            ("chipotle", "Chipotle"),
+        )
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.List(),
+                widget=deform.widget.Select2SortableWidget(
+                    values=choices, multiple=True, tags=True
+                ),
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form)
+
     @view_config(renderer="templates/form.pt", name="checkboxchoice")
     @demonstrate("Checkbox Choice Widget")
     def checkboxchoice(self):
