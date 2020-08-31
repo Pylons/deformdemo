@@ -2690,7 +2690,6 @@ class Select2SortableWidgetTests(Base, unittest.TestCase):
             ['Habanero', 'Chipotle'],
         )
 
-    @unittest.expectedFailure
     def test_select_reversed_order(self):
 
         # Select options reversed
@@ -2709,7 +2708,6 @@ class Select2SortableWidgetTests(Base, unittest.TestCase):
         )
 
         findid("deformsubmit").click()
-        # there seems to be a bug in select2sortable, because the test fails here
         self.assertEqual(
             findid("captured").text,
             "{'pepper': [  'chipotle', 'jalapeno','habanero',]}",
