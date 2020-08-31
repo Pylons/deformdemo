@@ -2618,6 +2618,134 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
         self.assertSimilarRepr(captured, expected)
 
 
+class Select2SortableWidgetTests(Base, unittest.TestCase):
+    url = test_url("/select2sortable/")
+
+    def get_selected(self):
+        return browser.find_elements_by_css_selector(
+            '.select2-choices > li.select2-search-choice'
+        )
+
+    def get_options(self):
+        try:
+            return findid("select2-drop").find_elements_by_css_selector(
+                "li.select2-results-dept-0:not(.select2-selected)"
+            )
+        except Exception:
+            # activate search first
+            browser.find_element_by_css_selector(
+                '.select2-choices > li.select2-search-field'
+            ).click()
+            return findid("select2-drop").find_elements_by_css_selector(
+                "li.select2-results-dept-0:not(.select2-selected)"
+            )
+
+    def test_render_default(self):
+        self.assertTrue("Pepper" in browser.page_source)
+        self.assertEqual(
+            [el.text for el in self.get_options()],
+            ['Habanero', 'Jalapeno', 'Chipotle'],
+        )
+
+    def test_select(self):
+
+        # select Habanero
+        self.get_options()[0].click()
+        # deactivate search
+        ActionChains(browser).send_keys(Keys.ESCAPE).perform()
+        # Habanero not in options anymore
+        self.assertTrue(
+            "Habanero" not in [el.text for el in self.get_options()]
+        )
+        ActionChains(browser).send_keys(Keys.ESCAPE).perform()
+        self.assertEqual(['Habanero'], [el.text for el in self.get_selected()])
+
+        # Select last option (Chipotle)
+        self.get_options()[-1].click()
+        ActionChains(browser).send_keys(Keys.ESCAPE).perform()
+        self.assertTrue(
+            "Chipotle" not in [el.text for el in self.get_options()]
+        )
+        ActionChains(browser).send_keys(Keys.ESCAPE).perform()
+        self.assertEqual(
+            ['Habanero', 'Chipotle'], [el.text for el in self.get_selected()]
+        )
+
+        # items are selected in order
+        self.assertEqual(
+            [el.text for el in self.get_selected()],
+            ['Habanero', 'Chipotle'],
+        )
+
+        findid("deformsubmit").click()
+        # there might be a bug in select2sortable, because we would expect
+        # ['chipotle', 'habanero']
+        self.assertEqual(
+            findid("captured").text, "{'pepper': ['habanero', 'chipotle']}"
+        )
+
+        # check correct items are selected and in captured order
+        self.assertEqual(
+            [el.text for el in self.get_selected()],
+            ['Habanero', 'Chipotle'],
+        )
+
+    @unittest.expectedFailure
+    def test_select_reversed_order(self):
+
+        # Select options reversed
+        while True:
+            elems = self.get_options()
+            if elems:
+                elems[-1].click()
+            else:
+                break
+        ActionChains(browser).send_keys(Keys.ESCAPE).perform()
+
+        # check order
+        self.assertEqual(
+            [el.text for el in self.get_selected()],
+            ['Chipotle', 'Jalapeno', 'Habanero'],
+        )
+
+        findid("deformsubmit").click()
+        # there seems to be a bug in select2sortable, because the test fails here
+        self.assertEqual(
+            findid("captured").text,
+            "{'pepper': [  'chipotle', 'jalapeno','habanero',]}",
+        )
+
+    @unittest.expectedFailure
+    def test_adjust_order(self):
+        # Select options reversed
+        while True:
+            elems = self.get_options()
+            if elems:
+                elems[-1].click()
+            else:
+                break
+        ActionChains(browser).send_keys(Keys.ESCAPE).perform()
+
+        # check order
+        self.assertEqual(
+            [el.text for el in self.get_selected()],
+            ['Chipotle', 'Jalapeno', 'Habanero'],
+        )
+
+        # drag first element down
+        # can't get this to work, something with selenium?
+        el1, el2, el3 = self.get_selected()
+        ActionChains(browser).click(el1).drag_and_drop(el1, el3).click(
+            el1
+        ).perform()
+
+        # order has changed
+        self.assertEqual(
+            [el.text for el in self.get_selected()],
+            ['Jalapeno', 'Chipotle', 'Habanero'],
+        )
+
+
 class SelectWithDefaultTests(Base, unittest.TestCase):
 
     url = test_url("/select_with_default/")
