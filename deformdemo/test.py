@@ -281,7 +281,7 @@ def setUpModule():
         from selenium.webdriver import Remote
 
         start_firefox()
-        time.sleep(os.getenv('DOCKER_RUN_TIMEOUT', 30))
+        time.sleep(os.getenv('WAITTOSTART', 30))
 
         selenium_grid_url = "http://localhost:4444/wd/hub"
         capabilities = DesiredCapabilities.FIREFOX.copy()
