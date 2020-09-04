@@ -274,7 +274,6 @@ def setUpModule():
 
         from selenium_containers import start_chrome
 
-        from selenium.webdriver import ChromeOptions
         from selenium.webdriver import DesiredCapabilities
         from selenium.webdriver import Remote
 
@@ -284,16 +283,9 @@ def setUpModule():
         selenium_grid_url = "http://localhost:4444/wd/hub"
         capabilities = DesiredCapabilities.CHROME.copy()
 
-        options = ChromeOptions()
-        options.add_argument('headless')
-        options.add_argument('no-sandbox')
-        options.add_argument('whitelisted-ips')
-        options.add_argument('window-size=1920, 1080')
-
         browser = Remote(
             command_executor=selenium_grid_url,
             desired_capabilities=capabilities,
-            options=options,
         )
 
         browser.set_window_size(1920, 1080)
