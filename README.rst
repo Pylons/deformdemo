@@ -148,12 +148,12 @@ Install the `latest release of geckodriver <https://github.com/mozilla/geckodriv
 .. code-block:: bash
 
     # macOS
-    wget https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-macos.tar.gz
-    tar -xzf geckodriver-v0.26.0-macos.tar.gz
+    wget https://github.com/mozilla/geckodriver/releases/download/v0.27.0/geckodriver-v0.27.0-macos.tar.gz
+    tar -xzf geckodriver-v0.27.0-macos.tar.gz
 
     # Linux (Debian)
-    wget https://github.com/mozilla/geckodriver/releases/download/v0.26.0/geckodriver-v0.26.0-linux64.tar.gz
-    tar -xzf geckodriver-v0.26.0-linux64.tar.gz
+    wget https://github.com/mozilla/geckodriver/releases/download/v0.27.0/geckodriver-v0.27.0-linux64.tar.gz
+    tar -xzf geckodriver-v0.27.0-linux64.tar.gz
 
 
 gettext
