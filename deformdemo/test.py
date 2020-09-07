@@ -432,10 +432,7 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         self.assertTrue(findid("deformField1-0").is_selected())
         captured = findid("captured").text
-        self.assertSimilarRepr(
-            captured,
-            "{'pepper': {'habanero'}}"
-        )
+        self.assertSimilarRepr(captured, "{'pepper': {'habanero'}}")
 
     def test_submit_three_checked(self):
         findid("deformField1-0").click()
@@ -2654,7 +2651,8 @@ class Select2TagsWidgetTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         captured = findid("captured").text
         self.assertSimilarRepr(
-            captured, "{'pepper': 'hello'}",
+            captured,
+            "{'pepper': 'hello'}",
         )
 
 
