@@ -340,8 +340,8 @@ def setUpModule():
         return browser
 
     elif (
-            driver_name == "selenium_local_firefox"
-            or os.environ.get('TRAVIS') == 'true'
+        driver_name == "selenium_local_firefox"
+        or os.environ.get('TRAVIS') == 'true'
     ):
 
         from selenium import webdriver
@@ -2651,8 +2651,7 @@ class Select2TagsWidgetTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         captured = findid("captured").text
         self.assertSimilarRepr(
-            captured,
-            "{'pepper': 'hello'}",
+            captured, "{'pepper': 'hello'}",
         )
 
 
