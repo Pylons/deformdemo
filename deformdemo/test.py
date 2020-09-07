@@ -256,6 +256,8 @@ def setUpModule():
 
     # Quick override for testing with different browsers
     driver_name = os.environ.get("WEBDRIVER")
+    if driver_name is None:
+        raise Exception("WEBDRIVER environment variable must be set.")
 
     if driver_name == "chrome":
         from selenium.webdriver import Chrome
@@ -295,17 +297,10 @@ def setUpModule():
         return browser
 
     else:
-        from selenium.webdriver import Firefox
-        from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+        from selenium import webdriver
 
-        firefox_path = os.environ.get("FIREFOX_PATH")
-
-        binary = FirefoxBinary(
-            firefox_path=firefox_path,
-            log_file=open(BROKEN_SELENIUM_LOG_FILE, "wt"),
-        )
         try:
-            browser = Firefox(firefox_binary=binary)
+            browser = webdriver.Firefox()
             browser.set_window_size(1920, 1080)
         except WebDriverException:
             if os.path.exists(BROKEN_SELENIUM_LOG_FILE):
