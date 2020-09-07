@@ -256,8 +256,6 @@ def setUpModule():
 
     # Quick override for testing with different browsers
     driver_name = os.environ.get("WEBDRIVER")
-    if driver_name is None:
-        raise Exception("WEBDRIVER environment variable must be set.")
 
     if (
         driver_name == "selenium_local_chrome"
