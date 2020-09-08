@@ -6,6 +6,18 @@
 - Use master branch of Deform and Colander on GitHub. [sydoluciani]
 
 
+.. _2.0.15:
+
+2.0.15 (unreleased)
+-------------------
+
+- Add Docker containerization of Deform and deformdemo as an option for running
+  tests, and improve related documentation.
+
+- Add demo and tests for arbitrary HTML5 attributes in widgets.
+  https://github.com/Pylons/deform/issues/430
+
+
 .. _2.0.11:
 
 2.0.11 (2020-08-21)
