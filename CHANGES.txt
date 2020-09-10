@@ -11,6 +11,9 @@
 2.0.15 (unreleased)
 -------------------
 
+- Changed dateparts widget to use ``type="number"`` instead of default `text`.
+  https://github.com/Pylons/deform/issues/442
+
 - Add Docker containerization of Deform and deformdemo as an option for running
   tests, and improve related documentation.
 
