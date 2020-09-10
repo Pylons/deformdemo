@@ -1263,7 +1263,6 @@ class MappingWidgetTests(Base, unittest.TestCase):
             findid("deformField4-day").get_attribute("value"), "31"
         )
         self.assertEqual(findid("captured").text, "None")
-        time.sleep(10)
 
     def test_submit_success(self):
         findid("deformField1").send_keys("1")
