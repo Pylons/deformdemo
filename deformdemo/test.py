@@ -257,21 +257,66 @@ def setUpModule():
     # Quick override for testing with different browsers
     driver_name = os.environ.get("WEBDRIVER")
 
-    if driver_name == "chrome":
+    if (
+        driver_name == "selenium_local_chrome"
+        and os.environ.get('TRAVIS') != 'true'
+    ):
+
         from selenium.webdriver import Chrome
 
         browser = Chrome()
         return browser
 
-    elif driver_name == "phantomjs":
-        # TODO: Test fails on Phantomjs
-        # They just hang in some point
-        from selenium.webdriver import PhantomJS
+    elif (
+        driver_name == "selenium_container_chrome"
+        and os.environ.get('TRAVIS') != 'true'
+    ):
 
-        browser = PhantomJS()
+        from selenium_containers import start_chrome
+
+        from selenium.webdriver import DesiredCapabilities
+        from selenium.webdriver import Remote
+
+        start_chrome()
+        time.sleep(os.getenv('WAITTOSTART', 30))
+
+        selenium_grid_url = "http://localhost:4444/wd/hub"
+        capabilities = DesiredCapabilities.CHROME.copy()
+
+        browser = Remote(
+            command_executor=selenium_grid_url,
+            desired_capabilities=capabilities,
+        )
+
+        browser.set_window_size(1920, 1080)
+        return browser
 
     elif (
-        driver_name == "selenium_standalone_firefox"
+        driver_name == "selenium_container_opera"
+        and os.environ.get('TRAVIS') != 'true'
+    ):
+
+        from selenium_containers import start_opera
+
+        from selenium.webdriver import DesiredCapabilities
+        from selenium.webdriver import Remote
+
+        start_opera()
+        time.sleep(os.getenv('WAITTOSTART', 30))
+
+        selenium_grid_url = "http://localhost:4444/wd/hub"
+        capabilities = DesiredCapabilities.OPERA.copy()
+
+        browser = Remote(
+            command_executor=selenium_grid_url,
+            desired_capabilities=capabilities,
+        )
+
+        browser.set_window_size(1920, 1080)
+        return browser
+
+    elif (
+        driver_name == "selenium_container_firefox"
         and os.environ.get('TRAVIS') != 'true'
     ):
 
@@ -294,18 +339,15 @@ def setUpModule():
         browser.set_window_size(1920, 1080)
         return browser
 
-    else:
-        from selenium.webdriver import Firefox
-        from selenium.webdriver.firefox.firefox_binary import FirefoxBinary
+    elif (
+        driver_name == "selenium_local_firefox"
+        or os.environ.get('TRAVIS') == 'true'
+    ):
 
-        firefox_path = os.environ.get("FIREFOX_PATH")
+        from selenium import webdriver
 
-        binary = FirefoxBinary(
-            firefox_path=firefox_path,
-            log_file=open(BROKEN_SELENIUM_LOG_FILE, "wt"),
-        )
         try:
-            browser = Firefox(firefox_binary=binary)
+            browser = webdriver.Firefox()
             browser.set_window_size(1920, 1080)
         except WebDriverException:
             if os.path.exists(BROKEN_SELENIUM_LOG_FILE):
