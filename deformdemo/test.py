@@ -1245,9 +1245,9 @@ class MappingWidgetTests(Base, unittest.TestCase):
     def test_submit_invalid_date(self):
         findid("deformField1").send_keys("1")
         findid("deformField3").send_keys("name")
-        findid("deformField4").send_keys("year")
-        findid("deformField4-month").send_keys("month")
-        findid("deformField4-day").send_keys("day")
+        findid("deformField4").send_keys("2020")
+        findid("deformField4-month").send_keys("2")
+        findid("deformField4-day").send_keys("31")
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".has-error"))
         self.assertEqual(findid("error-deformField4").text, "Invalid date")
@@ -1255,12 +1255,12 @@ class MappingWidgetTests(Base, unittest.TestCase):
             findid_view("deformField1").get_attribute("value"), "1"
         )
         self.assertEqual(findid("deformField3").get_attribute("value"), "name")
-        self.assertEqual(findid("deformField4").get_attribute("value"), "year")
+        self.assertEqual(findid("deformField4").get_attribute("value"), "2020")
         self.assertEqual(
-            findid("deformField4-month").get_attribute("value"), "mo"
+            findid("deformField4-month").get_attribute("value"), "2"
         )
         self.assertEqual(
-            findid("deformField4-day").get_attribute("value"), "da"
+            findid("deformField4-day").get_attribute("value"), "31"
         )
         self.assertEqual(findid("captured").text, "None")
 
