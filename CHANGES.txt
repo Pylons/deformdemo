@@ -1,3 +1,23 @@
+.. _2.0.15:
+
+2.0.15 (unreleased)
+-------------------
+
+- Add Docker containerization of Deform and deformdemo as an option for running
+  tests, and improve related documentation.
+
+- Add demo and tests for arbitrary HTML5 attributes in widgets.
+  https://github.com/Pylons/deform/issues/430
+
+
+.. _2.0.14:
+
+2.0.14 (2020-08-26)
+-------------------
+
+- Sync version with Deform.
+
+
 .. _2.0.13:
 
 2.0.13 (2020-08-25)
