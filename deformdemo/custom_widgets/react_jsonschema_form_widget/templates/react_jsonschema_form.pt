@@ -1,0 +1,43 @@
+<tal:def tal:define="oid oid|field.oid;
+                     uuid uuid|field.uuid; 
+                     name name|field.name;
+                     errormsg errormsg|field.errormsg;
+                     jsonschema jsonschema|field.widget.jsonschema;" i18n:domain="deform">
+
+
+    
+    <input id="${oid}-${uuid}" name="${name}" value="${cstruct}" hidden></input>
+    <div id="${oid}-${uuid}-editor"></div>
+    <div tal:condition="errormsg" class="clearfix alert alert-danger">
+        <p>${errormsg}</p>
+    </div>
+    <script>
+        (function(){
+          const container = document.getElementById("${oid}-${uuid}-editor");
+          const field = document.getElementById("${oid}-${uuid}");
+          const formData = ${cstruct}
+          const properties = {
+              schema: ${jsonschema},
+              onChange: (change) => {
+                  document.getElementById("${oid}-${uuid}").setAttribute("value",JSON.stringify(change.formData))
+                },
+              children: [],
+              omitExtraData: true, 
+              liveValidate: true,
+              liveOmit: true,
+              formData: formData
+          }
+
+          ReactDOM.render(
+              React.createElement(JSONSchemaForm.default, properties),
+              document.getElementById("${oid}-${uuid}-editor")
+          );
+        })()
+    </script>
+
+    <style>
+    form.rjsf div.panel.panel-danger.errors {
+      display: none
+    }
+    </style>
+</tal:def>
