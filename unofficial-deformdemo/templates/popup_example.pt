@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<div metal:use-macro="view.macros['master']">
+
+  <div metal:fill-slot="head_end">
+    <style>
+      #opener {
+        margin: 20px;
+      }
+    </style>
+  </div>
+
+  <div metal:fill-slot="body_end">
+    <!-- We we place our pop up code before closing </body> -->
+    <script>
+      "use strict";
+
+      $(document).ready(function() {
+        // Automatically show pop up if the form contains validation errors
+        if($("#my-pop-up .error-msg-detail").length > 0) {
+          $("#my-pop-up").modal("show");
+        }
+      });
+    </script>
+  </div>
+
+  <div metal:fill-slot="main">
+
+    <div class="panel panel-primary">
+      <div class="panel-heading">
+        <h3 class="panel-title">Demo: ${title}</h3>
+      </div>
+
+      <div id="opener">
+        <button type="button" id="btn-show-pop-up" class="btn btn-primary btn-lg btn-block" data-toggle="modal" data-target="#my-pop-up">
+          Open pop up form
+        </button>
+        </div>
+
+      <!-- Variable `form` contains the renderer form HTML as a Python string -->
+      <form tal:replace="structure form"></form>
+
+    </div>
+
+    <div class="panel panel-info">
+      <div class="panel-heading">
+        <h3 class="panel-title">Captured submission</h3>
+      </div>
+      <div class="panel-body">
+        <pre style="border: none; background-color: #FFF" class="highlight" id="captured" tal:content="structure captured"/>
+      </div>
+    </div>
+
+    <div class="panel panel-default">
+      <div class="panel-heading">
+        <h3 class="panel-title">Code <a href="${request.resource_url(request.root, 'allcode', query={'start':start, 'end':end}, anchor='line-%s' % start)}"><small>
+        (click to show in context)</small></a>
+        </h3>
+      </div>
+      <div class="panel-body highlight">
+        <pre style="border: none; background-color: #FFF" tal:content="structure code"/>
+      </div>
+    </div>
+  </div>
+</div>
+
