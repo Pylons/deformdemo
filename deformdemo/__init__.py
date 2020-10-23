@@ -2901,4 +2901,7 @@ def main(global_config, **settings):
         pass
 
     config.scan("deformdemo", onerror=onerror)
+
+    config.include('..unofficial-deformdemo')
+
     return config.make_wsgi_app()
