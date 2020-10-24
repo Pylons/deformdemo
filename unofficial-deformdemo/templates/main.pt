@@ -10,11 +10,11 @@
         <meta name="viewport"
               content="width=device-width, initial-scale=1.0">
         <title i18n:translate="">
-            Deform Demo Site
+            Unofficial Deform Demo Site
         </title>
 
         <link rel="stylesheet"
-              href="${request.resource_url(request.root, 'pygments.css', route_name='deformdemo')}"
+              href="${request.resource_url(request.root, 'pygments.css', route_name='unofficial-deformdemo')}"
               type="text/css"/>
 
         <link rel="stylesheet"
@@ -61,7 +61,7 @@
     <div class="navbar navbar-default" role="navigation">
         <div class="container">
             <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-info-sign"></span>
-                                             <span i18n:translate=""> Deform Demo</span>
+                                             <span i18n:translate=""> Unofficial Deform Demo</span>
             </a>
         </div>
     </div>

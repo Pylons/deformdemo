@@ -34,7 +34,7 @@ if PY3:
         return val
 
 
-_ = TranslationStringFactory("deformdemo")
+_ = TranslationStringFactory("unofficial-deformdemo")
 
 formatter = HtmlFormatter(nowrap=True)
 css = formatter.get_style_defs()
@@ -67,8 +67,8 @@ def my_safe_repr(obj, context, maxlevels, level, sort_dicts=True):
         return pprint._safe_repr(obj, context, maxlevels, level)
 
 
-@view_defaults(route_name="deformdemo")
-class DeformDemo(object):
+@view_defaults(route_name='unofficial-deformdemo')
+class UnOfficialDeformDemo(object):
     def __init__(self, request):
         self.request = request
         self.macros = get_renderer("templates/main.pt").implementation().macros
@@ -141,14 +141,16 @@ class DeformDemo(object):
             code = unicode(code, "utf-8")
         return highlight(code, PythonLexer(), formatter), start, end
 
-    @view_config(name="thanks.html")
+    @view_config(name="thanks.html", route_name='unofficial-deformdemo')
     def thanks(self):
         return Response(
             "<html><body><p>Thanks!</p><small>"
             '<a href="..">Up</a></small></body></html>'
         )
 
-    @view_config(name="allcode", renderer="templates/code.pt")
+    @view_config(name="allcode",
+                 renderer="templates/code.pt",
+                 route_name='unofficial-deformdemo')
     def allcode(self):
         params = self.request.params
         start = params.get("start")
@@ -177,13 +179,14 @@ class DeformDemo(object):
         method = getattr(inst, attr)
         return method.demo
 
-    @view_config(name="pygments.css")
+    @view_config(name="pygments.css", route_name='unofficial-deformdemo')
     def cssview(self):
         response = Response(body=css, content_type="text/css")
         response.cache_expires = 360
         return response
 
-    @view_config(renderer="templates/index.pt")
+    @view_config(renderer="templates/index.pt",
+                 route_name='unofficial-deformdemo')
     def index(self):
         return {"demos": self.get_demos()}
 
@@ -196,13 +199,17 @@ class DeformDemo(object):
         L = []
         for name, method in demos:
             url = self.request.resource_url(
-                self.request.root, name, route_name="deformdemo"
+                self.request.root, name, route_name="unofficial-deformdemo"
             )
             L.append((method.demo, url))
         L.sort()
         return L
 
-    @view_config(renderer="templates/form.pt", name="textinput")
+    # Unofficial Deform Demo Forms Starts Here.
+
+    @view_config(name="textinput",
+                 renderer="templates/form.pt",
+                 route_name='unofficial-deformdemo')
     @demonstrate("Text Input Widget")
     def textinput(self):
         class Schema(colander.Schema):
@@ -220,13 +227,5 @@ class DeformDemo(object):
 
 
 def includeme(config):
-
-    # Configure renderer
-    config.add_static_view(
-        "static_unofficial-deformdemo", "unofficial-deformdemo:static"
-    )
-    config.add_route(
-        "unofficial-deformdemo", "/unofficial-deformdemo*traverse"
-    )
 
     config.scan("unofficial-deformdemo")
