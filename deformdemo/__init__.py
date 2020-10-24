@@ -2898,6 +2898,11 @@ def main(global_config, **settings):
     )
 
     config.add_static_view("static_deform", "deform:static")
+
+    config.add_route(
+        "unofficial-deformdemo", "/unofficial-deformdemo*traverse"
+    )
+
     config.add_route("deformdemo", "*traverse")
 
     def onerror(*arg):
