@@ -67,8 +67,8 @@ def my_safe_repr(obj, context, maxlevels, level, sort_dicts=True):
         return pprint._safe_repr(obj, context, maxlevels, level)
 
 
-@view_defaults(route_name='unofficial-deformdemo')
-class UnOfficialDeformDemo(object):
+@view_defaults(route_name="unofficial-deformdemo")
+class UnofficialDeformDemo(object):
     def __init__(self, request):
         self.request = request
         self.macros = get_renderer("templates/main.pt").implementation().macros
@@ -141,7 +141,7 @@ class UnOfficialDeformDemo(object):
             code = unicode(code, "utf-8")
         return highlight(code, PythonLexer(), formatter), start, end
 
-    @view_config(name="thanks.html", route_name='unofficial-deformdemo')
+    @view_config(name="thanks.html", route_name="unofficial-deformdemo")
     def thanks(self):
         return Response(
             "<html><body><p>Thanks!</p><small>"
@@ -150,7 +150,7 @@ class UnOfficialDeformDemo(object):
 
     @view_config(name="allcode",
                  renderer="templates/code.pt",
-                 route_name='unofficial-deformdemo')
+                 route_name="unofficial-deformdemo")
     def allcode(self):
         params = self.request.params
         start = params.get("start")
@@ -179,14 +179,14 @@ class UnOfficialDeformDemo(object):
         method = getattr(inst, attr)
         return method.demo
 
-    @view_config(name="pygments.css", route_name='unofficial-deformdemo')
+    @view_config(name="pygments.css", route_name="unofficial-deformdemo")
     def cssview(self):
         response = Response(body=css, content_type="text/css")
         response.cache_expires = 360
         return response
 
     @view_config(renderer="templates/index.pt",
-                 route_name='unofficial-deformdemo')
+                 route_name="unofficial-deformdemo")
     def index(self):
         return {"demos": self.get_demos()}
 
@@ -205,11 +205,11 @@ class UnOfficialDeformDemo(object):
         L.sort()
         return L
 
-    # Unofficial Deform Demo Forms Starts Here.
+    # Unofficial Deform Demo Forms Start Here.
 
     @view_config(name="textinput",
                  renderer="templates/form.pt",
-                 route_name='unofficial-deformdemo')
+                 route_name="unofficial-deformdemo")
     @demonstrate("Text Input Widget")
     def textinput(self):
         class Schema(colander.Schema):
