@@ -2896,7 +2896,6 @@ def main(global_config, **settings):
         ("deformdemo:custom_widgets", "unofficial-deformdemo:custom_widgets"),
         translator,
     )
-
     config.add_static_view("static_deform", "deform:static")
     config.add_route("deformdemo", "*traverse")
     config.add_route(
@@ -2907,7 +2906,5 @@ def main(global_config, **settings):
         pass
 
     config.scan("deformdemo", onerror=onerror)
-
     config.include('..unofficial-deformdemo')
-
     return config.make_wsgi_app()
