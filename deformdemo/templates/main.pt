@@ -60,9 +60,14 @@
 
     <div class="navbar navbar-default" role="navigation">
         <div class="container">
-            <a class="navbar-brand" href="/"><span class="glyphicon glyphicon-info-sign"></span>
-                                             <span i18n:translate=""> Deform Demo</span>
-            </a>
+          <ul class="nav nav-pills">
+            <li class="nav-item active">
+              <a class="nav-link active" href="/"><span i18n:translate="">Deform Demo</span></a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link" href="/unofficial-deformdemo"><span i18n:translate="">Unofficial Deform Demo</span></a>
+            </li>
+          </ul>
         </div>
     </div>
 
