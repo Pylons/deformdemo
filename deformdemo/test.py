@@ -257,20 +257,14 @@ def setUpModule():
     # Quick override for testing with different browsers
     driver_name = os.environ.get("WEBDRIVER")
 
-    if (
-        driver_name == "selenium_local_chrome"
-        and os.environ.get('TRAVIS') != 'true'
-    ):
+    if driver_name == "selenium_local_chrome":
 
         from selenium.webdriver import Chrome
 
         browser = Chrome()
         return browser
 
-    elif (
-        driver_name == "selenium_container_chrome"
-        and os.environ.get('TRAVIS') != 'true'
-    ):
+    elif driver_name == "selenium_container_chrome":
 
         from selenium_containers import start_chrome
 
@@ -291,10 +285,7 @@ def setUpModule():
         browser.set_window_size(1920, 1080)
         return browser
 
-    elif (
-        driver_name == "selenium_container_opera"
-        and os.environ.get('TRAVIS') != 'true'
-    ):
+    elif driver_name == "selenium_container_opera":
 
         from selenium_containers import start_opera
 
@@ -315,10 +306,7 @@ def setUpModule():
         browser.set_window_size(1920, 1080)
         return browser
 
-    elif (
-        driver_name == "selenium_container_firefox"
-        and os.environ.get('TRAVIS') != 'true'
-    ):
+    elif driver_name == "selenium_container_firefox":
 
         from selenium_containers import start_firefox
 
@@ -339,10 +327,26 @@ def setUpModule():
         browser.set_window_size(1920, 1080)
         return browser
 
-    elif (
-        driver_name == "selenium_local_firefox"
-        or os.environ.get('TRAVIS') == 'true'
-    ):
+    elif driver_name == "selenium_local_firefox":
+
+        from selenium import webdriver
+
+        try:
+            browser = webdriver.Firefox()
+            browser.set_window_size(1920, 1080)
+        except WebDriverException:
+            if os.path.exists(BROKEN_SELENIUM_LOG_FILE):
+                print("Selenium says no")
+                print(open(BROKEN_SELENIUM_LOG_FILE, "rt").read())
+            raise
+        return browser
+
+    else:
+        """
+        Runs in Github Actions environment when driver_name is not set.
+        using local firefox and local geckodriver.
+        https://github.com/Pylons/deform/blob/master/contributing.md
+        """
 
         from selenium import webdriver
 
