@@ -348,6 +348,12 @@ def setUpModule():
         https://github.com/Pylons/deform/blob/master/contributing.md
         """
 
+        display_number = os.environ.get("DISPLAY")
+        if display_number is None:
+            import sys
+
+            sys.exit("DISPLAY environment variable needs to be set.")
+
         from selenium import webdriver
 
         try:
