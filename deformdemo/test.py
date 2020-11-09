@@ -350,10 +350,8 @@ def setUpModule():
 
         display_number = os.environ.get("DISPLAY")
         if display_number is None:
-            import sys
 
-            print("DISPLAY environment variable needs to be set.")
-            sys.exit("DISPLAY environment variable needs to be set.")
+            print("ERROR: DISPLAY environment variable needs to be set.")
         else:
             print("DISPLAY is set to: {}".format(display_number))
 
