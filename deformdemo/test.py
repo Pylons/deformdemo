@@ -351,10 +351,10 @@ def setUpModule():
         display_number = os.environ.get("DISPLAY")
         if display_number is None:
             import sys
-
+            print("DISPLAY environment variable needs to be set.")
             sys.exit("DISPLAY environment variable needs to be set.")
         else:
-            print(display_number)
+            print("DISPLAY is set to: {}".format(display_number))
 
         from selenium import webdriver
 
