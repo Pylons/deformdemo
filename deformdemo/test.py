@@ -353,6 +353,8 @@ def setUpModule():
             import sys
 
             sys.exit("DISPLAY environment variable needs to be set.")
+        else:
+            print(display_number)
 
         from selenium import webdriver
 
