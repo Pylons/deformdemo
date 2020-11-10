@@ -3,6 +3,11 @@
 2.0.15 (unreleased)
 -------------------
 
+- Added unofficial deformdemo. This provides a space for contributors to add
+  their widgets without requiring tests, especially when the functional tests
+  cannot pass using Selenium. [sydoluciani]
+  https://github.com/Pylons/deformdemo/pull/92
+
 - Changed dateparts widget to use ``type="number"`` instead of default `text`.
   https://github.com/Pylons/deform/issues/442
 
