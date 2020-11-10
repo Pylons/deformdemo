@@ -7,4 +7,6 @@
 .noseids
 .tox/
 [Ff]irefox*
+chromedriver*
 geckodriver*
+pip-wheel-metadata/
