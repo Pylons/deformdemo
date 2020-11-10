@@ -6,8 +6,7 @@ Deform Demo
 
 Demonstration application for the `Deform <https://docs.pylonsproject.org/projects/deform/en/latest>`_ Python HTML form library.
 
-This application is tested on Python versions 2.7, 3.5, 3.6, 3.7, and 3.8, and PyPy and PyPy3.
-It is also tested on Python 3.9-dev but allowed to fail.
+This application is tested on Python versions 2.7, 3.5, 3.6, 3.7, 3.8, and 3.9, and PyPy and PyPy3.
 
 
 Online version
