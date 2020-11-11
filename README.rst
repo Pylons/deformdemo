@@ -7,7 +7,6 @@ Deform Demo
 Demonstration application for the `Deform <https://docs.pylonsproject.org/projects/deform/en/latest>`_ Python HTML form library.
 
 This application is tested on Python versions 3.6, 3.7, 3.8, and 3.9, and PyPy3.
-It is also tested on Python 3.9-dev but allowed to fail.
 
 
 Online version
@@ -24,13 +23,13 @@ Build the Docker image for deformdemo and tag it.
 .. code-block:: bash
 
     # docker build --tag pylons/deformdemo:<version> .
-    docker build --tag pylons/deformdemo:2.0.11 .
+    docker build --tag pylons/deformdemo:master .
 
 Run the built image with Docker.
 
 .. code-block:: bash
 
-    docker run -d -p 8000:8522 pylons/deformdemo:2.0.11
+    docker run -d -p 8000:8522 pylons/deformdemo:master
 
 Then in your browser, visit http://localhost:8000
 

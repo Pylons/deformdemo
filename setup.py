@@ -30,7 +30,7 @@ PY3 = sys.version_info[0] == 3
 
 requires = [
     "Babel",
-    "deform>=2.0.11",
+    "deform>=2.0.14.dev0",  # .dev0 allows pre-releases. Use only on master.
     "pyramid>=1.5a1",  # route_name argument to resource_url
     "pyramid_chameleon",
     "pygments",
@@ -50,10 +50,10 @@ setup(
         "License :: Repoze Public License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Internet :: WWW/HTTP",
