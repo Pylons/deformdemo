@@ -48,7 +48,9 @@ jobs:
     - name: Running tox
       env:
         DISPLAY: ":99"
-      run: tox -e py -- ${{ matrix.nosetests-args }}
+      run: |
+        Xvfb :99 &
+        tox -e py -- ${{ matrix.nosetests-args }}
   lint:
     runs-on: ubuntu-latest
     name: Lint the package
