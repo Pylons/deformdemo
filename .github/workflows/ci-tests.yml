@@ -22,11 +22,8 @@ jobs:
           - "pypy3"
         os:
           - "ubuntu-latest"
-          - "windows-latest"
-          - "macos-latest"
         architecture:
           - x64
-          - x86
         include:
           # Only run coverage on ubuntu-latest, except on pypy3
           - os: "ubuntu-latest"
@@ -34,15 +31,6 @@ jobs:
           - os: "ubuntu-latest"
             py: "pypy3"
             nosetests-args: ""
-        exclude:
-          # Linux and macOS don't have x86 python
-          - os: "ubuntu-latest"
-            architecture: x86
-          - os: "macos-latest"
-            architecture: x86
-          # PyPy3 on Windows doesn't seem to work
-          - os: "windows-latest"
-            py: "pypy3"
     name: "Python: ${{ matrix.py }}-${{ matrix.architecture }} on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     steps:
