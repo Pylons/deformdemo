@@ -1,4 +1,4 @@
-FROM python:3.6-alpine as base
+FROM python:3.9-alpine as base
 
 FROM base as builder
 
@@ -7,12 +7,13 @@ RUN mkdir /wheelhouse
 COPY . /app
 WORKDIR /app
 
+RUN apk add git
 RUN pip install --upgrade pip setuptools
-RUN pip wheel -r requirements.txt --wheel-dir=/wheelhouse
+RUN pip wheel -r requirements-dev.txt --wheel-dir=/wheelhouse
 
 FROM base
 
-LABEL maintainer "Erico Andrei <ericof@gmail.com>" \
+LABEL maintainer "Steve Piercy <web@stevepiercy.com>" \
       org.label-schema.name = "Deform Demo" \
       org.label-schema.description = "Demonstration application for Deform, a Python library for generating HTML forms." \
       org.label-schema.vendor = "Pylons Project" \
@@ -25,7 +26,7 @@ RUN adduser -s /bin/false -D -H pylons \
 
 COPY --from=builder /wheelhouse /wheelhouse
 
-RUN pip install --no-cache-dir --no-index --find-links=/wheelhouse deformdemo
+RUN pip install --pre --no-cache-dir --no-index --find-links=/wheelhouse deformdemo
 
 WORKDIR /app
 
