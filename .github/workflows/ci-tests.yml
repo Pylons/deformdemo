@@ -21,11 +21,10 @@ jobs:
           - "3.7"
           - "3.8"
           - "3.9"
+          - "pypy"
           - "pypy3"
         os:
           - "ubuntu-latest"
-        architecture:
-          - x64
         include:
           - os: "ubuntu-latest"
             py: "pypy3"
@@ -33,7 +32,7 @@ jobs:
           - os: "ubuntu-latest"
             py: "pypy"
             nosetests-args: ""
-    name: "Python: ${{ matrix.py }}-${{ matrix.architecture }} on ${{ matrix.os }}"
+    name: "Python: ${{ matrix.py }} on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
