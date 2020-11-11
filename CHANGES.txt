@@ -3,6 +3,8 @@
 2.0.15 (unreleased)
 -------------------
 
+- Add support of Python 3.9.
+
 - Added unofficial deformdemo. This provides a space for contributors to add
   their widgets without requiring tests, especially when the functional tests
   cannot pass using Selenium. [sydoluciani]

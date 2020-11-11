@@ -1,4 +1,4 @@
-FROM python:3.6-alpine as base
+FROM python:3.9-alpine as base
 
 FROM base as builder
 
@@ -12,7 +12,7 @@ RUN pip wheel -r requirements.txt --wheel-dir=/wheelhouse
 
 FROM base
 
-LABEL maintainer "Erico Andrei <ericof@gmail.com>" \
+LABEL maintainer "Steve Piercy <web@stevepiercy.com>" \
       org.label-schema.name = "Deform Demo" \
       org.label-schema.description = "Demonstration application for Deform, a Python library for generating HTML forms." \
       org.label-schema.vendor = "Pylons Project" \
