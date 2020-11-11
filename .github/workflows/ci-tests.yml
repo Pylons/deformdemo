@@ -21,18 +21,17 @@ jobs:
           - "3.7"
           - "3.8"
           - "3.9"
-          - "pypy"
+          - "pypy2"
           - "pypy3"
         os:
           - "ubuntu-latest"
+        architecture:
+          - x64
         include:
           - os: "ubuntu-latest"
             py: "pypy3"
             nosetests-args: ""
-          - os: "ubuntu-latest"
-            py: "pypy"
-            nosetests-args: ""
-    name: "Python: ${{ matrix.py }} on ${{ matrix.os }}"
+    name: "Python: ${{ matrix.py }}-${{ matrix.architecture }} on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     steps:
     - uses: actions/checkout@v2
@@ -40,6 +39,7 @@ jobs:
       uses: actions/setup-python@v2
       with:
           python-version: ${{ matrix.py }}
+          architecture: ${{ matrix.architecture }}
     - name: Install requirements
       run: |
         sudo apt-get update
