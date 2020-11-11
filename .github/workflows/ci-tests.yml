@@ -33,7 +33,6 @@ jobs:
           - os: "ubuntu-latest"
             py: "pypy"
             nosetests-args: ""
-            architecture: "x86"
     name: "Python: ${{ matrix.py }}-${{ matrix.architecture }} on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     steps:
