@@ -40,8 +40,14 @@ jobs:
       with:
           python-version: ${{ matrix.py }}
           architecture: ${{ matrix.architecture }}
-    - run: pip install tox
+    - name: Install requirements
+      run: |
+        sudo apt-get update
+        sudo apt-get install firefox firefox-geckodriver gettext gettext-base xvfb
+        pip install tox
     - name: Running tox
+      env:
+        DISPLAY: ":99"
       run: tox -e py -- ${{ matrix.nosetests-args }}
   lint:
     runs-on: ubuntu-latest
