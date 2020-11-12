@@ -24,13 +24,6 @@ jobs:
           - "ubuntu-latest"
         architecture:
           - x64
-        include:
-          # Only run coverage on ubuntu-latest, except on pypy3
-          - os: "ubuntu-latest"
-            pytest-args: "--cov"
-          - os: "ubuntu-latest"
-            py: "pypy3"
-            pytest-args: ""
     name: "Python: ${{ matrix.py }}-${{ matrix.architecture }} on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     steps:
@@ -50,7 +43,7 @@ jobs:
         DISPLAY: ":99"
       run: |
         Xvfb :99 &
-        tox -e py -- ${{ matrix.pytest-args }}
+        tox -e py --
   lint:
     runs-on: ubuntu-latest
     name: Lint the package
