@@ -1,5 +1,8 @@
 name: Build and test
 
+env:
+  GHA_CONTAINER_NAME: "selenium_container_firefox"
+
 on:
   # Build only on pushes to master or one of the release branches
   push:
@@ -50,8 +53,6 @@ jobs:
         sudo apt-get update
         pip install tox
     - name: Running tox
-      env:
-        GHA_CONTAINER_NAME: "selenium_container_firefox"
       run: |
         tox -e py --
 
