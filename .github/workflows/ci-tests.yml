@@ -48,7 +48,7 @@ jobs:
         DISPLAY: ":99"
       run: |
         Xvfb :99 &
-        tox -e functional3
+        tox -e py --
 
 #################
 # End of test
