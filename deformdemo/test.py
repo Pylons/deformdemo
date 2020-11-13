@@ -327,6 +327,24 @@ def setUpModule():
         browser.set_window_size(1920, 1080)
         return browser
 
+    elif os.environ.get("GHA_CONTAINER_NAME") == "selenium_container_firefox":
+
+        from selenium.webdriver import DesiredCapabilities
+        from selenium.webdriver import Remote
+
+        time.sleep(os.getenv('WAITTOSTART', 30))
+
+        selenium_grid_url = "http://localhost:4444/wd/hub"
+        capabilities = DesiredCapabilities.FIREFOX.copy()
+
+        browser = Remote(
+            command_executor=selenium_grid_url,
+            desired_capabilities=capabilities,
+        )
+
+        browser.set_window_size(1920, 1080)
+        return browser
+
     elif driver_name == "selenium_local_firefox":
 
         from selenium import webdriver
@@ -343,8 +361,8 @@ def setUpModule():
 
     else:
         """
-        Runs in Github Actions environment when driver_name is not set.
-        using local firefox and local geckodriver.
+        Runs in Github Actions environment when WEBDRIVER or GHA_CONTAINER_NAME
+        is not set, using local firefox and local geckodriver.
         https://github.com/Pylons/deform/blob/master/contributing.md
         """
 
