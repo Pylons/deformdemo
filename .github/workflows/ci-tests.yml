@@ -1,7 +1,5 @@
 name: Build and test
 
-env:
-  GHA_CONTAINER_NAME: "selenium_container_firefox"
 
 on:
   # Build only on pushes to master or one of the release branches
@@ -34,6 +32,8 @@ jobs:
 
     name: "Python: ${{ matrix.py }}-${{ matrix.architecture }} on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
+    env:
+      GHA_CONTAINER_NAME: "selenium_container_firefox"
     services:
       selenium:
         image: selenium/standalone-chrome
