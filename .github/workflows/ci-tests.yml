@@ -27,10 +27,6 @@ jobs:
           - "ubuntu-latest"
         architecture:
           - x64
-        include:
-          - os: "ubuntu-latest"
-            py: "pypy3"
-            nosetests-args: ""
     name: "Python: ${{ matrix.py }}-${{ matrix.architecture }} on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
     steps:
@@ -50,7 +46,7 @@ jobs:
         DISPLAY: ":99"
       run: |
         Xvfb :99 &
-        tox -e py -- ${{ matrix.nosetests-args }}
+        tox -e py --
   lint:
     runs-on: ubuntu-latest
     name: Lint the package

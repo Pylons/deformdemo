@@ -205,7 +205,7 @@ Running the Demo's Functional Tests
         cd ~/projects/deformdemo
 
 -   Set an environment variable to add your local checkout of Deform to your ``PATH``.
-    It must to be set before running tox or nosetest, otherwise Firefox or Chrome will not start and will return an error message such as ``'geckodriver' executable needs to be in PATH.``
+    It must to be set before running tox or pytest, otherwise Firefox or Chrome will not start and will return an error message such as ``'geckodriver' executable needs to be in PATH.``
 
     .. code-block:: bash
 
@@ -215,14 +215,14 @@ Running the Demo's Functional Tests
 
     .. code-block:: bash
 
-        $VENV/bin/nosetests
+        $VENV/bin/pytest
 
     ``$VENV`` is defined as it was in "Running the Demo" above.
 
 -   You will (hopefully) see Firefox pop up and it will begin to display in quick succession the loading of pages.
     The tests will run for five or ten minutes.
 
--   Test success means that the console window on which you ran ``nosetests`` shows a bunch of dots, a test summary, then ``OK``.
+-   Test success means that the console window on which you ran ``pytest`` shows a bunch of dots, a test summary, then ``OK``.
     If it shows a traceback, ``FAILED``, or anything other than a straight line of dots, it means there was an error.
 
 -   Fix any errors by modifying your code or by modifying the tests to expect the changes you've made.
