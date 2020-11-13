@@ -31,6 +31,12 @@ jobs:
 
     name: "Python: ${{ matrix.py }}-${{ matrix.architecture }} on ${{ matrix.os }}"
     runs-on: ${{ matrix.os }}
+    services:
+      selenium:
+        image: selenium/standalone-chrome
+        ports:
+          - 4444:4444
+          - 5900:5900
     steps:
     - uses: actions/checkout@v2
     - name: Setup python
@@ -41,13 +47,11 @@ jobs:
     - name: Install requirements
       run: |
         sudo apt-get update
-        sudo apt-get install firefox firefox-geckodriver gettext gettext-base xvfb
         pip install tox
     - name: Running tox
       env:
-        DISPLAY: ":99"
+        GHA_CONTAINER_NAME: "selenium_container_firefox"
       run: |
-        Xvfb :99 &
         tox -e py --
 
 #################
