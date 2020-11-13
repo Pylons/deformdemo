@@ -34,7 +34,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     services:
       selenium:
-        image: selenium/standalone-chrome
+        image: "selenium/standalone-firefox"
         ports:
           - 4444:4444
           - 5900:5900
