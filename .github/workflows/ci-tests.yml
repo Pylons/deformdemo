@@ -13,10 +13,6 @@ on:
 
 jobs:
   test:
-
-    env:
-      GHA_CONTAINER_NAME: "selenium_container_firefox"
-
     strategy:
       matrix:
         py:
@@ -56,6 +52,8 @@ jobs:
         pip install tox
     - name: Running tox
       run: |
+      env:
+        GHA_CONTAINER_NAME: "selenium_container_firefox"
         tox -e py --
 
 #################
