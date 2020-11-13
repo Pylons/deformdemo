@@ -7,6 +7,7 @@ RUN mkdir /wheelhouse
 COPY . /app
 WORKDIR /app
 
+RUN apk add git
 RUN pip install --upgrade pip setuptools
 RUN pip wheel -r requirements.txt --wheel-dir=/wheelhouse
 

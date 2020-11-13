@@ -381,7 +381,7 @@ def _getFile(name="test.py"):
     return path, filename
 
 
-# appease nosetests by giving a default argument, it thinks this is a test
+# appease pytest by giving a default argument, it thinks this is a test
 def test_url(url=""):
     return URL + BASE_PATH + url
 
