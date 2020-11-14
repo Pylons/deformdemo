@@ -343,28 +343,25 @@ def setUpModule():
 
     else:
         """
-        Runs in Github Actions environment when driver_name is not set.
-        using local firefox and local geckodriver.
+        When WEBDRIVER is not set runs tests against
+        Selenium container stand alone Firefox in Github Workflows.
         https://github.com/Pylons/deform/blob/master/contributing.md
         """
 
-        display_number = os.environ.get("DISPLAY")
-        if display_number is None:
+        from selenium.webdriver import DesiredCapabilities
+        from selenium.webdriver import Remote
 
-            print("ERROR: DISPLAY environment variable needs to be set.")
-        else:
-            print("DISPLAY is set to: {}".format(display_number))
+        time.sleep(os.getenv('WAITTOSTART', 30))
 
-        from selenium import webdriver
+        selenium_grid_url = "http://localhost:4444/wd/hub"
+        capabilities = DesiredCapabilities.FIREFOX.copy()
 
-        try:
-            browser = webdriver.Firefox()
-            browser.set_window_size(1920, 1080)
-        except WebDriverException:
-            if os.path.exists(BROKEN_SELENIUM_LOG_FILE):
-                print("Selenium says no")
-                print(open(BROKEN_SELENIUM_LOG_FILE, "rt").read())
-            raise
+        browser = Remote(
+            command_executor=selenium_grid_url,
+            desired_capabilities=capabilities,
+        )
+
+        browser.set_window_size(1920, 1080)
         return browser
 
 
