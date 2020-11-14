@@ -47,8 +47,6 @@ jobs:
       run: |
         echo "URL=http://`hostname -i`:8522" >> $GITHUB_ENV
     - name: Running tox
-      env:
-        GHA_CONTAINER_NAME: "selenium_container_firefox"
       run: |
         tox -e py --
   lint:
