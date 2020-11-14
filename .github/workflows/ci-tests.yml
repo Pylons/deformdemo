@@ -50,6 +50,9 @@ jobs:
       run: |
         sudo apt-get update
         pip install tox
+    - name: Get host ip address
+      run: |
+        hostname -i
     - name: Get interfaces ip addresses
       run: |
         ifconfig -a
@@ -59,7 +62,7 @@ jobs:
     - name: Running tox
       env:
         # URL: "http://10.1.0.4:8522"
-        URL: "http://127.0.0.1:8522"
+        URL: http://`hostname -i`:8522
         GHA_CONTAINER_NAME: "selenium_container_firefox"
       run: |
         tox -e py --
