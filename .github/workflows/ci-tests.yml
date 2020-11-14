@@ -61,12 +61,13 @@ jobs:
         docker ps -a
     - name: Running tox
       env:
-        # URL: "http://10.1.0.4:8522"
+        # URL: "http://10.1.0.4:8522" # This works.
         GHA_CONTAINER_NAME: "selenium_container_firefox"
       run: |
-        echo "URL=http://10.1.0.4:8522" >> $GITHUB_ENV
-        echo $URL
-        # echo "URL=http://`hostname -i`:8522" >> $GITHUB_ENV
+        # echo "URL=http://10.1.0.4:8522" >> $GITHUB_ENV # Not working.
+        echo ::set-env name=URL::$(echo -n "http://10.1.0.4:8522")
+        echo $URL # Not working.
+        # echo "URL=http://`hostname -i`:8522" >> $GITHUB_ENV # Not working.
         tox -e py --
 
 #################
