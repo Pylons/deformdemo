@@ -52,16 +52,12 @@ jobs:
         pip install tox
     - name: Seting URL
       run: |
-        echo "URL=http://10.1.0.4:8522" >> $GITHUB_ENV
+        echo "URL=http://`hostname -i`:8522" >> $GITHUB_ENV
+        # echo "URL=http://10.1.0.4:8522" >> $GITHUB_ENV
     - name: Running tox
       env:
-        # URL: "http://10.1.0.4:8522" # This works.
         GHA_CONTAINER_NAME: "selenium_container_firefox"
       run: |
-        # echo "URL=http://10.1.0.4:8522" >> $GITHUB_ENV # Not working.
-        # echo "URL=http://`hostname -i`:8522" >> $GITHUB_ENV # Not working.
-        # echo ::set-env name=URL::$(echo -n "http://10.1.0.4:8522") # Deprecated. Not working.
-        echo $URL
         tox -e py --
 
 #################
