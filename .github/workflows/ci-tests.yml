@@ -38,7 +38,6 @@ jobs:
         ports:
           - 4444:4444
           - 5900:5900
-        # options: --health-cmd "curl http://localhost:4444" --health-interval=5s
     steps:
     - uses: actions/checkout@v2
     - name: Setup python
@@ -50,11 +49,9 @@ jobs:
       run: |
         sudo apt-get update
         pip install tox
-    - name: Seting URL
+    - name: Seting URL environment variable
       run: |
-        echo '::set-output name=URL::http://10.1.0.4:8522'
-        # echo "URL=http://`hostname -i`:8522" >> $GITHUB_ENV
-        # echo "URL=http://10.1.0.4:8522" >> $GITHUB_ENV
+        echo "URL=http://`hostname -i`:8522" >> $GITHUB_ENV
     - name: Running tox
       env:
         GHA_CONTAINER_NAME: "selenium_container_firefox"
