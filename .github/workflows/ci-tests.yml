@@ -50,9 +50,12 @@ jobs:
       run: |
         sudo apt-get update
         pip install tox
-    - name: Troubleshooting Selenium Container
-      run: ifconfig -a        
-      run: docker ps -a 
+    - name: Get interfaces ip addresses
+      run: |
+        ifconfig -a
+    - name: Get list of containers
+      run: |
+        docker ps -a
     - name: Running tox
       env:
         URL: "http://localhost:8522"
