@@ -52,7 +52,8 @@ jobs:
         pip install tox
     - name: Seting URL
       run: |
-        echo "URL=http://`hostname -i`:8522" >> $GITHUB_ENV
+        echo '::set-output name=URL::http://10.1.0.4:8522'
+        # echo "URL=http://`hostname -i`:8522" >> $GITHUB_ENV
         # echo "URL=http://10.1.0.4:8522" >> $GITHUB_ENV
     - name: Running tox
       env:
