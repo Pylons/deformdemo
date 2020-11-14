@@ -65,6 +65,7 @@ jobs:
         GHA_CONTAINER_NAME: "selenium_container_firefox"
       run: |
         echo "URL=http://10.1.0.4:8522" >> $GITHUB_ENV
+        echo $URL
         # echo "URL=http://`hostname -i`:8522" >> $GITHUB_ENV
         tox -e py --
 
