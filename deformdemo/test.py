@@ -384,8 +384,8 @@ def test_url(url=""):
 
 
 class Base(object):
-    urepl = re.compile("\\bu('.*?'|\".*?\")")  # noQA
-    setrepl = re.compile("set\(\[(.*)\]\)")  # noQA
+    urepl = re.compile(r"\\bu('.*?'|\".*?\")")  # noQA
+    setrepl = re.compile(r"set\(\[(.*)\]\)")  # noQA
 
     def setUp(self):
         browser.get(self.url)
