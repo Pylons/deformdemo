@@ -18,7 +18,7 @@ from pyramid.i18n import get_locale_name
 from pyramid.i18n import get_localizer
 from pyramid.renderers import get_renderer
 from pyramid.response import Response
-from pyramid.session import UnencryptedCookieSessionFactoryConfig
+from pyramid.session import SignedCookieSessionFactory
 from pyramid.threadlocal import get_current_request
 from pyramid.view import view_config
 from pyramid.view import view_defaults
@@ -2877,7 +2877,7 @@ def main(global_config, **settings):
     # paster serve entry point
     settings["debug_templates"] = "true"
 
-    session_factory = UnencryptedCookieSessionFactoryConfig("seekrit!")
+    session_factory = SignedCookieSessionFactory("seekrit!")
     config = Configurator(settings=settings, session_factory=session_factory)
     config.add_translation_dirs(
         "colander:locale", "deform:locale", "deformdemo:locale"
