@@ -2283,12 +2283,8 @@ class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
     @flaky(max_runs=4)
     def test_submit_one_filled(self):
         browser.get(self.url)
-        action_chains_on_id("deformField1-seqAdd").click().perform()
-
-        action_chains_on_xpath('//input[@name="text"]').click().send_keys(
-            Keys.HOME
-        ).send_keys("140118866").perform()
-
+        findxpath("deformField1-seqAdd").click().perform()
+        findxpath('//input[@name="text"]').send_keys("140118866")
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         captured = findid("captured").text
