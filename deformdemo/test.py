@@ -21,6 +21,7 @@ from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.wait import WebDriverWait
 
+
 browser = None
 
 #: Where we write stuff when Selenium doesn't work
@@ -2654,7 +2655,8 @@ class Select2TagsWidgetTests(Base, unittest.TestCase):
         findid("deformsubmit").click()
         captured = findid("captured").text
         self.assertSimilarRepr(
-            captured, "{'pepper': 'hello'}",
+            captured,
+            "{'pepper': 'hello'}",
         )
 
 
