@@ -39,15 +39,16 @@ jobs:
       with:
           python-version: ${{ matrix.py }}
           architecture: ${{ matrix.architecture }}
-    - name: Install requirements
+    - name: Install tox
       run: |
         sudo apt-get update
         pip install tox
-    - name: Set URL environment variable. localhost did not work.
+    # `localhost` did not work
+    - name: Set URL environment variable
       run: |
         echo "URL=http://`hostname -i`:8522" >> $GITHUB_ENV
         echo "URL: "$URL
-    - name: Running tox
+    - name: Run tox
       run: |
         tox -e py --
   lint:
