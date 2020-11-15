@@ -2251,7 +2251,7 @@ class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
 
     def test_submit_one_filled(self):
         findid("deformField1-seqAdd").click()
-        browser.switch_to.frame(browser.find_element_by_tag_name("iframe"))
+        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
         findid("tinymce").click()
         findid("tinymce").send_keys("yo")
         browser.switch_to.default_content()
@@ -2990,7 +2990,7 @@ class DelayedRichTextWidgetTests(Base, unittest.TestCase):
     def test_submit_filled(self):
         findcss(".tinymce-preload").click()
         time.sleep(0.5)
-        browser.switch_to.frame(browser.find_element_by_tag_name("iframe"))
+        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
         findid("tinymce").click()
         findid("tinymce").send_keys("hello")
         browser.switch_to.default_content()
@@ -3022,7 +3022,7 @@ class RichTextWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_filled(self):
-        browser.switch_to.frame(browser.find_element_by_tag_name("iframe"))
+        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
         findid("tinymce").click()
         findid("tinymce").send_keys("hello")
         browser.switch_to.default_content()
@@ -3401,7 +3401,7 @@ class AjaxFormTests(Base, unittest.TestCase):
         findid("deformField4").send_keys("2010")
         findid("deformField4-month").send_keys("1")
         findid("deformField4-day").send_keys("1")
-        browser.switch_to.frame(browser.find_element_by_tag_name("iframe"))
+        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
         findid("tinymce").send_keys("yo")
         browser.switch_to.default_content()
         source = browser.page_source
