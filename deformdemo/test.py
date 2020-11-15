@@ -2251,10 +2251,10 @@ class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
 
     def test_submit_one_filled(self):
         findid("deformField1-seqAdd").click()
-        browser.switch_to_frame(browser.find_element_by_tag_name("iframe"))
+        browser.switch_to.frame(browser.find_element_by_tag_name("iframe"))
         findid("tinymce").click()
         findid("tinymce").send_keys("yo")
-        browser.switch_to_default_content()
+        browser.switch_to.default_content()
         wait_to_click("#deformsubmit")
         self.assertEqual(
             eval(findid("captured").text), {"texts": ["<p>yo</p>"]}
@@ -2990,10 +2990,10 @@ class DelayedRichTextWidgetTests(Base, unittest.TestCase):
     def test_submit_filled(self):
         findcss(".tinymce-preload").click()
         time.sleep(0.5)
-        browser.switch_to_frame(browser.find_element_by_tag_name("iframe"))
+        browser.switch_to.frame(browser.find_element_by_tag_name("iframe"))
         findid("tinymce").click()
         findid("tinymce").send_keys("hello")
-        browser.switch_to_default_content()
+        browser.switch_to.default_content()
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         self.assertEqual(
@@ -3022,10 +3022,10 @@ class RichTextWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_filled(self):
-        browser.switch_to_frame(browser.find_element_by_tag_name("iframe"))
+        browser.switch_to.frame(browser.find_element_by_tag_name("iframe"))
         findid("tinymce").click()
         findid("tinymce").send_keys("hello")
-        browser.switch_to_default_content()
+        browser.switch_to.default_content()
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         self.assertEqual(
