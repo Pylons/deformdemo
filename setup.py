@@ -77,7 +77,7 @@ setup(
             "isort",
             "readme_renderer",
         ],
-        "testing": ["flaky", "pytest", "selenium>=3.0"],
+        "testing": ["flaky", "pytest", "selenium>=4.0a"],
     },
     entry_points="""\
     [paste.app_factory]
