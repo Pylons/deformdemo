@@ -26,17 +26,35 @@ README = readfile("README.rst")
 CHANGES = readfile("CHANGES.txt")
 VERSION = '3.0.0.dev0'
 
-PY3 = sys.version_info[0] == 3
+PY37MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 7
 
 requires = [
     "Babel",
-    "deform>=2.0.14.dev0",  # .dev0 allows pre-releases. Use only on master.
-    "pyramid>=1.5a1",  # route_name argument to resource_url
+    "deform >= 2.0.14.dev0",  # .dev0 allows pre-releases. Use only on master.
+    "pyramid >= 1.5a1",  # route_name argument to resource_url
     "pyramid_chameleon",
     "pygments",
     "six",
     "waitress",
 ]
+
+lint_extras = [
+    "black",
+    "check-manifest",
+    "flake8",
+    "flake8-bugbear",
+    "flake8-builtins",
+    "isort",
+    "readme_renderer",
+]
+
+testing_extras = ["flaky", "pytest"]
+
+# Selenium 4.0 does not work on Python 3.6.
+if PY37MIN:
+    testing_extras.extend(["selenium >= 4.0a"])
+else:
+    testing_extras.extend(["selenium >= 3.0, < 4.0"])
 
 setup(
     name="deformdemo",
@@ -67,18 +85,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
-    extras_require={
-        "lint": [
-            "black",
-            "check-manifest",
-            "flake8",
-            "flake8-bugbear",
-            "flake8-builtins",
-            "isort",
-            "readme_renderer",
-        ],
-        "testing": ["flaky", "pytest", "selenium>=3.0"],
-    },
+    extras_require={"lint": lint_extras, "testing": testing_extras},
     entry_points="""\
     [paste.app_factory]
     demo = deformdemo:main
