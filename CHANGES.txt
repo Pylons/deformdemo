@@ -3,6 +3,8 @@
 2.0.15 (unreleased)
 -------------------
 
+- Switch from Travis-CI to GitHub Actions for running tests and builds.
+
 - Add support of Python 3.9.
 
 - Added unofficial deformdemo. This provides a space for contributors to add

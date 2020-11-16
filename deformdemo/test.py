@@ -38,7 +38,6 @@ PY3 = sys.version_info[0] == 3
 #: Wait 2.0 seconds for some Selenium events to happen before giving up
 SELENIUM_IMPLICIT_WAIT = 1.0
 
-
 # Disable unnecessary Selenium trace output bloat
 logging.getLogger("selenium.webdriver.remote.remote_connection").setLevel(
     logging.WARN
@@ -98,7 +97,7 @@ def action_chains_on_xpath(expath):
 
 def action_chains_xpath_on_select(option_xpath):
     return ActionChains(browser).move_to_element(
-        browser.find_element_by_xpath(option_xpath)
+        browser.find_element(By.XPATH, option_xpath)
     )
 
 
@@ -129,7 +128,7 @@ def findid_view(elid):
 
     while True:
         try:
-            return browser.find_element_by_id(elid)
+            return browser.find_element(By.ID, elid)
         except NoSuchElementException:
             if time.time() < deadline:
                 # FLAKY is fun!
@@ -141,17 +140,17 @@ def findid_view(elid):
 
 @give_selenium_some_time
 def findcss(selector):
-    return browser.find_element_by_css_selector(selector)
+    return browser.find_element(By.CSS_SELECTOR, selector)
 
 
 @give_selenium_some_time
 def findcsses(selector):
-    return browser.find_elements_by_css_selector(selector)
+    return browser.find_elements(By.CSS_SELECTOR, selector)
 
 
 @give_selenium_some_time
 def findxpath(selector):
-    return browser.find_element_by_xpath(selector)
+    return browser.find_element(By.XPATH, selector)
 
 
 @give_selenium_some_time
@@ -183,7 +182,7 @@ def wait_to_click(selector):
     deadline = time.time() + SELENIUM_IMPLICIT_WAIT
     while time.time() < deadline:
         try:
-            elems = browser.find_elements_by_css_selector(selector)
+            elems = findcsses(selector)
             # assert len(elems) == 1, "Got {} for {}".format(elems, selector)
             if len(elems) > 0:
                 elems[0].click()
@@ -251,7 +250,6 @@ def sort_set_values(captured):
 
 
 def setUpModule():
-
     global browser
 
     # Quick override for testing with different browsers
@@ -343,28 +341,25 @@ def setUpModule():
 
     else:
         """
-        Runs in Github Actions environment when driver_name is not set.
-        using local firefox and local geckodriver.
+        When WEBDRIVER is not set, run tests against
+        Selenium container and stand alone Firefox in Github Workflows.
         https://github.com/Pylons/deform/blob/master/contributing.md
         """
 
-        display_number = os.environ.get("DISPLAY")
-        if display_number is None:
+        from selenium.webdriver import DesiredCapabilities
+        from selenium.webdriver import Remote
 
-            print("ERROR: DISPLAY environment variable needs to be set.")
-        else:
-            print("DISPLAY is set to: {}".format(display_number))
+        time.sleep(os.getenv('WAITTOSTART', 30))
 
-        from selenium import webdriver
+        selenium_grid_url = "http://localhost:4444/wd/hub"
+        capabilities = DesiredCapabilities.FIREFOX.copy()
 
-        try:
-            browser = webdriver.Firefox()
-            browser.set_window_size(1920, 1080)
-        except WebDriverException:
-            if os.path.exists(BROKEN_SELENIUM_LOG_FILE):
-                print("Selenium says no")
-                print(open(BROKEN_SELENIUM_LOG_FILE, "rt").read())
-            raise
+        browser = Remote(
+            command_executor=selenium_grid_url,
+            desired_capabilities=capabilities,
+        )
+
+        browser.set_window_size(1920, 1080)
         return browser
 
 
@@ -387,8 +382,8 @@ def test_url(url=""):
 
 
 class Base(object):
-    urepl = re.compile("\\bu('.*?'|\".*?\")")  # noQA
-    setrepl = re.compile("set\(\[(.*)\]\)")  # noQA
+    urepl = re.compile(r"\bu('.*?'|\".*?\")")  # noQA
+    setrepl = re.compile(r"set\(\[(.*)\]\)")  # noQA
 
     def setUp(self):
         browser.get(self.url)
@@ -414,7 +409,6 @@ class Base(object):
 
 
 class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
-
     url = test_url("/checkboxchoice/")
 
     def test_render_default(self):
@@ -899,7 +893,6 @@ class DateInputWidgetTests(Base, unittest.TestCase):
 
 
 class TimeInputWidgetTests(Base, unittest.TestCase):
-
     url = test_url("/timeinput/")
 
     def test_render_default(self):
@@ -1466,7 +1459,6 @@ class FileUploadTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_filled(self):
-
         # submit one first
         path, filename = _getFile()
         findcss("input[type=file]").send_keys(path)
@@ -2148,12 +2140,12 @@ class SequenceOfAutocompletes(Base, unittest.TestCase):
 
     def test_submit_two_filled(self):
         action_chains_on_id("deformField1-seqAdd").click().perform()
-        input_text = browser.find_elements_by_xpath('//input[@name="text"]')
+        input_text = findxpaths('//input[@name="text"]')
         ActionChains(browser).move_to_element(input_text[0]).click().send_keys(
             "bar"
         ).send_keys(Keys.TAB).perform()
         action_chains_on_id("deformField1-seqAdd").click().perform()
-        input_text = browser.find_elements_by_xpath('//input[@name="text"]')
+        input_text = browser.find_elements(By.XPATH, '//input[@name="text"]')
         ActionChains(browser).move_to_element(input_text[1]).click().send_keys(
             "baz"
         ).click().perform()
@@ -2254,10 +2246,10 @@ class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
 
     def test_submit_one_filled(self):
         findid("deformField1-seqAdd").click()
-        browser.switch_to_frame(browser.find_element_by_tag_name("iframe"))
+        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
         findid("tinymce").click()
         findid("tinymce").send_keys("yo")
-        browser.switch_to_default_content()
+        browser.switch_to.default_content()
         wait_to_click("#deformsubmit")
         self.assertEqual(
             eval(findid("captured").text), {"texts": ["<p>yo</p>"]}
@@ -2288,14 +2280,11 @@ class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
         self.assertEqual(findid("error-deformField4").text, "Required")
         self.assertEqual(findid("captured").text, "None")
 
+    @flaky(max_runs=4)
     def test_submit_one_filled(self):
         browser.get(self.url)
-        action_chains_on_id("deformField1-seqAdd").click().perform()
-
-        action_chains_on_xpath('//input[@name="text"]').click().send_keys(
-            Keys.HOME
-        ).send_keys(Keys.HOME).send_keys("140118866").perform()
-
+        findid("deformField1-seqAdd").click()
+        findxpath('//input[@name="text"]').send_keys("140118866")
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
         captured = findid("captured").text
@@ -2315,7 +2304,7 @@ class SelectWidgetTests(Base, unittest.TestCase):
         select = findid("deformField1")
         self.assertEqual(select.get_attribute("name"), "pepper")
         self.assertFalse(select.get_attribute("multiple"))
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         self.assertEqual(
             [o.text for o in options],
             ["- Select -", "Habanero", "Jalapeno", "Chipotle"],
@@ -2333,13 +2322,13 @@ class SelectWidgetTests(Base, unittest.TestCase):
 
     def test_submit_selected(self):
         select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         options[1].click()
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
         wait_until_visible("#deformField1")
         select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         # TODO: The form state is not carried over POST in demos and this
         # is disabled for self.assertTrue(options[1].is_selected())
         text = findid("captured").text
@@ -2365,7 +2354,7 @@ class SelectWidgetMultipleTests(Base, unittest.TestCase):
     def test_submit_selected(self):
         select = findid("deformField1")
         self.assertTrue(select.get_attribute("multiple"))
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         options[0].click()
         options[2].click()
 
@@ -2384,7 +2373,7 @@ class SelectWidgetIntegerTests(Base, unittest.TestCase):
         select = findid("deformField1")
         self.assertEqual(select.get_attribute("name"), "number")
         self.assertFalse(select.get_attribute("multiple"))
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         self.assertTrue(options[0].is_selected())
         self.assertEqual(
             [o.text for o in options], ["- Select -", "Zero", "One", "Two"]
@@ -2397,19 +2386,19 @@ class SelectWidgetIntegerTests(Base, unittest.TestCase):
         self.assertTrue("Number" in browser.page_source)
         select = findid("deformField1")
         self.assertEqual(select.get_attribute("name"), "number")
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         self.assertTrue(options[0].is_selected())
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_selected(self):
         select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         options[1].click()
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
         select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         # TODO: This is not captured in new demos so we don't test it here
         # self.assertTrue(options[1].is_selected())
         captured = findid("captured").text
@@ -2424,7 +2413,7 @@ class SelectWidgetWithOptgroupTests(Base, unittest.TestCase):
         select = findid("deformField1")
         self.assertEqual(select.get_attribute("name"), "musician")
         self.assertFalse(select.get_attribute("multiple"))
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         self.assertTrue(options[0].is_selected())
         self.assertEqual(
             [o.text for o in options],
@@ -2442,12 +2431,12 @@ class SelectWidgetWithOptgroupTests(Base, unittest.TestCase):
 
     def test_submit_selected(self):
         select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         options[1].click()
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
         select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         # TODO: DEmo no longer carries over the submission state, not tested
         # self.assertTrue(options[1].is_selected())
         captured = findid("captured").text
@@ -2462,7 +2451,7 @@ class SelectWidgetWithOptgroupAndLabelTests(SelectWidgetWithOptgroupTests):
         select = findid("deformField1")
         self.assertEqual(select.get_attribute("name"), "musician")
         self.assertFalse(select.get_attribute("multiple"))
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         self.assertTrue(options[0].is_selected())
         self.assertEqual(
             [o.text for o in options],
@@ -2480,12 +2469,12 @@ class SelectWidgetWithOptgroupAndLabelTests(SelectWidgetWithOptgroupTests):
 
     def test_submit_selected(self):
         select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         options[1].click()
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
         select = findid("deformField1")
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         # TODO: Not currently carried over in demo
         # self.assertTrue(options[1].is_selected())
         captured = findid("captured").text
@@ -2515,7 +2504,7 @@ class Select2WidgetTests(Base, unittest.TestCase):
         select = findid("deformField1")
         self.assertEqual(select.get_attribute("name"), "pepper")
         self.assertFalse(select.get_attribute("multiple"))
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         self.assertTrue(options[0].is_selected())
         self.assertEqual(
             [o.text for o in options],
@@ -2529,7 +2518,7 @@ class Select2WidgetTests(Base, unittest.TestCase):
         self.assertTrue("Pepper" in browser.page_source)
         select = findid("deformField1")
         self.assertEqual(select.get_attribute("name"), "pepper")
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         self.assertTrue(options[0].is_selected())
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertEqual(findid("captured").text, "None")
@@ -2596,7 +2585,7 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
         select = findid("deformField1")
         self.assertEqual(select.get_attribute("name"), "musician")
         self.assertFalse(select.get_attribute("multiple"))
-        options = select.find_elements_by_tag_name("option")
+        options = select.find_elements(By.TAG_NAME, "option")
         self.assertTrue(options[0].is_selected())
         self.assertEqual(
             [o.text for o in options],
@@ -2651,10 +2640,10 @@ class Select2TagsWidgetTests(Base, unittest.TestCase):
             findid("select2-deformField1-results").text, "No results found"
         )
 
-        # type a value in selec2 search
+        # type a value in select2 search
         (
             findid("public")
-            .find_element_by_css_selector(".select2-search__field")
+            .find_element(By.CSS_SELECTOR, ".select2-search__field")
             .send_keys("hello\n")
         )
 
@@ -2687,7 +2676,7 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
             # type values in selec2 search
             (
                 findid("public")
-                .find_element_by_css_selector(".select2-search__field")
+                .find_element(By.CSS_SELECTOR, ".select2-search__field")
                 .send_keys(value + "\n")
             )
 
@@ -2701,7 +2690,6 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
 
 
 class SelectWithDefaultTests(Base, unittest.TestCase):
-
     url = test_url("/select_with_default/")
 
     def test_default_selected(self):
@@ -2715,7 +2703,6 @@ class SelectWithDefaultTests(Base, unittest.TestCase):
 
 
 class SelectWithMultipleDefaultTests(Base, unittest.TestCase):
-
     url = test_url("/select_with_multiple_default_integers/")
 
     def test_default_selected(self):
@@ -2993,10 +2980,10 @@ class DelayedRichTextWidgetTests(Base, unittest.TestCase):
     def test_submit_filled(self):
         findcss(".tinymce-preload").click()
         time.sleep(0.5)
-        browser.switch_to_frame(browser.find_element_by_tag_name("iframe"))
+        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
         findid("tinymce").click()
         findid("tinymce").send_keys("hello")
-        browser.switch_to_default_content()
+        browser.switch_to.default_content()
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
         self.assertEqual(
@@ -3025,10 +3012,10 @@ class RichTextWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_filled(self):
-        browser.switch_to_frame(browser.find_element_by_tag_name("iframe"))
+        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
         findid("tinymce").click()
         findid("tinymce").send_keys("hello")
-        browser.switch_to_default_content()
+        browser.switch_to.default_content()
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".has-error")
         self.assertEqual(
@@ -3153,8 +3140,8 @@ class SequenceOrderableTests(Base, unittest.TestCase):
         # add a third
         action_chains_on_id("deformField1-seqAdd").click().perform()
         time.sleep(2)
-        input_ages = browser.find_elements_by_xpath('//input[@name="age"]')
-        input_names = browser.find_elements_by_xpath('//input[@name="name"]')
+        input_ages = findxpaths('//input[@name="age"]')
+        input_names = findxpaths('//input[@name="name"]')
 
         ActionChains(browser).move_to_element(
             input_names[0]
@@ -3179,7 +3166,7 @@ class SequenceOrderableTests(Base, unittest.TestCase):
 
         seq_height = findcss(".deform-seq-item").size["height"]
 
-        persons = browser.find_elements_by_xpath(
+        persons = findxpaths(
             '//div[@class="panel-heading"][contains(text(), "Person")]'
         )
 
@@ -3404,7 +3391,7 @@ class AjaxFormTests(Base, unittest.TestCase):
         findid("deformField4").send_keys("2010")
         findid("deformField4-month").send_keys("1")
         findid("deformField4-day").send_keys("1")
-        browser.switch_to.frame(browser.find_element_by_tag_name("iframe"))
+        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
         findid("tinymce").send_keys("yo")
         browser.switch_to.default_content()
         source = browser.page_source

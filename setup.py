@@ -27,6 +27,7 @@ CHANGES = readfile("CHANGES.txt")
 VERSION = '2.0.14'
 
 PY3 = sys.version_info[0] == 3
+PY37MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 7
 
 requires = [
     "deform>=2.0.14",
@@ -37,8 +38,26 @@ requires = [
     "waitress",
 ]
 
+lint_extras = [
+    "black",
+    "check-manifest",
+    "flake8",
+    "flake8-bugbear",
+    "flake8-builtins",
+    "isort",
+    "readme_renderer",
+]
+
+testing_extras = ["flaky", "pytest"]
+
 if not PY3:
     requires.extend(("Babel", "lingua"))
+
+# Selenium 4.0 does not work on Python 3.6.
+if PY37MIN:
+    testing_extras.extend(["selenium >= 4.0a"])
+else:
+    testing_extras.extend(["selenium >= 3.0, < 4.0"])
 
 setup(
     name="deformdemo",
@@ -71,18 +90,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
     install_requires=requires,
-    extras_require={
-        "lint": [
-            "black",
-            "check-manifest",
-            "flake8",
-            "flake8-bugbear",
-            "flake8-builtins",
-            "isort",
-            "readme_renderer",
-        ],
-        "testing": ["flaky", "pytest", "selenium>=3.0"],
-    },
+    extras_require={"lint": lint_extras, "testing": testing_extras},
     entry_points="""\
     [paste.app_factory]
     demo = deformdemo:main
