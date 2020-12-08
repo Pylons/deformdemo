@@ -2207,7 +2207,9 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
-    @view_config(renderer="templates/form.pt", name="selectize_with_tags_and_multiple")
+    @view_config(
+        renderer="templates/form.pt", name="selectize_with_tags_and_multiple"
+    )
     @demonstrate("Selectize Widget (with tags and multiple)")
     def selectize_with_tags_and_multiple(self):
 
