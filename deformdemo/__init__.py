@@ -2093,6 +2093,151 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer="templates/form.pt", name="selectize")
+    @demonstrate("Selectize Widget")
+    def selectize(self):
+
+        choices = (
+            ("", "- Select -"),
+            ("habanero", "Habanero"),
+            ("jalapeno", "Jalapeno"),
+            ("chipotle", "Chipotle"),
+        )
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectizeWidget(values=choices),
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form)
+
+    @view_config(renderer="templates/form.pt", name="selectize_with_multiple")
+    @demonstrate("Selectize Widget (with multiple)")
+    def selectize_with_multiple(self):
+
+        choices = (
+            ("habanero", "Habanero"),
+            ("jalapeno", "Jalapeno"),
+            ("chipotle", "Chipotle"),
+        )
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.Set(),
+                widget=deform.widget.SelectizeWidget(
+                    values=choices,
+                    multiple=True,
+                    attributes={
+                        "placeholder": "Select...",
+                    },
+                ),
+                validator=colander.Length(
+                    min=1, min_err="You must select at least one pepper."
+                ),
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form)
+
+    @view_config(renderer="templates/form.pt", name="selectize_with_optgroup")
+    @demonstrate("Selectize Widget (with optgroup)")
+    def selectize_with_optgroup(self):
+        from deform.widget import OptGroup
+
+        choices = (
+            ("", "Select your favorite musician"),
+            OptGroup(
+                "Guitarists",
+                ("page", "Jimmy Page"),
+                ("hendrix", "Jimi Hendrix"),
+            ),
+            OptGroup(
+                "Drummers",
+                ("cobham", "Billy Cobham"),
+                ("bonham", "John Bonham"),
+            ),
+        )
+
+        class Schema(colander.Schema):
+            musician = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectizeWidget(
+                    values=choices,
+                    attributes={
+                        "placeholder": "Select...",
+                    },
+                ),
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form)
+
+    @view_config(renderer="templates/form.pt", name="selectize_with_tags")
+    @demonstrate("Selectize Widget (with tags)")
+    def selectize_with_tags(self):
+
+        choices = ()
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectizeWidget(
+                    values=choices,
+                    tags=True,
+                    selectize_options={
+                        "createOnBlur": True,
+                        "create": True,
+                    },
+                    attributes={
+                        "placeholder": "Add a tag...",
+                    },
+                ),
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form)
+
+    @view_config(renderer="templates/form.pt", name="selectize_with_tags_and_multiple")
+    @demonstrate("Selectize Widget (with tags and multiple)")
+    def selectize_with_tags_and_multiple(self):
+
+        choices = ()
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.Set(),
+                widget=deform.widget.SelectizeWidget(
+                    values=choices,
+                    tags=True,
+                    multiple=True,
+                    selectize_options={
+                        "createOnBlur": True,
+                        "create": True,
+                    },
+                    attributes={
+                        "placeholder": "Add a tag...",
+                    },
+                ),
+                validator=colander.Length(
+                    min=1, min_err="You must enter at least one tag."
+                ),
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form)
+
     @view_config(renderer="templates/form.pt", name="checkboxchoice")
     @demonstrate("Checkbox Choice Widget")
     def checkboxchoice(self):

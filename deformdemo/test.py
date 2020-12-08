@@ -19,8 +19,8 @@ from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
-
 
 browser = None
 
@@ -2481,7 +2481,7 @@ class SelectWidgetWithOptgroupAndLabelTests(SelectWidgetWithOptgroupTests):
         self.assertSimilarRepr(captured, "{'musician': 'page'}")
 
 
-class SelectReadonlyTests(Base, unittest.TestCase):
+class SelectWidgetReadonlyTests(Base, unittest.TestCase):
     url = test_url("/select_readonly/")
 
     def test_render_default(self):
@@ -2492,6 +2492,35 @@ class SelectReadonlyTests(Base, unittest.TestCase):
         multi2 = findid("deformField2-2-0")
         self.assertEqual(multi2.text, "Billy Cobham")
         self.assertEqual(findid("captured").text, "None")
+
+
+class SelectWidgetWithDefaultTests(Base, unittest.TestCase):
+    url = test_url("/select_with_default/")
+
+    def test_default_selected(self):
+        """Make sure the supplied default value for select is honoured."""
+
+        elem = findcss("option[value='jalapeno']")
+        assert elem.get_attribute("selected") is not None
+
+        elem = findcss("option[value='chipotle']")
+        assert elem.get_attribute("selected") is None
+
+
+class SelectWidgetWithMultipleDefaultTests(Base, unittest.TestCase):
+    url = test_url("/select_with_multiple_default_integers/")
+
+    def test_default_selected(self):
+        """Make sure the supplied default value for select is honoured for multiple values."""  # noQA
+
+        elem = findcss("option[value='1']")
+        assert elem.get_attribute("selected") is not None
+
+        elem = findcss("option[value='2']")
+        assert elem.get_attribute("selected") is not None
+
+        elem = findcss("option[value='3']")
+        assert elem.get_attribute("selected") is None
 
 
 class Select2WidgetTests(Base, unittest.TestCase):
@@ -2689,33 +2718,203 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
         self.assertSimilarRepr(captured, expected)
 
 
-class SelectWithDefaultTests(Base, unittest.TestCase):
-    url = test_url("/select_with_default/")
+class SelectizeWidgetTests(Base, unittest.TestCase):
+    url = test_url("/selectize/")
+    first_selected_captured = "{'pepper': 'habanero'}"
+    second_selected_captured = "{'pepper': 'jalapeno'}"
 
-    def test_default_selected(self):
-        """Make sure the supplied default value for select is honoured."""
+    def test_render_default(self):
+        self.assertTrue("Pepper" in browser.page_source)
+        element = findid("deformField1", clickable=False)
+        select_object = Select(element)
+        self.assertEqual(element.get_attribute("name"), "pepper")
+        self.assertFalse(select_object.is_multiple)
+        self.assertTrue(select_object.options[0].is_selected())
+        # Selectize replaces the select with an input, then makes the options
+        # not visible.  Thus Selenium cannot find them.  To make them visible,
+        # we must click the input, then grab them.
+        input = browser.find_element_by_id("deformField1-selectized")
+        input.click()
+        options = browser.find_elements_by_css_selector("div.option")
+        self.assertEqual(
+            [o.text for o in options],
+            ["- Select -", "Habanero", "Jalapeno", "Chipotle"],
+        )
+        self.assertEqual(findcss(".required").text, "Pepper")
+        self.assertEqual(findid("captured").text, "None")
 
-        elem = findcss("option[value='jalapeno']")
-        assert elem.get_attribute("selected") is not None
+    def test_submit_default(self):
+        findid("deformsubmit").click()
+        self.assertTrue("Pepper" in browser.page_source)
+        element = findid("deformField1", clickable=False)
+        select_object = Select(element)
+        self.assertEqual(element.get_attribute("name"), "pepper")
+        self.assertTrue(select_object.options[0].is_selected())
+        self.assertEqual(findid("error-deformField1").text, "Required")
+        self.assertEqual(findid("captured").text, "None")
 
-        elem = findcss("option[value='chipotle']")
-        assert elem.get_attribute("selected") is None
+    def test_submit_selected(self):
+        input = browser.find_element_by_id("deformField1-selectized")
+        input.click()
+        options = browser.find_elements_by_css_selector("div.option")
+        options[1].click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
+        self.assertTrue(
+            findid("captured").text in self.first_selected_captured
+        )
+
+        input = browser.find_element_by_id("deformField1-selectized")
+        input.click()
+        options = browser.find_elements_by_css_selector("div.option")
+        options[2].click()
+        findid("deformsubmit").click()
+        self.assertTrue(
+            findid("captured").text in self.second_selected_captured
+        )
 
 
-class SelectWithMultipleDefaultTests(Base, unittest.TestCase):
-    url = test_url("/select_with_multiple_default_integers/")
+class SelectizeWidgetMultipleTests(Base, unittest.TestCase):
+    url = test_url("/selectize_with_multiple/")
 
-    def test_default_selected(self):
-        """Make sure the supplied default value for select is honoured for multiple values."""  # noQA
+    def test_submit_selected(self):
+        element = findid("deformField1", clickable=False)
+        select_object = Select(element)
+        self.assertTrue(select_object.is_multiple)
+        input = browser.find_element_by_id("deformField1-selectized")
+        input.click()
+        options = browser.find_elements_by_css_selector("div.option")
+        options[0].click()
+        options[1].click()
+        input.send_keys(Keys.ESCAPE)
+        findid("deformsubmit").click()
+        captured_default = {"pepper": set(["habanero", "jalapeno"])}
+        self.assertEqual(eval(findid("captured").text), captured_default)
+        self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
-        elem = findcss("option[value='1']")
-        assert elem.get_attribute("selected") is not None
 
-        elem = findcss("option[value='2']")
-        assert elem.get_attribute("selected") is not None
+class SelectizeWidgetWithOptgroupTests(Base, unittest.TestCase):
+    url = test_url("/selectize_with_optgroup/")
 
-        elem = findcss("option[value='3']")
-        assert elem.get_attribute("selected") is None
+    first_selected_captured = "{'musician': 'page'}"
+    second_selected_captured = "{'musician': 'bonham'}"
+
+    def test_render_default(self):
+        self.assertTrue("Musician" in browser.page_source)
+        element = findid("deformField1", clickable=False)
+        select_object = Select(element)
+        self.assertFalse(select_object.is_multiple)
+        self.assertEqual(element.get_attribute("name"), "musician")
+        input = browser.find_element_by_id("deformField1-selectized")
+        input.click()
+        options = browser.find_elements_by_css_selector("div.option")
+        self.assertTrue(select_object.options[0].is_selected())
+        self.assertEqual(
+            [o.text for o in options],
+            [
+                "Select your favorite musician",
+                "Jimmy Page",
+                "Jimi Hendrix",
+                "Billy Cobham",
+                "John Bonham",
+            ],
+        )
+        self.assertEqual(
+            len(browser.find_elements_by_css_selector("div.optgroup")), 2
+        )
+        self.assertEqual(findcss(".required").text, "Musician")
+        self.assertEqual(findid("captured").text, "None")
+
+    def test_submit_selected(self):
+        input = browser.find_element_by_id("deformField1-selectized")
+        input.click()
+        options = browser.find_elements_by_css_selector("div.option")
+        options[1].click()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
+        captured = findid("captured").text
+        self.assertSimilarRepr(captured, self.first_selected_captured)
+
+        time.sleep(0.3)
+
+        input = browser.find_element_by_id("deformField1-selectized")
+        input.click()
+        options = browser.find_elements_by_css_selector("div.option")
+        options[4].click()
+        findid("deformsubmit").click()
+        self.assertTrue(
+            findid("captured").text in self.second_selected_captured
+        )
+
+
+class SelectizeTagsWidgetTests(Base, unittest.TestCase):
+    url = test_url("/selectize_with_tags/")
+
+    def test_submit_default(self):
+        findid("deformsubmit").click()
+        self.assertTrue("Pepper" in browser.page_source)
+        element = findid("deformField1", clickable=False)
+        select_object = Select(element)
+        self.assertEqual(element.get_attribute("name"), "pepper")
+        self.assertTrue(select_object.options[0].is_selected())
+        self.assertEqual(findid("error-deformField1").text, "Required")
+        self.assertEqual(findid("captured").text, "None")
+
+    def test_submit_new_option(self):
+        # options list is empty
+        assert browser.find_element_by_css_selector(
+            "div.selectize-input.items.not-full"
+        )
+        # type a value in selectize
+        action_chains_on_id("deformField1-selectized").click().send_keys(
+            "hello"
+        ).send_keys(Keys.ENTER).perform()
+        findid("deformsubmit").click()
+        self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
+        captured = findid("captured").text
+        self.assertSimilarRepr(
+            captured,
+            "{'pepper': 'hello'}",
+        )
+
+
+class SelectizeWidgetTagsMultipleTests(Base, unittest.TestCase):
+    url = test_url("/selectize_with_tags_and_multiple/")
+
+    def test_submit_default(self):
+        findid("deformsubmit").click()
+        assert "Pepper" in browser.page_source
+        element = findid("deformField1", clickable=False)
+        select_object = Select(element)
+        assert element.get_attribute("name") == "pepper"
+        assert len(select_object.options) == 0
+        assert findid("error-deformField1").text == "You must enter at least one tag."
+        assert findid("captured").text == "None"
+
+    def test_submit_new_options(self):
+        # multiple submission is activated
+        element = findid("deformField1", clickable=False)
+        select_object = Select(element)
+        self.assertTrue(select_object.is_multiple)
+        # options list is empty
+        assert browser.find_element_by_css_selector(
+            "div.selectize-input.items.not-full"
+        )
+        # add values to selectize field
+        for value in ("hello", "qwerty", "hello"):
+            # type values in selectize
+            action_chains_on_id("deformField1-selectized").click().send_keys(
+                value
+            ).send_keys(Keys.ENTER).perform()
+            time.sleep(2)
+
+        # after form submission typed value appear in captured
+        findid("deformsubmit").click()
+        captured = findid("captured").text
+        expected = "{'pepper': {'hello', 'qwerty'}}"
+        if PY3:
+            captured = sort_set_values(captured)
+        self.assertSimilarRepr(captured, expected)
 
 
 class TextInputWidgetTests(Base, unittest.TestCase):
