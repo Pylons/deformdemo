@@ -12,6 +12,7 @@ import time
 import unittest
 
 from flaky import flaky
+from selenium.common.exceptions import ElementNotInteractableException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
@@ -3697,6 +3698,205 @@ class CssClassesOnTheOutermostHTMLElementTests(Base, unittest.TestCase):
         findcss("form > fieldset > div.top_level_mapping_widget_custom_class")
         findcss("[title=MappingWidget] div.mapped_widget_custom_class")
         findcss("[title=SequenceWidget] div.sequenced_widget_custom_class")
+
+
+class ReadOnlyHTMLAttributeTests(Base, unittest.TestCase):
+    url = test_url("/readonly_html/")
+
+    def test_render_checkbox_default(self):
+        self.assertEqual(findid("captured").text, "None")
+
+        self.assertTrue("Checkbox" in browser.page_source)
+        self.assertTrue(findid("req-deformField1").text, "Checkbox")
+
+        element0 = findid("deformField1-0")
+        element1 = findid("deformField1-1")
+        element2 = findid("deformField1-2")
+
+        self.assertTrue(element0.get_attribute("onclick"), "return false;")
+        self.assertFalse(element0.is_selected())
+        element0.click()
+        self.assertFalse(element0.is_selected())
+
+        self.assertTrue(element1.get_attribute("onclick"), "return false;")
+        self.assertTrue(element1.is_selected())
+        element1.click()
+        self.assertTrue(element1.is_selected())
+
+        self.assertTrue(element2.get_attribute("onclick"), "return false;")
+        self.assertFalse(element2.is_selected())
+        element2.click()
+        self.assertFalse(element2.is_selected())
+
+    def test_render_money_default(self):
+        self.assertTrue("Money" in browser.page_source)
+        self.assertTrue(findid("req-deformField2").text, "Money")
+        element = findid("deformField2")
+        self.assertTrue(element.get_attribute("readonly"), "readonly")
+        self.assertTrue(element.get_attribute("value"), "1")
+        element.send_keys("234")
+        self.assertTrue(element.get_attribute("value"), "1")
+
+    def test_render_radio_default(self):
+        self.assertTrue("Radio" in browser.page_source)
+        self.assertTrue(findid("req-deformField3").text, "Radio")
+
+        element0 = findid("deformField3-0", clickable=False)
+        element1 = findid("deformField3-1")
+        element2 = findid("deformField3-2", clickable=False)
+
+        self.assertTrue(element0.get_attribute("disabled"), "disabled")
+        self.assertTrue(element0.get_attribute("readonly"), "readonly")
+        self.assertFalse(element0.is_selected())
+        element0.click()
+        self.assertFalse(element0.is_selected())
+
+        self.assertIsNone(element1.get_attribute("disabled"))
+        self.assertTrue(element1.get_attribute("readonly"), "readonly")
+        self.assertTrue(element1.is_selected())
+        element1.click()
+        self.assertTrue(element1.is_selected())
+
+        self.assertTrue(element2.get_attribute("disabled"), "disabled")
+        self.assertTrue(element2.get_attribute("readonly"), "readonly")
+        self.assertFalse(element2.is_selected())
+        element2.click()
+        self.assertFalse(element2.is_selected())
+
+    def test_render_select_single_default(self):
+        self.assertTrue("Select Single" in browser.page_source)
+        self.assertTrue(findid("req-deformField4").text, "Select Single")
+
+        element = findid("deformField4")
+        select_object = Select(element)
+        self.assertFalse(select_object.is_multiple)
+        self.assertTrue(element.get_attribute("readonly"), "readonly")
+        options = select_object.options
+        self.assertEqual(
+            [o.text for o in options],
+            ["The letter a", "The letter b", "The letter c"],
+        )
+        self.assertTrue(options[0].get_attribute("disabled"), "disabled")
+        self.assertIsNone(options[1].get_attribute("disabled"))
+        self.assertTrue(options[1].is_selected())
+        self.assertTrue(options[1].get_attribute("readonly"), "readonly")
+        self.assertTrue(options[2].get_attribute("disabled"), "disabled")
+
+        select_object.select_by_index(0)
+        self.assertTrue(options[1].is_selected())
+
+    def test_render_selectize_multi_default(self):
+        self.assertTrue("Selectize Multi" in browser.page_source)
+        self.assertTrue(findid("req-deformField5").text, "Selectize Multi")
+
+        element = findid("deformField5", clickable=False)
+        select_object = Select(element)
+        self.assertTrue(select_object.is_multiple)
+        self.assertTrue(element.get_attribute("readonly"), "readonly")
+        options = select_object.options
+        # Selectize removes unselected options from the DOM.
+        # Selectize hides the select, and Selenium only returns `.text` for
+        # visible elements. Use `.get_attribute("text")` instead.
+        self.assertEqual(
+            [o.get_attribute("text") for o in options],
+            ["The letter a", "The letter b"],
+        )
+        self.assertIsNone(options[0].get_attribute("disabled"))
+        self.assertTrue(options[0].is_selected())
+        self.assertIsNone(options[1].get_attribute("disabled"))
+        self.assertTrue(options[1].is_selected())
+
+        self.assertRaises(
+            ElementNotInteractableException, select_object.deselect_by_index, 0
+        )
+        self.assertTrue(options[0].is_selected())
+        self.assertTrue(options[1].is_selected())
+
+    def test_render_selectize_single_default(self):
+        self.assertTrue("Selectize Single" in browser.page_source)
+        self.assertTrue(findid("req-deformField6").text, "Selectize Single")
+
+        element = findid("deformField6", clickable=False)
+        select_object = Select(element)
+        self.assertFalse(select_object.is_multiple)
+        self.assertTrue(element.get_attribute("readonly"), "readonly")
+        options = select_object.options
+        self.assertEqual(
+            [o.get_attribute("text") for o in options],
+            ["The letter b"],
+        )
+        self.assertIsNone(options[0].get_attribute("disabled"))
+        self.assertTrue(options[0].is_selected())
+
+    def test_render_textarea_default(self):
+        self.assertTrue("Textarea" in browser.page_source)
+        self.assertTrue(findid("req-deformField7").text, "Textarea")
+
+        element = findid("deformField7")
+        self.assertEqual(element.get_attribute("name"), "textarea")
+        self.assertTrue(element.get_attribute("readonly"), "readonly")
+        self.assertTrue(element.get_attribute("value"), "readonly text area")
+        element.send_keys("cannot edit a readonly field")
+        self.assertTrue(element.get_attribute("value"), "readonly text area")
+
+    def test_render_text_input_default(self):
+        self.assertTrue("Textinput" in browser.page_source)
+        self.assertTrue(findid("req-deformField8").text, "Textinput")
+
+        element = findid("deformField8")
+        self.assertEqual(element.get_attribute("name"), "textinput")
+        self.assertTrue(element.get_attribute("readonly"), "readonly")
+        self.assertTrue(element.get_attribute("value"), "readonly text input")
+        element.send_keys("cannot edit a readonly field")
+        self.assertTrue(element.get_attribute("value"), "readonly text input")
+
+    def test_submit_success(self):
+        wait_to_click("#deformsubmit")
+        self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
+        self.assertEqual(
+            eval(findid("captured").text),
+            {
+                "checkbox": {"b"},
+                "money": Decimal("1"),
+                "radio": "b",
+                "select_single": "b",
+                "selectize_multi": {"b", "a"},
+                "selectize_single": "b",
+                "textarea": "readonly text area",
+                "textinput": "readonly text input",
+            },
+        )
+        element0 = findid("deformField1-0")
+        element1 = findid("deformField1-1")
+        element2 = findid("deformField1-2")
+        self.assertFalse(element0.is_selected())
+        self.assertTrue(element1.is_selected())
+        self.assertFalse(element2.is_selected())
+        element = findid("deformField2")
+        self.assertTrue(element.get_attribute("value"), "1")
+        element0 = findid("deformField3-0", clickable=False)
+        element1 = findid("deformField3-1")
+        element2 = findid("deformField3-2", clickable=False)
+        self.assertFalse(element0.is_selected())
+        self.assertTrue(element1.is_selected())
+        self.assertFalse(element2.is_selected())
+        element = findid("deformField4")
+        select_object = Select(element)
+        options = select_object.options
+        self.assertTrue(options[1].is_selected())
+        element = findid("deformField5", clickable=False)
+        select_object = Select(element)
+        options = select_object.options
+        self.assertTrue(options[0].is_selected())
+        self.assertTrue(options[1].is_selected())
+        element = findid("deformField6", clickable=False)
+        select_object = Select(element)
+        options = select_object.options
+        self.assertTrue(options[0].is_selected())
+        element = findid("deformField7")
+        self.assertTrue(element.get_attribute("value"), "readonly text area")
+        element = findid("deformField8")
+        self.assertTrue(element.get_attribute("value"), "readonly text input")
 
 
 if __name__ == "__main__":

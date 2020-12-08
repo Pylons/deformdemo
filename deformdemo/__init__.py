@@ -2851,9 +2851,9 @@ class DeformDemo(object):
 
         return self.render_form(form, appstruct=appstruct)
 
-    @view_config(renderer="templates/form.pt", name="readonly_fields")
-    @demonstrate("Read-Only Fields")
-    def readonly_fields(self):
+    @view_config(renderer="templates/form.pt", name="readonly_argument")
+    @demonstrate("Readonly Widget Argument")
+    def readonly_argument(self):
         import datetime
 
         class Schema(colander.Schema):
@@ -2915,6 +2915,107 @@ class DeformDemo(object):
             "richtext": "<p>Yo!</p>",
             "money": decimal.Decimal(1),
             "date": datetime.date(2010, 5, 5),
+        }
+
+        schema = Schema()
+
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form, appstruct=appstruct)
+
+    @view_config(renderer="templates/form.pt", name="readonly_html")
+    @demonstrate("Readonly HTML Attribute")
+    def readonly_html(self):
+        """
+        This form shows the widgets that support the HTML attribute
+        ``readonly``.
+        """
+        values = [
+            ("a", "The letter a"),
+            ("b", "The letter b"),
+            ("c", "The letter c"),
+        ]
+
+        class Schema(colander.Schema):
+            checkbox = colander.SchemaNode(
+                colander.Set(),
+                widget=deform.widget.CheckboxChoiceWidget(
+                    values=values,
+                    attributes={"onclick": "return false;"},
+                ),
+                description="Readonly checkbox choices",
+            )
+            money = colander.SchemaNode(
+                colander.Decimal(),
+                widget=deform.widget.MoneyInputWidget(
+                    attributes={"readonly": "readonly"}
+                ),
+                description="Readonly money",
+            )
+            radio = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.RadioChoiceWidget(
+                    values=values,
+                    attributes={"readonly": "readonly"},
+                ),
+                description="Readonly radio choices",
+            )
+            select_single = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectWidget(
+                    values=values,
+                    attributes={"readonly": "readonly"},
+                ),
+                description="Readonly select single",
+            )
+            selectize_multi = colander.SchemaNode(
+                colander.Set(),
+                widget=deform.widget.SelectizeWidget(
+                    values=values,
+                    multiple=True,
+                    attributes={"readonly": "readonly"},
+                    selectize_options={
+                        "persist": False,
+                        "plugins": ["remove_button"],
+                    },
+                ),
+                description="Readonly selectize multiple",
+            )
+            selectize_single = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectizeWidget(
+                    values=values,
+                    attributes={"readonly": "readonly"},
+                    selectize_options={
+                        "persist": False,
+                    },
+                ),
+                description="Readonly selectize single",
+            )
+            textarea = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.TextAreaWidget(
+                    attributes={"readonly": "readonly"}
+                ),
+                description="Readonly textarea",
+            )
+            textinput = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.TextInputWidget(
+                    attributes={"readonly": "readonly"}
+                ),
+                description="Readonly text input",
+            )
+
+        appstruct = {
+            "checkbox": "b",
+            "money": decimal.Decimal(1),
+            "radio": "b",
+            "select_single": "b",
+            "selectize_single": "b",
+            "selectize_multi": ("a", "b"),
+            "textarea": "readonly text area",
+            "textinput": "readonly text input",
         }
 
         schema = Schema()
