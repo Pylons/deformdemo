@@ -23,6 +23,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
+
 browser = None
 
 #: Where we write stuff when Selenium doesn't work
@@ -2734,8 +2735,8 @@ class SelectizeWidgetTests(Base, unittest.TestCase):
         # Selectize replaces the select with an input, then makes the options
         # not visible.  Thus Selenium cannot find them.  To make them visible,
         # we must click the input, then grab them.
-        input = browser.find_element_by_id("deformField1-selectized")
-        input.click()
+        sel_input = browser.find_element_by_id("deformField1-selectized")
+        sel_input.click()
         options = browser.find_elements_by_css_selector("div.option")
         self.assertEqual(
             [o.text for o in options],
@@ -2755,8 +2756,8 @@ class SelectizeWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_selected(self):
-        input = browser.find_element_by_id("deformField1-selectized")
-        input.click()
+        sel_input = browser.find_element_by_id("deformField1-selectized")
+        sel_input.click()
         options = browser.find_elements_by_css_selector("div.option")
         options[1].click()
         findid("deformsubmit").click()
@@ -2765,8 +2766,8 @@ class SelectizeWidgetTests(Base, unittest.TestCase):
             findid("captured").text in self.first_selected_captured
         )
 
-        input = browser.find_element_by_id("deformField1-selectized")
-        input.click()
+        sel_input = browser.find_element_by_id("deformField1-selectized")
+        sel_input.click()
         options = browser.find_elements_by_css_selector("div.option")
         options[2].click()
         findid("deformsubmit").click()
@@ -2782,12 +2783,12 @@ class SelectizeWidgetMultipleTests(Base, unittest.TestCase):
         element = findid("deformField1", clickable=False)
         select_object = Select(element)
         self.assertTrue(select_object.is_multiple)
-        input = browser.find_element_by_id("deformField1-selectized")
-        input.click()
+        sel_input = browser.find_element_by_id("deformField1-selectized")
+        sel_input.click()
         options = browser.find_elements_by_css_selector("div.option")
         options[0].click()
         options[1].click()
-        input.send_keys(Keys.ESCAPE)
+        sel_input.send_keys(Keys.ESCAPE)
         findid("deformsubmit").click()
         captured_default = {"pepper": set(["habanero", "jalapeno"])}
         self.assertEqual(eval(findid("captured").text), captured_default)
@@ -2806,8 +2807,8 @@ class SelectizeWidgetWithOptgroupTests(Base, unittest.TestCase):
         select_object = Select(element)
         self.assertFalse(select_object.is_multiple)
         self.assertEqual(element.get_attribute("name"), "musician")
-        input = browser.find_element_by_id("deformField1-selectized")
-        input.click()
+        sel_input = browser.find_element_by_id("deformField1-selectized")
+        sel_input.click()
         options = browser.find_elements_by_css_selector("div.option")
         self.assertTrue(select_object.options[0].is_selected())
         self.assertEqual(
@@ -2827,8 +2828,8 @@ class SelectizeWidgetWithOptgroupTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_selected(self):
-        input = browser.find_element_by_id("deformField1-selectized")
-        input.click()
+        sel_input = browser.find_element_by_id("deformField1-selectized")
+        sel_input.click()
         options = browser.find_elements_by_css_selector("div.option")
         options[1].click()
         findid("deformsubmit").click()
@@ -2838,8 +2839,8 @@ class SelectizeWidgetWithOptgroupTests(Base, unittest.TestCase):
 
         time.sleep(0.3)
 
-        input = browser.find_element_by_id("deformField1-selectized")
-        input.click()
+        sel_input = browser.find_element_by_id("deformField1-selectized")
+        sel_input.click()
         options = browser.find_elements_by_css_selector("div.option")
         options[4].click()
         findid("deformsubmit").click()
@@ -2889,7 +2890,10 @@ class SelectizeWidgetTagsMultipleTests(Base, unittest.TestCase):
         select_object = Select(element)
         assert element.get_attribute("name") == "pepper"
         assert len(select_object.options) == 0
-        assert findid("error-deformField1").text == "You must enter at least one tag."
+        assert (
+            findid("error-deformField1").text == "You must enter at "
+            "least one tag."
+        )
         assert findid("captured").text == "None"
 
     def test_submit_new_options(self):
