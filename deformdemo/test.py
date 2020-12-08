@@ -2864,8 +2864,8 @@ class SelectizeTagsWidgetTests(Base, unittest.TestCase):
 
     def test_submit_new_option(self):
         # options list is empty
-        assert browser.find_element(By.CSS_SELECTOR,
-            "div.selectize-input.items.not-full"
+        assert browser.find_element(
+            By.CSS_SELECTOR, "div.selectize-input.items.not-full"
         )
         # type a value in selectize
         action_chains_on_id("deformField1-selectized").click().send_keys(
@@ -2902,8 +2902,8 @@ class SelectizeWidgetTagsMultipleTests(Base, unittest.TestCase):
         select_object = Select(element)
         self.assertTrue(select_object.is_multiple)
         # options list is empty
-        assert browser.find_element(By.CSS_SELECTOR,
-            "div.selectize-input.items.not-full"
+        assert browser.find_element(
+            By.CSS_SELECTOR, "div.selectize-input.items.not-full"
         )
         # add values to selectize field
         for value in ("hello", "qwerty", "hello"):
