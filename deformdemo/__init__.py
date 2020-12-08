@@ -30,14 +30,12 @@ from pygments import highlight
 from pygments.formatters import HtmlFormatter
 from pygments.lexers import PythonLexer
 
-
 log = logging.getLogger(__name__)
 
 try:
     from StringIO import StringIO
 except ImportError:
     from io import StringIO
-
 
 PY3 = sys.version_info[0] == 3
 PY38MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 8
@@ -52,6 +50,7 @@ _ = TranslationStringFactory("deformdemo")
 
 formatter = HtmlFormatter(nowrap=True)
 css = formatter.get_style_defs()
+
 
 # the zpt_renderer above is referred to within the demo.ini file by dotted name
 
@@ -69,7 +68,6 @@ class demonstrate(object):
 # http://stackoverflow.com/a/16888673/315168
 # eliminate u''
 def my_safe_repr(obj, context, maxlevels, level, sort_dicts=True):
-
     if type(obj) == unicode:
         obj = obj.encode("utf-8")
 
@@ -549,7 +547,6 @@ class DeformDemo(object):
         """
 
         class Schema(colander.Schema):
-
             title = "Pop up example title"
 
             # Override default form.pt for rendering <form>
@@ -2341,7 +2338,8 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(
-        renderer="templates/form.pt", name="multiple_error_messages_mapping"
+        renderer="templates/form.pt",
+        name="multiple_error_messages_mapping",
     )
     @demonstrate("Multiple Error Messages For a Single Widget (Mapping)")
     def multiple_error_messages_mapping(self):
@@ -2685,7 +2683,7 @@ class DeformDemo(object):
     @view_config(
         renderer="templates/form.pt", name="readonly_value_nonvalidation"
     )
-    @demonstrate("Dont Validate Readonly Fields")
+    @demonstrate("Don't Validate Readonly Fields")
     def readonly_value_nonvalidation(self):
         @colander.deferred
         def deferred_missing(node, kw):
@@ -2699,7 +2697,10 @@ class DeformDemo(object):
             )
             readwrite = colander.SchemaNode(colander.String())
 
-        appstruct = {"readonly": "Read Only", "readwrite": "Read and Write"}
+        appstruct = {
+            "readonly": "Read Only",
+            "readwrite": "Read and Write",
+        }
         schema = Values().bind()
         form = deform.Form(schema, buttons=("submit",))
 
@@ -2893,7 +2894,10 @@ def main(global_config, **settings):
 
     # Configure renderer
     configure_zpt_renderer(
-        ("deformdemo:custom_widgets", "unofficial-deformdemo:custom_widgets"),
+        (
+            "deformdemo:custom_widgets",
+            "unofficial-deformdemo:custom_widgets",
+        ),
         translator,
     )
     config.add_static_view("static_deform", "deform:static")
