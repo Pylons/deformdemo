@@ -38,7 +38,6 @@ try:
 except ImportError:
     from io import StringIO
 
-
 PY3 = sys.version_info[0] == 3
 PY38MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 8
 
@@ -52,6 +51,7 @@ _ = TranslationStringFactory("deformdemo")
 
 formatter = HtmlFormatter(nowrap=True)
 css = formatter.get_style_defs()
+
 
 # the zpt_renderer above is referred to within the demo.ini file by dotted name
 
@@ -69,7 +69,6 @@ class demonstrate(object):
 # http://stackoverflow.com/a/16888673/315168
 # eliminate u''
 def my_safe_repr(obj, context, maxlevels, level, sort_dicts=True):
-
     if type(obj) == unicode:
         obj = obj.encode("utf-8")
 
@@ -549,7 +548,6 @@ class DeformDemo(object):
         """
 
         class Schema(colander.Schema):
-
             title = "Pop up example title"
 
             # Override default form.pt for rendering <form>
@@ -2096,6 +2094,153 @@ class DeformDemo(object):
 
         return self.render_form(form)
 
+    @view_config(renderer="templates/form.pt", name="selectize")
+    @demonstrate("Selectize Widget")
+    def selectize(self):
+
+        choices = (
+            ("", "- Select -"),
+            ("habanero", "Habanero"),
+            ("jalapeno", "Jalapeno"),
+            ("chipotle", "Chipotle"),
+        )
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectizeWidget(values=choices),
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form)
+
+    @view_config(renderer="templates/form.pt", name="selectize_with_multiple")
+    @demonstrate("Selectize Widget (with multiple)")
+    def selectize_with_multiple(self):
+
+        choices = (
+            ("habanero", "Habanero"),
+            ("jalapeno", "Jalapeno"),
+            ("chipotle", "Chipotle"),
+        )
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.Set(),
+                widget=deform.widget.SelectizeWidget(
+                    values=choices,
+                    multiple=True,
+                    attributes={
+                        "placeholder": "Select...",
+                    },
+                ),
+                validator=colander.Length(
+                    min=1, min_err="You must select at least one pepper."
+                ),
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form)
+
+    @view_config(renderer="templates/form.pt", name="selectize_with_optgroup")
+    @demonstrate("Selectize Widget (with optgroup)")
+    def selectize_with_optgroup(self):
+        from deform.widget import OptGroup
+
+        choices = (
+            ("", "Select your favorite musician"),
+            OptGroup(
+                "Guitarists",
+                ("page", "Jimmy Page"),
+                ("hendrix", "Jimi Hendrix"),
+            ),
+            OptGroup(
+                "Drummers",
+                ("cobham", "Billy Cobham"),
+                ("bonham", "John Bonham"),
+            ),
+        )
+
+        class Schema(colander.Schema):
+            musician = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectizeWidget(
+                    values=choices,
+                    attributes={
+                        "placeholder": "Select...",
+                    },
+                ),
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form)
+
+    @view_config(renderer="templates/form.pt", name="selectize_with_tags")
+    @demonstrate("Selectize Widget (with tags)")
+    def selectize_with_tags(self):
+
+        choices = ()
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectizeWidget(
+                    values=choices,
+                    tags=True,
+                    selectize_options={
+                        "createOnBlur": True,
+                        "create": True,
+                    },
+                    attributes={
+                        "placeholder": "Add a tag...",
+                    },
+                ),
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form)
+
+    @view_config(
+        renderer="templates/form.pt", name="selectize_with_tags_and_multiple"
+    )
+    @demonstrate("Selectize Widget (with tags and multiple)")
+    def selectize_with_tags_and_multiple(self):
+
+        choices = ()
+
+        class Schema(colander.Schema):
+            pepper = colander.SchemaNode(
+                colander.Set(),
+                widget=deform.widget.SelectizeWidget(
+                    values=choices,
+                    tags=True,
+                    multiple=True,
+                    selectize_options={
+                        "createOnBlur": True,
+                        "create": True,
+                    },
+                    attributes={
+                        "placeholder": "Add a tag...",
+                    },
+                ),
+                validator=colander.Length(
+                    min=1, min_err="You must enter at least one tag."
+                ),
+            )
+
+        schema = Schema()
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form)
+
     @view_config(renderer="templates/form.pt", name="checkboxchoice")
     @demonstrate("Checkbox Choice Widget")
     def checkboxchoice(self):
@@ -2341,7 +2486,8 @@ class DeformDemo(object):
         return self.render_form(form)
 
     @view_config(
-        renderer="templates/form.pt", name="multiple_error_messages_mapping"
+        renderer="templates/form.pt",
+        name="multiple_error_messages_mapping",
     )
     @demonstrate("Multiple Error Messages For a Single Widget (Mapping)")
     def multiple_error_messages_mapping(self):
@@ -2685,7 +2831,7 @@ class DeformDemo(object):
     @view_config(
         renderer="templates/form.pt", name="readonly_value_nonvalidation"
     )
-    @demonstrate("Dont Validate Readonly Fields")
+    @demonstrate("Don't Validate Readonly Fields")
     def readonly_value_nonvalidation(self):
         @colander.deferred
         def deferred_missing(node, kw):
@@ -2699,15 +2845,18 @@ class DeformDemo(object):
             )
             readwrite = colander.SchemaNode(colander.String())
 
-        appstruct = {"readonly": "Read Only", "readwrite": "Read and Write"}
+        appstruct = {
+            "readonly": "Read Only",
+            "readwrite": "Read and Write",
+        }
         schema = Values().bind()
         form = deform.Form(schema, buttons=("submit",))
 
         return self.render_form(form, appstruct=appstruct)
 
-    @view_config(renderer="templates/form.pt", name="readonly_fields")
-    @demonstrate("Read-Only Fields")
-    def readonly_fields(self):
+    @view_config(renderer="templates/form.pt", name="readonly_argument")
+    @demonstrate("Readonly Widget Argument")
+    def readonly_argument(self):
         import datetime
 
         class Schema(colander.Schema):
@@ -2769,6 +2918,107 @@ class DeformDemo(object):
             "richtext": "<p>Yo!</p>",
             "money": decimal.Decimal(1),
             "date": datetime.date(2010, 5, 5),
+        }
+
+        schema = Schema()
+
+        form = deform.Form(schema, buttons=("submit",))
+
+        return self.render_form(form, appstruct=appstruct)
+
+    @view_config(renderer="templates/form.pt", name="readonly_html")
+    @demonstrate("Readonly HTML Attribute")
+    def readonly_html(self):
+        """
+        This form shows the widgets that support the HTML attribute
+        ``readonly``.
+        """
+        values = [
+            ("a", "The letter a"),
+            ("b", "The letter b"),
+            ("c", "The letter c"),
+        ]
+
+        class Schema(colander.Schema):
+            checkbox = colander.SchemaNode(
+                colander.Set(),
+                widget=deform.widget.CheckboxChoiceWidget(
+                    values=values,
+                    attributes={"onclick": "return false;"},
+                ),
+                description="Readonly checkbox choices",
+            )
+            money = colander.SchemaNode(
+                colander.Decimal(),
+                widget=deform.widget.MoneyInputWidget(
+                    attributes={"readonly": "readonly"}
+                ),
+                description="Readonly money",
+            )
+            radio = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.RadioChoiceWidget(
+                    values=values,
+                    attributes={"readonly": "readonly"},
+                ),
+                description="Readonly radio choices",
+            )
+            select_single = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectWidget(
+                    values=values,
+                    attributes={"readonly": "readonly"},
+                ),
+                description="Readonly select single",
+            )
+            selectize_multi = colander.SchemaNode(
+                colander.Set(),
+                widget=deform.widget.SelectizeWidget(
+                    values=values,
+                    multiple=True,
+                    attributes={"readonly": "readonly"},
+                    selectize_options={
+                        "persist": False,
+                        "plugins": ["remove_button"],
+                    },
+                ),
+                description="Readonly selectize multiple",
+            )
+            selectize_single = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.SelectizeWidget(
+                    values=values,
+                    attributes={"readonly": "readonly"},
+                    selectize_options={
+                        "persist": False,
+                    },
+                ),
+                description="Readonly selectize single",
+            )
+            textarea = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.TextAreaWidget(
+                    attributes={"readonly": "readonly"}
+                ),
+                description="Readonly textarea",
+            )
+            textinput = colander.SchemaNode(
+                colander.String(),
+                widget=deform.widget.TextInputWidget(
+                    attributes={"readonly": "readonly"}
+                ),
+                description="Readonly text input",
+            )
+
+        appstruct = {
+            "checkbox": "b",
+            "money": decimal.Decimal(1),
+            "radio": "b",
+            "select_single": "b",
+            "selectize_single": "b",
+            "selectize_multi": ("a", "b"),
+            "textarea": "readonly text area",
+            "textinput": "readonly text input",
         }
 
         schema = Schema()
@@ -2893,7 +3143,10 @@ def main(global_config, **settings):
 
     # Configure renderer
     configure_zpt_renderer(
-        ("deformdemo:custom_widgets", "unofficial-deformdemo:custom_widgets"),
+        (
+            "deformdemo:custom_widgets",
+            "unofficial-deformdemo:custom_widgets",
+        ),
         translator,
     )
     config.add_static_view("static_deform", "deform:static")
