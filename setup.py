@@ -30,7 +30,7 @@ PY3 = sys.version_info[0] == 3
 PY37MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 7
 
 requires = [
-    "deform>=2.0.14",
+    "deform",
     "pyramid>=1.5a1",  # route_name argument to resource_url
     "pyramid_chameleon",
     "pygments",
