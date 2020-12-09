@@ -2734,7 +2734,8 @@ class SelectizeWidgetTests(Base, unittest.TestCase):
         # Selectize replaces the select with an input, then makes the options
         # not visible.  Thus Selenium cannot find them.  To make them visible,
         # we must click the input, then grab them.
-        sel_input = findcss("div.selectize-control")
+        time.sleep(1.0)
+        sel_input = browser.find_element(By.ID, "deformField1-selectized")
         sel_input.click()
         options = browser.find_elements(By.CSS_SELECTOR, "div.option")
         self.assertEqual(
