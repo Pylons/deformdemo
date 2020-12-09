@@ -2734,8 +2734,7 @@ class SelectizeWidgetTests(Base, unittest.TestCase):
         # Selectize replaces the select with an input, then makes the options
         # not visible.  Thus Selenium cannot find them.  To make them visible,
         # we must click the input, then grab them.
-        sel_input = browser.find_element(By.CSS_SELECTOR,
-                                         "div.selectize-control")
+        sel_input = findcss("div.selectize-control")
         sel_input.click()
         options = browser.find_elements(By.CSS_SELECTOR, "div.option")
         self.assertEqual(
