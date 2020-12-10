@@ -1,4 +1,4 @@
-deform==2.0.14
+deform==2.0.15
 pyramid==1.10.5
 waitress==1.4.4
 .
