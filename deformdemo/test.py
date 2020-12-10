@@ -23,6 +23,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
+
 browser = None
 
 #: Where we write stuff when Selenium doesn't work
@@ -2673,8 +2674,8 @@ class Select2TagsWidgetTests(Base, unittest.TestCase):
         # type a value in select2 search
         (
             findid("public")
-                .find_element(By.CSS_SELECTOR, ".select2-search__field")
-                .send_keys("hello\n")
+            .find_element(By.CSS_SELECTOR, ".select2-search__field")
+            .send_keys("hello\n")
         )
 
         # after form submission typed value appear in captured
@@ -2706,8 +2707,8 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
             # type values in selec2 search
             (
                 findid("public")
-                    .find_element(By.CSS_SELECTOR, ".select2-search__field")
-                    .send_keys(value + "\n")
+                .find_element(By.CSS_SELECTOR, ".select2-search__field")
+                .send_keys(value + "\n")
             )
 
         # after form submission typed value appear in captured
@@ -2890,8 +2891,8 @@ class SelectizeWidgetTagsMultipleTests(Base, unittest.TestCase):
         assert element.get_attribute("name") == "pepper"
         assert len(select_object.options) == 0
         assert (
-                findid("error-deformField1").text == "You must enter at "
-                                                     "least one tag."
+            findid("error-deformField1").text == "You must enter at "
+            "least one tag."
         )
         assert findid("captured").text == "None"
 
