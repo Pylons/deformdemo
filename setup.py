@@ -30,7 +30,7 @@ PY37MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 7
 
 requires = [
     "Babel",
-    "deform >= 3.0.0.dev0",  # .dev0 allows pre-releases.
+    "deform >= 2.0.15.dev0",  # .dev0 allows pre-releases.
     "pyramid >= 1.5a1",  # route_name argument to resource_url
     "pyramid_chameleon",
     "pygments",
