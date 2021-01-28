@@ -1,6 +1,8 @@
 3.0.0 (unreleased)
 ------------------
 
+- Rename master branch to main.
+
 - Support Python 3.6, 3.7, 3.8, 3.9, and PyPy3.
 
 - Update to Bootstrap 4 and its dependencies. [sydoluciani]

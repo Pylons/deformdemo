@@ -1,8 +1,8 @@
 Deform Demo
 ===========
 
-.. image:: https://github.com/Pylons/deformdemo/workflows/Build%20and%20test/badge.svg?branch=master
-    :target: https://github.com/Pylons/deformdemo/actions?query=workflow%3A%22Build+and+test%22+branch%3Amaster
+.. image:: https://github.com/Pylons/deformdemo/workflows/Build%20and%20test/badge.svg?branch=main
+    :target: https://github.com/Pylons/deformdemo/actions?query=workflow%3A%22Build+and+test%22+branch%3Amain
 
 Demonstration application for the `Deform <https://docs.pylonsproject.org/projects/deform/en/latest>`_ Python HTML form library.
 
