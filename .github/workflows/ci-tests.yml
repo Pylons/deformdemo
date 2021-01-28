@@ -46,7 +46,7 @@ jobs:
     # `localhost` did not work
     - name: Set URL environment variable
       run: |
-        echo "URL=http://`hostname -i`:8522" >> $GITHUB_ENV
+        echo "URL=http://`hostname -i`:8523" >> $GITHUB_ENV
         echo "URL: "$URL
     - name: Run tox
       run: |

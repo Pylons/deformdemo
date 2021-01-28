@@ -12,7 +12,7 @@ This application is tested on Python versions 3.6, 3.7, 3.8, and 3.9, and PyPy3.
 Online version
 --------------
 
-Visit https://deformdemo.pylonsproject.org
+Visit https://deformdemo3.pylonsproject.org
 
 
 Docker version
@@ -22,14 +22,14 @@ Build the Docker image for deformdemo and tag it.
 
 .. code-block:: bash
 
-    # docker build --tag pylons/deformdemo:<version> .
-    docker build --tag pylons/deformdemo:master .
+    # docker build --tag pylons/deformdemo3:<version> .
+    docker build --tag pylons/deformdemo3:main .
 
 Run the built image with Docker.
 
 .. code-block:: bash
 
-    docker run -d -p 8000:8522 pylons/deformdemo:master
+    docker run -d -p 8000:8523 pylons/deformdemo3:main
 
 Then in your browser, visit http://localhost:8000
 
@@ -76,7 +76,7 @@ From source
 
         $VENV/bin/pserve demo.ini
 
--   Visit http://localhost:8522 in a browser to see the demo.
+-   Visit http://localhost:8523 in a browser to see the demo.
 
 
 Install functional test requirements
