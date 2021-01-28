@@ -34,7 +34,7 @@ BROKEN_SELENIUM_LOG_FILE = "/tmp/selenium.log"
 DATE_PICKER_DELAY = 1.0
 
 BASE_PATH = os.environ.get("BASE_PATH", "")
-URL = os.environ.get("URL", "http://localhost:8522")
+URL = os.environ.get("URL", "http://localhost:8523")
 PY3 = sys.version_info[0] == 3
 
 #: Wait 2.0 seconds for some Selenium events to happen before giving up
