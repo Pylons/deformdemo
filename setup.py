@@ -30,7 +30,7 @@ PY3 = sys.version_info[0] == 3
 PY37MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 7
 
 requires = [
-    "deform>=2.0.0dev,<3.0.0",
+    "deform>=2.0.15dev,<3.0.0",
     "pyramid>=1.5a1",  # route_name argument to resource_url
     "pyramid_chameleon",
     "pygments",
@@ -55,7 +55,7 @@ if not PY3:
 
 # Selenium 4.0 does not work on Python 3.6.
 if PY37MIN:
-    testing_extras.extend(["selenium >= 4.0a"])
+    testing_extras.extend(["selenium >= 4.0a, < 4.0.0.b1"])
 else:
     testing_extras.extend(["selenium >= 3.0, < 4.0"])
 

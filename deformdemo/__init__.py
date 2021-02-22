@@ -542,9 +542,9 @@ class DeformDemo(object):
 
         Source code:
 
-        https://github.com/Pylons/deformdemo/blob/master/deformdemo/templates/popup_example.pt
+        https://github.com/Pylons/deformdemo/blob/main/deformdemo/templates/popup_example.pt
 
-        https://github.com/Pylons/deformdemo/blob/master/deformdemo/custom_widgets/modal.pt
+        https://github.com/Pylons/deformdemo/blob/main/deformdemo/custom_widgets/modal.pt
         """
 
         class Schema(colander.Schema):
