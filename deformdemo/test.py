@@ -343,8 +343,8 @@ def setUpModule():
 
     else:
         """
-        When WEBDRIVER is not set runs tests against
-        Selenium container stand alone Firefox in Github Workflows.
+        When WEBDRIVER is not set, run tests against
+        Selenium container and stand alone Firefox in Github Workflows.
         https://github.com/Pylons/deform/blob/main/contributing.md
         """
 

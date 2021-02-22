@@ -15,22 +15,95 @@
 
 .. _2.0.15:
 
-2.0.15 (unreleased)
+2.0.15 (2020-12-10)
 -------------------
+
+- Add support of Python 3.9.
+
+- Added a new widget ``SelectizeWidget`` based on the jQuery plugin
+  `selectize.js <https://github.com/selectize/selectize.js>`_. [stevepiercy]
+  https://github.com/Pylons/deform/issues/260
+
+- Improved handling of the ``readonly`` HTML attribute in certain widgets. The
+  ``readonly`` HTML form control attribute makes the element not mutable,
+  meaning the user cannot edit the control. When ``"readonly": "readonly"`` is
+  one of the items in a dict passed into the ``attributes`` option when
+  creating a widget, the rendered widget both prevents the user from changing
+  the value, and if the form does not pass validation after submitted then the
+  field value will be displayed.
+
+  ``readonly`` is supported by most form controls, but not all. Deform adds
+  some logic to add read-only support for a few of those form controls, as
+  described below.
+
+  ``CheckboxWidget`` and ``CheckboxChoiceWidget``
+    Due to the nature of how checkbox values are processed, the ``readonly``
+    attribute has no effect.
+    To achieve a read-only behavior, pass in ``attributes={"onclick": "return
+    false;"}``.
+    This will render as an inline JavaScript ``onclick="return false;"`` for
+    each checkbox item.
+
+  ``MoneyInputWidget``
+    The provided value will be displayed in the input and be not editable.
+
+  ``RadioChoiceWidget``
+    For the selected value it will render an attribute in the HTML as
+    ``readonly="readonly"``, and for all other values as
+    ``disabled="disabled"``.
+
+  ``SelectWidget``
+    For selection of single options only, the selected value will render an
+    attribute in the HTML as ``readonly="readonly"``, and for all other values
+    as ``disabled="disabled"``.
+    Multiple selections, set by the ``multiple=True`` option, do not support
+    the ``readonly`` attribute on the ``<select>`` element.
+    For multiple selections, use the ``SelectizeWidget``.
+
+  ``SelectizeWidget``
+    For both single and multiple selections, the selected value or values will
+    be rendered as selected, and the others will not be selectable.
+    Selectize uses JavaScript to "lock" the form control.
+
+  ``TextAreaWidget``
+    The provided value will be displayed in the input and be not editable.
+
+  ``TextInputWidget``
+    The provided value will be displayed in the input and be not editable.
+
+  [stevepiercy]
+  https://github.com/Pylons/deform/issues/260
+
+- Optionally bypass the resource registry and specify a resource as a dict
+  where its keys are the type of asset (``"js"`` or ``"css"``) and its values
+  are either a string or a list of strings of paths to assets on disk.
+  [tdamsma]
+  https://github.com/Pylons/deform/issues/485
+
+- Conditionally load ``jquery.maskedinput`` if and only if ``mask`` option is
+  provided. [tisdall, stevepiercy]
+  https://github.com/Pylons/deform/pull/487
+
+- Changed dateparts widget to use ``type="number"`` instead of default `text`.
+  https://github.com/Pylons/deform/issues/442
+
+- Switch from using nosetests to pytest as the test runner, as nosetests is no
+  longer maintained. [stevepiercy]
+  https://github.com/Pylons/deform/pull/497
+  https://github.com/Pylons/deform/pull/498
+
+- Add demo and tests for arbitrary HTML5 attributes in widgets.
+  https://github.com/Pylons/deform/issues/430
 
 - Added unofficial deformdemo. This provides a space for contributors to add
   their widgets without requiring tests, especially when the functional tests
   cannot pass using Selenium. [sydoluciani]
   https://github.com/Pylons/deformdemo/pull/92
 
-- Changed dateparts widget to use ``type="number"`` instead of default `text`.
-  https://github.com/Pylons/deform/issues/442
+- Switch from Travis-CI to GitHub Actions for running tests and builds.
 
 - Add Docker containerization of Deform and deformdemo as an option for running
   tests, and improve related documentation.
-
-- Add demo and tests for arbitrary HTML5 attributes in widgets.
-  https://github.com/Pylons/deform/issues/430
 
 
 .. _2.0.14:
