@@ -9,6 +9,9 @@
 
 - Use master branch of Deform and Colander on GitHub. [sydoluciani]
 
+- Remove spurious styles definition
+  https://github.com/Pylons/deform/pull/504 [lelit]
+
 
 .. _2.0.15:
 
