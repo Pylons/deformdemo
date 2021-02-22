@@ -21,7 +21,7 @@ jobs:
           - "3.9"
           - "pypy3"
         os:
-          - "ubuntu-latest"
+          - "ubuntu-18.04"
         architecture:
           - x64
     name: "Python: ${{ matrix.py }}-${{ matrix.architecture }} on ${{ matrix.os }}"
@@ -52,7 +52,7 @@ jobs:
       run: |
         tox -e py --
   lint:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     name: Lint the package
     steps:
     - uses: actions/checkout@v2
