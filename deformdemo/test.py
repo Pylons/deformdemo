@@ -2758,7 +2758,7 @@ class SelectizeWidgetTests(Base, unittest.TestCase):
     def test_submit_selected(self):
         sel_input = browser.find_element(By.ID, "deformField1-selectized")
         sel_input.click()
-        options = browser.find_elements_by_css_selector("div.option")
+        options = browser.find_elements(By.CSS_SELECTOR, "div.option")
         options[1].click()
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
