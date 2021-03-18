@@ -1,3 +1,2 @@
 -e git+https://github.com/Pylons/deform.git@main#egg=deform
 -e ".[testing]"
-git+https://github.com/stevepiercy/selenium.git@fix-9201-file-upload#egg=selenium

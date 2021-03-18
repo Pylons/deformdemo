@@ -1463,6 +1463,8 @@ class FileUploadTests(Base, unittest.TestCase):
     def test_submit_filled(self):
         # submit one first
         path, filename = _getFile()
+        # Test to show value of `path` via deliberate failure.
+        self.assertEqual("", path)
         findcss("input[type=file]").send_keys(path)
         self.assertEqual(
             findcss(".upload-filename").get_attribute("value"), filename
