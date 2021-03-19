@@ -1460,11 +1460,14 @@ class FileUploadTests(Base, unittest.TestCase):
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertEqual(findid("captured").text, "None")
 
-    def test_submit_filled(self):
-        # submit one first
+    def test_getfile(self):
         path, filename = _getFile()
         # Test to show value of `path` via deliberate failure.
         self.assertEqual("", path)
+
+    def test_submit_filled(self):
+        # submit one first
+        path, filename = _getFile()
         findcss("input[type=file]").send_keys(path)
         self.assertEqual(
             findcss(".upload-filename").get_attribute("value"), filename
