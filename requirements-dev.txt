@@ -1,2 +1,3 @@
 -e git+https://github.com/Pylons/deform.git@main#egg=deform
 -e ".[testing]"
+-e git+https://github.com/SeleniumHQ/selenium.git@trunk#egg=selenium
