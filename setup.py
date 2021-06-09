@@ -52,7 +52,7 @@ testing_extras = ["flaky", "pytest"]
 
 # Selenium 4.0 does not work on Python 3.6.
 if PY37MIN:
-    testing_extras.extend(["selenium >= 4.0a, < 4.0.0.b1"])
+    testing_extras.extend(["selenium >= 4.0.0.b4"])
 else:
     testing_extras.extend(["selenium >= 3.0, < 4.0"])
 
