@@ -2550,35 +2550,27 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="multiple_forms")
     @demonstrate("Multiple Forms on the Same Page")
     def multiple_forms(self):
-        import itertools
-
         # We need to make sure the form field identifiers for the two
         # forms do not overlap so accessibility features continue to work,
         # such as focusing the field related to a legend when the
         # legend is clicked on.
-        # We do so by creating an ``itertools.count`` object and
-        # passing that object as the ``counter`` keyword argument to
-        # the constructor of both forms.  As a result, the second
-        # form's element identifiers will not overlap the first
-        # form's.
-
-        counter = itertools.count()
+        # We do so by passing distinct ``formid`` keyword argument to the
+        # constructor of both forms.  As a result, form's element identifiers
+        # will inherit parent's ``formid`` and will not overlap.
+        # (Note: alternatively, we could create an ``itertools.count`` object
+        # and pass that object as the ``counter`` keyword argument.)
 
         class Schema1(colander.Schema):
             name1 = colander.SchemaNode(colander.String())
 
         schema1 = Schema1()
-        form1 = deform.Form(
-            schema1, buttons=("submit",), formid="form1", counter=counter
-        )
+        form1 = deform.Form(schema1, buttons=("submit",), formid="form1")
 
         class Schema2(colander.Schema):
             name2 = colander.SchemaNode(colander.String())
 
         schema2 = Schema2()
-        form2 = deform.Form(
-            schema2, buttons=("submit",), formid="form2", counter=counter
-        )
+        form2 = deform.Form(schema2, buttons=("submit",), formid="form2")
 
         html = []
         captured = None
