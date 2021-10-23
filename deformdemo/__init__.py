@@ -2554,9 +2554,9 @@ class DeformDemo(object):
         # forms do not overlap so accessibility features continue to work,
         # such as focusing the field related to a legend when the
         # legend is clicked on.
-        # We do so by passing distinct ``formid`` keyword argument to the
-        # constructor of both forms.  As a result, form's element identifiers
-        # will inherit parent's ``formid`` and will not overlap.
+        # We do so by passing distinct ``formid`` keyword arguments to the
+        # constructor of both forms.  As a result, the form's element identifiers
+        # will inherit the parent's ``formid`` and will not conflict.
         # (Note: alternatively, we could create an ``itertools.count`` object
         # and pass that object as the ``counter`` keyword argument.)
 
