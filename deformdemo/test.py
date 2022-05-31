@@ -3498,22 +3498,22 @@ class MultipleFormsTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertEqual(
-            findid_view("deformField1").get_attribute("name"), "name1"
+            findid_view("form1Field1").get_attribute("name"), "name1"
         )
         self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), ""
+            findid_view("form1Field1").get_attribute("value"), ""
         )
-        self.assertEqual(findid("deformField3").get_attribute("name"), "name2")
-        self.assertEqual(findid("deformField3").get_attribute("value"), "")
+        self.assertEqual(findid("form2Field1").get_attribute("name"), "name2")
+        self.assertEqual(findid("form2Field1").get_attribute("value"), "")
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
     def test_submit_first(self):
-        findid("deformField1").send_keys("hey")
+        findid("form1Field1").send_keys("hey")
         findid("form1submit").click()
         self.assertEqual(eval(findid("captured").text), {"name1": "hey"})
 
     def test_submit_second(self):
-        findid("deformField3").send_keys("hey")
+        findid("form2Field2").send_keys("hey")
         findid("form2submit").click()
         self.assertEqual(eval(findid("captured").text), {"name2": "hey"})
 
