@@ -25,7 +25,7 @@
 
   <div metal:fill-slot="main">
 
-    <div class="card bg-primary">
+    <div class="card border-primary">
       <div class="card-header">
         <h3 class="card-title">Demo: ${title}</h3>
       </div>
@@ -41,7 +41,7 @@
 
     </div>
 
-    <div class="card bg-info">
+    <div class="card border-info">
       <div class="card-header">
         <h3 class="card-title">Captured submission</h3>
       </div>
