@@ -25,9 +25,9 @@
 
   <div metal:fill-slot="main">
 
-    <div class="panel panel-primary">
-      <div class="panel-heading">
-        <h3 class="panel-title">Demo: ${title}</h3>
+    <div class="card border-primary">
+      <div class="card-header">
+        <h3 class="card-title">Demo: ${title}</h3>
       </div>
 
       <div id="opener">
@@ -41,22 +41,22 @@
 
     </div>
 
-    <div class="panel panel-info">
-      <div class="panel-heading">
-        <h3 class="panel-title">Captured submission</h3>
+    <div class="card border-info">
+      <div class="card-header">
+        <h3 class="card-title">Captured submission</h3>
       </div>
-      <div class="panel-body">
+      <div class="card-body">
         <pre style="border: none; background-color: #FFF" class="highlight" id="captured" tal:content="structure captured"/>
       </div>
     </div>
 
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Code <a href="${request.resource_url(request.root, 'allcode', query={'start':start, 'end':end}, anchor='line-%s' % start)}"><small>
+    <div class="card">
+      <div class="card-header">
+        <h3 class="card-title">Code <a href="${request.resource_url(request.root, 'allcode', query={'start':start, 'end':end}, anchor='line-%s' % start)}"><small>
         (click to show in context)</small></a>
         </h3>
       </div>
-      <div class="panel-body highlight">
+      <div class="card-body highlight">
         <pre style="border: none; background-color: #FFF" tal:content="structure code"/>
       </div>
     </div>

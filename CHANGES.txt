@@ -12,6 +12,8 @@
 - Remove spurious styles definition
   https://github.com/Pylons/deform/pull/504 [lelit]
 
+- Fix sequence item and replace panels (Bootstrap 3) by cards (Bootstrap 4)
+  https://github.com/Pylons/deform/pull/518 [krysros]
 
 .. _2.0.15:
 

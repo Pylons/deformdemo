@@ -112,3 +112,4 @@ Contributors
 - Steve Piercy 2020/05/11
 - John Haiducek 2020/06/20
 - Maksym Shalenyi 2020/06/20
+- Krystian Rosiński 2022/06/12
