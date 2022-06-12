@@ -14,29 +14,22 @@
 
 
     <div class="card border-primary">
-      <div class="card-header">
-        <h3 class="card-title">Demo: ${title}</h3>
-      </div>
+      <div class="card-header">Demo: ${title}</div>
       <div class="card-body">
         <div id="form" tal:content="structure form"/>
       </div>
     </div>
 
     <div class="card border-info">
-      <div class="card-header">
-        <h3 class="card-title">Captured submission</h3>
-      </div>
+      <div class="card-header">Captured submission</div>
       <div class="card-body">
         <pre style="border: none; background-color: #FFF" class="highlight" id="captured" tal:content="structure captured"/>
       </div>
     </div>
 
     <div class="card">
-      <div class="card-header">
-        <h3 class="card-title">Code <a href="${request.resource_url(request.root, 'allcode', query={'start':start, 'end':end}, anchor='line-%s' % start)}"><small>
-        (click to show in context)</small></a>
-        </h3>
-      </div>
+      <div class="card-header">Code <a href="${request.resource_url(request.root, 'allcode', query={'start':start, 'end':end}, anchor='line-%s' % start)}"><small>
+        (click to show in context)</small></a></div>
       <div class="card-body highlight">
         <pre style="border: none; background-color: #FFF" tal:content="structure code"/>
       </div>
