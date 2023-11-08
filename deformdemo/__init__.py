@@ -39,7 +39,9 @@ except ImportError:
     from io import StringIO
 
 PY3 = sys.version_info[0] == 3
-PY38MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 8
+PY38MIN = (sys.version_info[0] == 3 and sys.version_info[1] >= 8 and
+           sys.version_info[1] <= 9)
+PY310MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 10
 
 if PY3:
 
@@ -126,7 +128,8 @@ class DeformDemo(object):
         reqts = form.get_widget_resources()
 
         printer = pprint.PrettyPrinter()
-        printer.format = my_safe_repr
+        if not PY310MIN:
+            printer.format = my_safe_repr
         output = printer.pformat(captured)
         captured = highlight(output, PythonLexer(), formatter)
 

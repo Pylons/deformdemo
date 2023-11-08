@@ -31,7 +31,7 @@
       </div>
 
       <div id="opener">
-        <button type="button" id="btn-show-pop-up" class="btn btn-primary btn-lg btn-block" data-toggle="modal" data-target="#my-pop-up">
+        <button type="button" id="btn-show-pop-up" class="btn btn-primary btn-lg btn-block" data-bs-toggle="modal" data-bs-target="#my-pop-up">
           Open pop up form
         </button>
         </div>
