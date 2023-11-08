@@ -26,8 +26,6 @@ README = readfile("README.rst")
 CHANGES = readfile("CHANGES.txt")
 VERSION = '3.0.0.dev0'
 
-PY37MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 7
-
 requires = [
     "Babel",
     "deform >= 2.0.15.dev0",  # .dev0 allows pre-releases.
@@ -50,11 +48,7 @@ lint_extras = [
 
 testing_extras = ["flaky", "pytest"]
 
-# Selenium 4.0 does not work on Python 3.6.
-if PY37MIN:
-    testing_extras.extend(["selenium >= 4.0.0.b4"])
-else:
-    testing_extras.extend(["selenium >= 3.0, < 4.0"])
+testing_extras.extend(["selenium >= 4.0.0.b4, < 4.9.0"])
 
 setup(
     name="deformdemo",
