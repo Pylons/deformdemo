@@ -2555,19 +2555,12 @@ class Select2WidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_selected(self):
-        action_chains_xpath_on_select(
-            "//select[@name='pepper']/option"
-        ).click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
-
         findid("deformsubmit").click()
-        self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
-        self.assertTrue(
-            findid("captured").text in self.first_selected_captured
-        )
+        self.assertTrue(findcss(".is-invalid").is_displayed())
 
-        action_chains_xpath_on_select(
-            "//select[@name='pepper']/option[@selected='selected']"
-        ).click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+        findcss("[data-select2-id='1']").click()
+        findcss(".select2-search__field").send_keys("haba")
+        findcss(".select2-results li[aria-selected='false']").click()
         findid("deformsubmit").click()
         self.assertTrue(
             findid("captured").text in self.second_selected_captured
