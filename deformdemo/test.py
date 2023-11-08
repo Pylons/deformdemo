@@ -2559,7 +2559,7 @@ class Select2WidgetTests(Base, unittest.TestCase):
         self.assertTrue(findcss(".is-invalid").is_displayed())
 
         findcss("[data-select2-id='1']").click()
-        findcss(".select2-search__field").send_keys("haba")
+        findcss(".select2-search__field").send_keys("jala")
         findcss(".select2-results li[aria-selected='false']").click()
         findid("deformsubmit").click()
         self.assertTrue(
