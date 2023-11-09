@@ -7,7 +7,7 @@ from pyramid.paster import bootstrap
 
 import StringIO
 import httplib
-from six.moves import input
+from six.moves import input  # noqa: A004
 import urlparse
 
 # Deform Demo
