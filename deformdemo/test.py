@@ -2639,26 +2639,25 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
         self.assertEqual(len(findxpaths("//optgroup")), 2)
 
     def test_submit_selected(self):
-        action_chains_xpath_on_select(
-            "//select[@name='musician']/option"
-        ).click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+        findcss("[data-select2-id='1']").click()
+        search_field = findcss(".select2-search__field")
+        search_field.send_keys(Keys.ARROW_DOWN)
+        search_field.send_keys(Keys.ENTER)
 
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         captured = findid("captured").text
-        self.assertSimilarRepr(captured, self.first_selected_captured)
+        self.assertEqual(captured, self.first_selected_captured)
 
         time.sleep(1)
 
-        action_chains_xpath_on_select(
-            "//option[contains(text(), 'Page')]"
-        ).click().send_keys(Keys.ARROW_DOWN).send_keys(
-            Keys.ARROW_DOWN
-        ).send_keys(
-            Keys.ARROW_DOWN
-        ).send_keys(
-            Keys.ENTER
-        ).perform()
+        findcss("[data-select2-id='1']").click()
+        search_field = findcss(".select2-search__field")
+        search_field.send_keys(Keys.ARROW_DOWN)
+        search_field.send_keys(Keys.ARROW_DOWN)
+        search_field.send_keys(Keys.ARROW_DOWN)
+        search_field.send_keys(Keys.ENTER)
+
         findid("deformsubmit").click()
         self.assertTrue(
             findid("captured").text in self.second_selected_captured
@@ -2669,25 +2668,22 @@ class Select2TagsWidgetTests(Base, unittest.TestCase):
     url = test_url("/select2_with_tags/")
 
     def test_submit_new_option(self):
-        # open select search field
         findcss(".select2-container").click()
 
         # options list is empty
-        self.assertSimilarRepr(
+        self.assertEqual(
             findid("select2-deformField1-results").text, "No results found"
         )
 
         # type a value in select2 search
-        (
-            findid("public")
-            .find_element(By.CSS_SELECTOR, ".select2-search__field")
-            .send_keys("hello\n")
-        )
+        search_field = findcss(".select2-search__field")
+        search_field.send_keys("hello\n")
+        search_field.send_keys(Keys.ENTER)
 
         # after form submission typed value appear in captured
         findid("deformsubmit").click()
         captured = findid("captured").text
-        self.assertSimilarRepr(
+        self.assertEqual(
             captured,
             "{'pepper': 'hello'}",
         )
@@ -2702,8 +2698,9 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
 
         # options list is empty
         findid("item-deformField1").click()
-        self.assertSimilarRepr(
-            findid("select2-deformField1-results").text, "No results found"
+        self.assertEqual(
+            findid("select2-deformField1-results").text,
+            "No results found",
         )
 
         # adding values to select field
@@ -2711,11 +2708,10 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
             # open select search field
             findid("item-deformField1").click()
             # type values in selec2 search
-            (
-                findid("public")
-                .find_element(By.CSS_SELECTOR, ".select2-search__field")
-                .send_keys(value + "\n")
-            )
+
+            search_field = findcss(".select2-search__field")
+            search_field.send_keys(value + "\n")
+            search_field.send_keys(Keys.ENTER)
 
         # after form submission typed value appear in captured
         findid("deformsubmit").click()
@@ -2723,7 +2719,7 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
         expected = "{'pepper': {'hello', 'qwerty'}}"
         if PY3:
             captured = sort_set_values(captured)
-        self.assertSimilarRepr(captured, expected)
+        self.assertEqual(captured, expected)
 
 
 class SelectizeWidgetTests(Base, unittest.TestCase):
