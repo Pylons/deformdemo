@@ -13,31 +13,31 @@
     </div>
 
 
-    <div class="panel panel-primary">
-      <div class="panel-heading">
-        <h3 class="panel-title">Demo: ${title}</h3>
+    <div class="card mb-3 border-primary">
+      <div class="card-header bg-primary">
+        <h3 class="card-title">Demo: ${title}</h3>
       </div>
-      <div class="panel-body">
+      <div class="card-body">
         <div id="form" tal:content="structure form"/>
       </div>
     </div>
 
-    <div class="panel panel-info">
-      <div class="panel-heading">
-        <h3 class="panel-title">Captured submission</h3>
+    <div class="card mb-3 border-info">
+      <div class="card-header bg-info">
+        <h3 class="card-title">Captured submission</h3>
       </div>
-      <div class="panel-body">
+      <div class="card-body">
         <pre style="border: none; background-color: #FFF" class="highlight" id="captured" tal:content="structure captured"/>
       </div>
     </div>
 
-    <div class="panel panel-default">
-      <div class="panel-heading">
-        <h3 class="panel-title">Code <a href="${request.resource_url(request.root, 'allcode', query={'start':start, 'end':end}, anchor='line-%s' % start)}"><small>
+    <div class="card mb-3">
+      <div class="card-header">
+        <h3 class="card-title">Code <a href="${request.resource_url(request.root, 'unofficial-deformdemo', 'allcode', query={'start':start, 'end':end}, anchor='line-%s' % start)}"><small>
         (click to show in context)</small></a>
         </h3>
       </div>
-      <div class="panel-body highlight">
+      <div class="card-body highlight">
         <pre style="border: none; background-color: #FFF" tal:content="structure code"/>
       </div>
     </div>
