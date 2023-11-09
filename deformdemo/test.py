@@ -204,6 +204,9 @@ def wait_to_click(selector):
                     # SO FUN!
                     time.sleep(0.2)
                     continue
+            if isinstance(e, ElementNotInteractableException):
+                time.sleep(0.2)
+                continue
             raise
 
 
@@ -3597,8 +3600,12 @@ class AjaxFormTests(Base, unittest.TestCase):
         findid("deformField4").send_keys("2010")
         findid("deformField4-month").send_keys("1")
         findid("deformField4-day").send_keys("1")
-        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
-        findid("tinymce").send_keys("yo")
+        # enter iframe
+        browser.switch_to.frame("deformField5_ifr")
+        tinymce = findid("tinymce")
+        tinymce.click()
+        tinymce.send_keys("yo")
+        # leave iframe
         browser.switch_to.default_content()
         source = browser.page_source
         wait_to_click("#deformsubmit")
@@ -3788,7 +3795,8 @@ class ReadOnlyHTMLAttributeTests(Base, unittest.TestCase):
         self.assertTrue(options[1].get_attribute("readonly"), "readonly")
         self.assertTrue(options[2].get_attribute("disabled"), "disabled")
 
-        select_object.select_by_index(0)
+        # XXX: You may not select a disabled option
+        self.assertRaises(NotImplementedError, select_object.select_by_index, 0)
         self.assertTrue(options[1].is_selected())
 
     def test_render_selectize_multi_default(self):
