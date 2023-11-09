@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
-
 import ast
 import datetime
 from decimal import Decimal
@@ -60,7 +58,6 @@ def give_selenium_some_time(func):
     """
 
     def inner(*args, **kwargs):
-
         deadline = time.time() + SELENIUM_IMPLICIT_WAIT
         sleep = 0.03
 
@@ -193,7 +190,6 @@ def wait_to_click(selector):
                 # Haha what a gotcha!
                 time.sleep(0.2)
         except Exception as e:
-
             if isinstance(e, StaleElementReferenceException):
                 # Look all these exceptions we can get!
                 time.sleep(0.2)
@@ -261,14 +257,12 @@ def setUpModule():
     driver_name = os.environ.get("WEBDRIVER")
 
     if driver_name == "selenium_local_chrome":
-
         from selenium.webdriver import Chrome
 
         browser = Chrome()
         return browser
 
     elif driver_name == "selenium_container_chrome":
-
         from selenium_containers import start_chrome
 
         from selenium.webdriver import DesiredCapabilities
@@ -289,7 +283,6 @@ def setUpModule():
         return browser
 
     elif driver_name == "selenium_container_opera":
-
         from selenium_containers import start_opera
 
         from selenium.webdriver import DesiredCapabilities
@@ -310,7 +303,6 @@ def setUpModule():
         return browser
 
     elif driver_name == "selenium_container_firefox":
-
         from selenium_containers import start_firefox
 
         from selenium.webdriver import DesiredCapabilities
@@ -331,7 +323,6 @@ def setUpModule():
         return browser
 
     elif driver_name == "selenium_local_firefox":
-
         from selenium import webdriver
 
         try:
@@ -2576,36 +2567,27 @@ class Select2WidgetMultipleTests(Base, unittest.TestCase):
     def test_submit_selected(self):
         findcss("[data-select2-id='1']").click()
         search_field = findcss(".select2-search__field")
-        search_field.send_keys(
-            Keys.ARROW_DOWN
-        )
-        search_field.send_keys(
-            Keys.ARROW_DOWN
-        )
-        search_field.send_keys(
-            Keys.ENTER
-        )
+        search_field.send_keys(Keys.ARROW_DOWN)
+        search_field.send_keys(Keys.ARROW_DOWN)
+        search_field.send_keys(Keys.ENTER)
 
         time.sleep(1)
 
         findcss("[data-select2-id='1']").click()
         search_field = findcss(".select2-search__field")
-        search_field.send_keys(
-            Keys.ARROW_DOWN
-        )
-        search_field.send_keys(
-            Keys.ARROW_UP
-        )
-        search_field.send_keys(
-            Keys.ARROW_UP
-        )
-        search_field.send_keys(
-            Keys.ENTER
-        )
+        search_field.send_keys(Keys.ARROW_DOWN)
+        search_field.send_keys(Keys.ARROW_UP)
+        search_field.send_keys(Keys.ARROW_UP)
+        search_field.send_keys(Keys.ENTER)
 
         captured_default = {"pepper": set(["chipotle", "habanero"])}
 
-        selected = set([x.get_property("title").lower() for x in findcsses(".select2-selection__choice")])
+        selected = set(
+            [
+                x.get_property("title").lower()
+                for x in findcsses(".select2-selection__choice")
+            ]
+        )
         self.assertEqual(selected, captured_default["pepper"])
 
         findid("deformsubmit").click()
@@ -3796,7 +3778,9 @@ class ReadOnlyHTMLAttributeTests(Base, unittest.TestCase):
         self.assertTrue(options[2].get_attribute("disabled"), "disabled")
 
         # XXX: You may not select a disabled option
-        self.assertRaises(NotImplementedError, select_object.select_by_index, 0)
+        self.assertRaises(
+            NotImplementedError, select_object.select_by_index, 0
+        )
         self.assertTrue(options[1].is_selected())
 
     def test_render_selectize_multi_default(self):

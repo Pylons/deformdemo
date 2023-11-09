@@ -11,8 +11,6 @@
 # FITNESS FOR A PARTICULAR PURPOSE
 #
 ##############################################################################
-import sys
-
 from setuptools import find_packages
 from setuptools import setup
 

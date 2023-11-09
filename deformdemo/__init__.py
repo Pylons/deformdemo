@@ -39,8 +39,11 @@ except ImportError:
     from io import StringIO
 
 PY3 = sys.version_info[0] == 3
-PY38MIN = (sys.version_info[0] == 3 and sys.version_info[1] >= 8 and
-           sys.version_info[1] <= 9)
+PY38MIN = (
+    sys.version_info[0] == 3
+    and sys.version_info[1] >= 8
+    and sys.version_info[1] <= 9
+)
 PY310MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 10
 
 if PY3:
@@ -71,7 +74,7 @@ class demonstrate(object):
 # http://stackoverflow.com/a/16888673/315168
 # eliminate u''
 def my_safe_repr(obj, context, maxlevels, level, sort_dicts=True):
-    if type(obj) == unicode:
+    if type(obj) is unicode:
         obj = obj.encode("utf-8")
 
     # Python 3.8 changed the call signature of pprint._safe_repr.
@@ -97,7 +100,6 @@ class DeformDemo(object):
         readonly=False,
         is_i18n=False,
     ):
-
         captured = None
 
         if submitted in self.request.POST:
@@ -262,7 +264,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="textinput_with_css_class")
     @demonstrate("Text Input Widget (with CSS class)")
     def textinput_with_css_class(self):
-
         css_widget = deform.widget.TextInputWidget(
             css_class="deform-widget-with-style"
         )
@@ -297,7 +298,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="money_input")
     @demonstrate("Money Input")
     def money_input(self):
-
         widget = deform.widget.MoneyInputWidget(options={"allowZero": True})
 
         class Schema(colander.Schema):
@@ -338,7 +338,6 @@ class DeformDemo(object):
     )
     @demonstrate("Autocomplete Input Widget (with Remote Data Source)")
     def autocomplete_remote_input(self):
-
         widget = deform.widget.AutocompleteInputWidget(
             min_length=1,
             values=self.request.route_path(
@@ -422,7 +421,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="richtext_i18n")
     @demonstrate("Rich Text Widget (internationalized)")
     def richtext_i18n(self):
-
         locale_name = get_locale_name(self.request)
 
         class Schema(colander.Schema):
@@ -604,7 +602,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="radiochoice")
     @demonstrate("Radio Choice Widget")
     def radiochoice(self):
-
         choices = (
             ("habanero", "Habanero"),
             ("jalapeno", "Jalapeno"),
@@ -628,7 +625,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="radiochoice_inline")
     @demonstrate("Radio Choice Widget (inline)")
     def radiochoice_inline(self):
-
         choices = (
             ("habanero", "Habanero"),
             ("jalapeno", "Jalapeno"),
@@ -673,7 +669,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="radiochoice_readonly")
     @demonstrate("Radio Choice Widget (read-only)")
     def radiochoice_readonly(self):
-
         choices = (
             ("habanero", "Habanero"),
             ("jalapeno", "Jalapeno"),
@@ -696,7 +691,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="checkedinput")
     @demonstrate("Checked Input Widget")
     def checkedinput(self):
-
         widget = deform.widget.CheckedInputWidget(
             subject="Email", confirm_subject="Confirm Email"
         )
@@ -718,7 +712,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="checkedinput_readonly")
     @demonstrate("Checked Input Widget (read-only)")
     def checkedinput_readonly(self):
-
         widget = deform.widget.CheckedInputWidget(
             subject="Email", confirm_subject="Confirm Email", readonly=True
         )
@@ -790,7 +783,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="checkedinput_withmask")
     @demonstrate("Checked Input Widget (with Input Mask)")
     def checkedinput_withmask(self):
-
         widget = deform.widget.CheckedInputWidget(
             subject="SSN",
             confirm_subject="Confirm SSN",
@@ -815,7 +807,6 @@ class DeformDemo(object):
     @demonstrate("Dynamic fields: add and remove")
     def dynamic_field(self):
         class Schema(colander.Schema):
-
             field1 = colander.SchemaNode(
                 colander.String(),
                 title="Field 1",
@@ -829,7 +820,6 @@ class DeformDemo(object):
             )
 
             def after_bind(self, schema, kwargs):
-
                 # after_bind() can be used as subclass method
                 # or a parameter passed to schema constructor.
                 #
@@ -1015,7 +1005,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="sequence_of_radiochoices")
     @demonstrate("Sequence of Radio Choice Widgets")
     def sequence_of_radiochoices(self):
-
         choices = (
             ("habanero", "Habanero"),
             ("jalapeno", "Jalapeno"),
@@ -1688,7 +1677,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="select")
     @demonstrate("Select Widget")
     def select(self):
-
         choices = (
             ("", "- Select -"),
             ("habanero", "Habanero"),
@@ -1710,7 +1698,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="select_with_size")
     @demonstrate("Select Widget (with size)")
     def select_with_size(self):
-
         choices = (
             ("", "- Select -"),
             ("habanero", "Habanero"),
@@ -1732,7 +1719,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="select_with_unicode")
     @demonstrate("Select Widget (with unicode)")
     def select_with_unicode(self):
-
         choices = (
             ("", "- Select -"),
             (unicode("ハバネロ", "utf-8"), "Habanero"),
@@ -1754,7 +1740,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="select_with_default")
     @demonstrate("Select Widget (with default)")
     def select_with_default(self):
-
         choices = (
             ("", "- Select -"),
             ("habanero", "Habanero"),
@@ -1777,7 +1762,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="select_with_multiple")
     @demonstrate("Select Widget (with multiple)")
     def select_with_multiple(self):
-
         choices = (
             ("habanero", "Habanero"),
             ("jalapeno", "Jalapeno"),
@@ -1803,7 +1787,6 @@ class DeformDemo(object):
     )
     @demonstrate("Select Widget (with multiple default integers)")
     def select_with_multiple_default_integers(self):
-
         choices = ((1, "Habanero"), (2, "Jalapeno"), (3, "Chipotle"))
 
         class Schema(colander.Schema):
@@ -1854,7 +1837,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="select_integer")
     @demonstrate("Select Widget (with Integer values)")
     def select_integer(self):
-
         choices = (("", "- Select -"), (0, "Zero"), (1, "One"), (2, "Two"))
 
         class Schema(colander.Schema):
@@ -1904,7 +1886,6 @@ class DeformDemo(object):
     )
     @demonstrate("Select Widget (with optgroup and label attributes)")
     def select_with_optgroup_and_label_attributes(self):
-
         # One may or may not notice any difference with
         # 'select_with_optgroup' above, depending on the browser being
         # used. See widget's documentation for further details.
@@ -1987,7 +1968,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="select2")
     @demonstrate("Select2 Widget")
     def select2(self):
-
         choices = (
             ("", "- Select -"),
             ("habanero", "Habanero"),
@@ -2009,7 +1989,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="select2_with_multiple")
     @demonstrate("Select2 Widget (with multiple)")
     def select2_with_multiple(self):
-
         choices = (
             ("habanero", "Habanero"),
             ("jalapeno", "Jalapeno"),
@@ -2062,7 +2041,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="select2_with_tags")
     @demonstrate("Select2 Widget (with tags)")
     def select2_with_tags(self):
-
         choices = ()
 
         class Schema(colander.Schema):
@@ -2081,7 +2059,6 @@ class DeformDemo(object):
     )
     @demonstrate("Select2 Widget (with tags and multiple)")
     def select2_with_tags_and_multiple(self):
-
         choices = ()
 
         class Schema(colander.Schema):
@@ -2100,7 +2077,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="selectize")
     @demonstrate("Selectize Widget")
     def selectize(self):
-
         choices = (
             ("", "- Select -"),
             ("habanero", "Habanero"),
@@ -2122,7 +2098,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="selectize_with_multiple")
     @demonstrate("Selectize Widget (with multiple)")
     def selectize_with_multiple(self):
-
         choices = (
             ("habanero", "Habanero"),
             ("jalapeno", "Jalapeno"),
@@ -2187,7 +2162,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="selectize_with_tags")
     @demonstrate("Selectize Widget (with tags)")
     def selectize_with_tags(self):
-
         choices = ()
 
         class Schema(colander.Schema):
@@ -2216,7 +2190,6 @@ class DeformDemo(object):
     )
     @demonstrate("Selectize Widget (with tags and multiple)")
     def selectize_with_tags_and_multiple(self):
-
         choices = ()
 
         class Schema(colander.Schema):
@@ -2247,7 +2220,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="checkboxchoice")
     @demonstrate("Checkbox Choice Widget")
     def checkboxchoice(self):
-
         choices = (
             ("habanero", "Habanero"),
             ("jalapeno", "Jalapeno"),
@@ -2269,7 +2241,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="checkboxchoice_inline")
     @demonstrate("Checkbox Choice Widget (inline)")
     def checkboxchoice_inline(self):
-
         choices = (
             ("habanero", "Habanero"),
             ("jalapeno", "Jalapeno"),
@@ -2293,7 +2264,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="checkboxchoice2")
     @demonstrate("Checkbox Choice Widget (with required field)")
     def checkboxchoice2(self):
-
         choices = (
             ("habanero", "Habanero"),
             ("jalapeno", "Jalapeno"),
@@ -2319,7 +2289,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="checkboxchoice_readonly")
     @demonstrate("Checkbox Choice Widget (read-only)")
     def checkboxchoice_readonly(self):
-
         choices = (
             ("habanero", "Habanero"),
             ("jalapeno", "Jalapeno"),
@@ -2344,7 +2313,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="i18n")
     @demonstrate("Internationalization")
     def i18n(self):
-
         minmax = {"min": 1, "max": 10}
         locale_name = get_locale_name(self.request)
 
@@ -2588,7 +2556,7 @@ class DeformDemo(object):
 
         if "submit" in self.request.POST:
             posted_formid = self.request.POST["__formid__"]
-            for (formid, form) in [("form1", form1), ("form2", form2)]:
+            for formid, form in [("form1", form1), ("form2", form2)]:
                 if formid == posted_formid:
                     try:
                         controls = self.request.POST.items()
