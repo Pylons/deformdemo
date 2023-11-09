@@ -2572,28 +2572,41 @@ class Select2WidgetMultipleTests(Base, unittest.TestCase):
 
     def test_submit_selected(self):
         findcss("[data-select2-id='1']").click()
-        findcss(".select2-search__field").send_keys(
+        search_field = findcss(".select2-search__field")
+        search_field.send_keys(
             Keys.ARROW_DOWN
-        ).send_keys(
+        )
+        search_field.send_keys(
             Keys.ARROW_DOWN
-        ).send_keys(
+        )
+        search_field.send_keys(
             Keys.ENTER
-        ).perform()
+        )
 
         time.sleep(1)
 
         findcss("[data-select2-id='1']").click()
-        findcss(".select2-search__field").send_keys(
+        search_field = findcss(".select2-search__field")
+        search_field.send_keys(
             Keys.ARROW_DOWN
-        ).send_keys(
+        )
+        search_field.send_keys(
             Keys.ARROW_UP
-        ).send_keys(
+        )
+        search_field.send_keys(
+            Keys.ARROW_UP
+        )
+        search_field.send_keys(
             Keys.ENTER
-        ).perform()
+        )
+
+        captured_default = {"pepper": set(["chipotle", "habanero"])}
+
+        selected = set([x.get_property("title").lower() for x in findcsses(".select2-selection__choice")])
+        self.assertEqual(selected, captured_default["pepper"])
 
         findid("deformsubmit").click()
 
-        captured_default = {"pepper": set(["chipotle", "habanero"])}
         self.assertEqual(eval(findid("captured").text), captured_default)
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
