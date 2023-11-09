@@ -2571,9 +2571,8 @@ class Select2WidgetMultipleTests(Base, unittest.TestCase):
     url = test_url("/select2_with_multiple/")
 
     def test_submit_selected(self):
-        action_chains_xpath_on_select(
-            "//select[@name='pepper']/option"
-        ).click().send_keys(Keys.ARROW_DOWN).send_keys(
+        findcss("[data-select2-id='1']").click()
+        findcss(".select2-search__field").send_keys(
             Keys.ARROW_DOWN
         ).send_keys(
             Keys.ARROW_DOWN
@@ -2583,9 +2582,10 @@ class Select2WidgetMultipleTests(Base, unittest.TestCase):
 
         time.sleep(1)
 
-        action_chains_xpath_on_select(
-            "//option[contains(text(), 'Chipotle')]"
-        ).click().send_keys(Keys.ARROW_UP).send_keys(Keys.ARROW_UP).send_keys(
+        findcss("[data-select2-id='1']").click()
+        findcss(".select2-search__field").send_keys(
+            Keys.ARROW_DOWN
+        ).send_keys(
             Keys.ARROW_UP
         ).send_keys(
             Keys.ENTER
