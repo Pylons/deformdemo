@@ -108,8 +108,8 @@ It performs editable installs of Colander and Deform into your virtual environme
 Install Firefox latest
 ^^^^^^^^^^^^^^^^^^^^^^
 
-macOS
-"""""
+macOS Firefox
+"""""""""""""
 
 `Download the latest version of Firefox for your platform <https://www.mozilla.org/en-US/firefox/all/>`_.
 
@@ -119,8 +119,8 @@ Open the ``.dmg`` (macOS), and drag the Firefox icon to:
 
         ~/projects/deformdemo/
 
-Linux (Debian)
-""""""""""""""
+Linux (Debian) Firefox
+""""""""""""""""""""""
 
 Use cURL or wget.
 See the `Firefox download README.txt <https://ftp.mozilla.org/pub/firefox/releases/latest/README.txt>`_ for instructions.
@@ -161,8 +161,8 @@ gettext
 The functional tests require the installation of the GNU ``gettext`` utilities, specifically ``msgmerge`` and ``msgfmt``.
 Use your package manager to install these requirements.
 
-macOS
-"""""
+macOS gettext
+"""""""""""""
 
 Use `Homebrew <https://brew.sh/>`_.
 
@@ -177,8 +177,8 @@ If you ever have problems building packages, you can always unlink it.
 
         brew unlink gettext
 
-Linux (Debian)
-""""""""""""""
+Linux (Debian) gettext
+""""""""""""""""""""""
 
 .. code-block:: bash
 
