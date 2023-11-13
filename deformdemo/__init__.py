@@ -214,7 +214,7 @@ class DeformDemo(object):
         L = []
         for name, method in demos:
             url = self.request.resource_url(
-                self.request.root, name, route_name="deformdemo"
+                self.request.context, name, route_name="deformdemo"
             )
             L.append((method.demo, url))
         L.sort()
@@ -982,7 +982,7 @@ class DeformDemo(object):
 
         def succeed():
             location = self.request.resource_url(
-                self.request.root, "thanks.html", route_name="deformdemo"
+                self.request.context, "thanks.html", route_name="deformdemo"
             )
             # To appease jquery 1.6+, we need to return something that smells
             # like HTML, or we get a "Node cannot be inserted at the

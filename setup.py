@@ -30,7 +30,6 @@ requires = [
     "pyramid >= 1.5a1",  # route_name argument to resource_url
     "pyramid_chameleon",
     "pygments",
-    "six",
     "waitress",
 ]
 
