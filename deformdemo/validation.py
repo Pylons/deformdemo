@@ -1,18 +1,20 @@
 import gzip
+import http.client
+from io import BytesIO
 import sys
 import unittest
+import urllib.parse
 
 from pyramid.paster import bootstrap
-
-from io import BytesIO
-import http.client
-import urllib.parse
 
 # Deform Demo
 from deformdemo import DeformDemo
 
-UA = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, " \
-        "like Gecko) Chrome/119.0.0.0 Safari/537.36"
+
+UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, "
+    "like Gecko) Chrome/119.0.0.0 Safari/537.36"
+)
 
 
 def validate(data):
@@ -91,6 +93,7 @@ class FunctionalTests(unittest.TestCase):
         bs = bootstrap("demo.ini")
         app = bs["app"]
         self.request = bs["request"]
+
         from webtest import TestApp
 
         self.testapp = TestApp(app)
