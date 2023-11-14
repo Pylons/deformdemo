@@ -3358,7 +3358,7 @@ class SequenceOrderableTests(Base, unittest.TestCase):
         seq_height = findcss(".deform-seq-item").size["height"]
 
         persons = findxpaths(
-            '//div[@class="panel-heading"][contains(text(), "Person")]'
+            '//div[@class="card-header"][contains(text(), "Person")]'
         )
 
         # Move item 3 up two
