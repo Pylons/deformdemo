@@ -27,7 +27,7 @@ VERSION = '3.0.0.dev0'
 requires = [
     "Babel",
     "deform >= 2.0.15.dev0",  # .dev0 allows pre-releases.
-    "pyramid >= 1.5a1",  # route_name argument to resource_url
+    "pyramid >= 2.0a0",  # route_name argument to resource_url
     "pyramid_chameleon",
     "pygments",
     "waitress",
@@ -59,10 +59,11 @@ setup(
         "License :: Repoze Public License",
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
         "Topic :: Internet :: WWW/HTTP",
