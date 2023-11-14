@@ -10,7 +10,6 @@ import deform
 
 
 class ExampleSchema(deform.schema.CSRFSchema):
-
     name = colander.SchemaNode(colander.String(), title="Name")
 
     age = colander.SchemaNode(
@@ -33,7 +32,6 @@ def mini_example(request):
     # User submitted this form
     if request.method == "POST":
         if "process" in request.POST:
-
             try:
                 appstruct = form.validate(request.POST.items())
 

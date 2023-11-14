@@ -1,6 +1,4 @@
 # -*- coding: utf-8 -*-
-from __future__ import print_function
-
 import ast
 import datetime
 from decimal import Decimal
@@ -60,7 +58,6 @@ def give_selenium_some_time(func):
     """
 
     def inner(*args, **kwargs):
-
         deadline = time.time() + SELENIUM_IMPLICIT_WAIT
         sleep = 0.03
 
@@ -193,7 +190,6 @@ def wait_to_click(selector):
                 # Haha what a gotcha!
                 time.sleep(0.2)
         except Exception as e:
-
             if isinstance(e, StaleElementReferenceException):
                 # Look all these exceptions we can get!
                 time.sleep(0.2)
@@ -204,6 +200,9 @@ def wait_to_click(selector):
                     # SO FUN!
                     time.sleep(0.2)
                     continue
+            if isinstance(e, ElementNotInteractableException):
+                time.sleep(0.2)
+                continue
             raise
 
 
@@ -258,14 +257,12 @@ def setUpModule():
     driver_name = os.environ.get("WEBDRIVER")
 
     if driver_name == "selenium_local_chrome":
-
         from selenium.webdriver import Chrome
 
         browser = Chrome()
         return browser
 
     elif driver_name == "selenium_container_chrome":
-
         from selenium_containers import start_chrome
 
         from selenium.webdriver import DesiredCapabilities
@@ -286,7 +283,6 @@ def setUpModule():
         return browser
 
     elif driver_name == "selenium_container_opera":
-
         from selenium_containers import start_opera
 
         from selenium.webdriver import DesiredCapabilities
@@ -307,7 +303,6 @@ def setUpModule():
         return browser
 
     elif driver_name == "selenium_container_firefox":
-
         from selenium_containers import start_firefox
 
         from selenium.webdriver import DesiredCapabilities
@@ -328,7 +323,6 @@ def setUpModule():
         return browser
 
     elif driver_name == "selenium_local_firefox":
-
         from selenium import webdriver
 
         try:
@@ -2555,19 +2549,12 @@ class Select2WidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_selected(self):
-        action_chains_xpath_on_select(
-            "//select[@name='pepper']/option"
-        ).click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
-
         findid("deformsubmit").click()
-        self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
-        self.assertTrue(
-            findid("captured").text in self.first_selected_captured
-        )
+        self.assertTrue(findcss(".is-invalid").is_displayed())
 
-        action_chains_xpath_on_select(
-            "//select[@name='pepper']/option[@selected='selected']"
-        ).click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+        findcss("[data-select2-id='1']").click()
+        findcss(".select2-search__field").send_keys("jala")
+        findcss(".select2-results li[aria-selected='false']").click()
         findid("deformsubmit").click()
         self.assertTrue(
             findid("captured").text in self.second_selected_captured
@@ -2578,29 +2565,33 @@ class Select2WidgetMultipleTests(Base, unittest.TestCase):
     url = test_url("/select2_with_multiple/")
 
     def test_submit_selected(self):
-        action_chains_xpath_on_select(
-            "//select[@name='pepper']/option"
-        ).click().send_keys(Keys.ARROW_DOWN).send_keys(
-            Keys.ARROW_DOWN
-        ).send_keys(
-            Keys.ARROW_DOWN
-        ).send_keys(
-            Keys.ENTER
-        ).perform()
+        findcss("[data-select2-id='1']").click()
+        search_field = findcss(".select2-search__field")
+        search_field.send_keys(Keys.ARROW_DOWN)
+        search_field.send_keys(Keys.ARROW_DOWN)
+        search_field.send_keys(Keys.ENTER)
 
         time.sleep(1)
 
-        action_chains_xpath_on_select(
-            "//option[contains(text(), 'Chipotle')]"
-        ).click().send_keys(Keys.ARROW_UP).send_keys(Keys.ARROW_UP).send_keys(
-            Keys.ARROW_UP
-        ).send_keys(
-            Keys.ENTER
-        ).perform()
+        findcss("[data-select2-id='1']").click()
+        search_field = findcss(".select2-search__field")
+        search_field.send_keys(Keys.ARROW_DOWN)
+        search_field.send_keys(Keys.ARROW_UP)
+        search_field.send_keys(Keys.ARROW_UP)
+        search_field.send_keys(Keys.ENTER)
+
+        captured_default = {"pepper": set(["chipotle", "habanero"])}
+
+        selected = set(
+            [
+                x.get_property("title").lower()
+                for x in findcsses(".select2-selection__choice")
+            ]
+        )
+        self.assertEqual(selected, captured_default["pepper"])
 
         findid("deformsubmit").click()
 
-        captured_default = {"pepper": set(["chipotle", "habanero"])}
         self.assertEqual(eval(findid("captured").text), captured_default)
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
@@ -2633,26 +2624,25 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
         self.assertEqual(len(findxpaths("//optgroup")), 2)
 
     def test_submit_selected(self):
-        action_chains_xpath_on_select(
-            "//select[@name='musician']/option"
-        ).click().send_keys(Keys.ARROW_DOWN).send_keys(Keys.ENTER).perform()
+        findcss("[data-select2-id='1']").click()
+        search_field = findcss(".select2-search__field")
+        search_field.send_keys(Keys.ARROW_DOWN)
+        search_field.send_keys(Keys.ENTER)
 
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         captured = findid("captured").text
-        self.assertSimilarRepr(captured, self.first_selected_captured)
+        self.assertEqual(captured, self.first_selected_captured)
 
         time.sleep(1)
 
-        action_chains_xpath_on_select(
-            "//option[contains(text(), 'Page')]"
-        ).click().send_keys(Keys.ARROW_DOWN).send_keys(
-            Keys.ARROW_DOWN
-        ).send_keys(
-            Keys.ARROW_DOWN
-        ).send_keys(
-            Keys.ENTER
-        ).perform()
+        findcss("[data-select2-id='1']").click()
+        search_field = findcss(".select2-search__field")
+        search_field.send_keys(Keys.ARROW_DOWN)
+        search_field.send_keys(Keys.ARROW_DOWN)
+        search_field.send_keys(Keys.ARROW_DOWN)
+        search_field.send_keys(Keys.ENTER)
+
         findid("deformsubmit").click()
         self.assertTrue(
             findid("captured").text in self.second_selected_captured
@@ -2663,25 +2653,22 @@ class Select2TagsWidgetTests(Base, unittest.TestCase):
     url = test_url("/select2_with_tags/")
 
     def test_submit_new_option(self):
-        # open select search field
         findcss(".select2-container").click()
 
         # options list is empty
-        self.assertSimilarRepr(
+        self.assertEqual(
             findid("select2-deformField1-results").text, "No results found"
         )
 
         # type a value in select2 search
-        (
-            findid("public")
-            .find_element(By.CSS_SELECTOR, ".select2-search__field")
-            .send_keys("hello\n")
-        )
+        search_field = findcss(".select2-search__field")
+        search_field.send_keys("hello\n")
+        search_field.send_keys(Keys.ENTER)
 
         # after form submission typed value appear in captured
         findid("deformsubmit").click()
         captured = findid("captured").text
-        self.assertSimilarRepr(
+        self.assertEqual(
             captured,
             "{'pepper': 'hello'}",
         )
@@ -2696,8 +2683,9 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
 
         # options list is empty
         findid("item-deformField1").click()
-        self.assertSimilarRepr(
-            findid("select2-deformField1-results").text, "No results found"
+        self.assertEqual(
+            findid("select2-deformField1-results").text,
+            "No results found",
         )
 
         # adding values to select field
@@ -2705,11 +2693,10 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
             # open select search field
             findid("item-deformField1").click()
             # type values in selec2 search
-            (
-                findid("public")
-                .find_element(By.CSS_SELECTOR, ".select2-search__field")
-                .send_keys(value + "\n")
-            )
+
+            search_field = findcss(".select2-search__field")
+            search_field.send_keys(value + "\n")
+            search_field.send_keys(Keys.ENTER)
 
         # after form submission typed value appear in captured
         findid("deformsubmit").click()
@@ -2717,7 +2704,7 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
         expected = "{'pepper': {'hello', 'qwerty'}}"
         if PY3:
             captured = sort_set_values(captured)
-        self.assertSimilarRepr(captured, expected)
+        self.assertEqual(captured, expected)
 
 
 class SelectizeWidgetTests(Base, unittest.TestCase):
@@ -3595,8 +3582,12 @@ class AjaxFormTests(Base, unittest.TestCase):
         findid("deformField4").send_keys("2010")
         findid("deformField4-month").send_keys("1")
         findid("deformField4-day").send_keys("1")
-        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
-        findid("tinymce").send_keys("yo")
+        # enter iframe
+        browser.switch_to.frame("deformField5_ifr")
+        tinymce = findid("tinymce")
+        tinymce.click()
+        tinymce.send_keys("yo")
+        # leave iframe
         browser.switch_to.default_content()
         source = browser.page_source
         wait_to_click("#deformsubmit")
@@ -3786,7 +3777,10 @@ class ReadOnlyHTMLAttributeTests(Base, unittest.TestCase):
         self.assertTrue(options[1].get_attribute("readonly"), "readonly")
         self.assertTrue(options[2].get_attribute("disabled"), "disabled")
 
-        select_object.select_by_index(0)
+        # XXX: You may not select a disabled option
+        self.assertRaises(
+            NotImplementedError, select_object.select_by_index, 0
+        )
         self.assertTrue(options[1].is_selected())
 
     def test_render_selectize_multi_default(self):

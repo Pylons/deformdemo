@@ -34,6 +34,8 @@
         <link rel="stylesheet"
               href="${request.static_url('deform:static/css/form.css')}"
               type="text/css"/>
+        <link rel="stylesheet" href="${request.static_url('deform:static/css/bootstrap-icons.min.css')}"
+              type="text/css"/>
         <tal:block repeat="reqt css_links|[]">
             <link rel="stylesheet" href="${request.static_url(reqt)}" type="text/css" />
         </tal:block>
@@ -41,7 +43,7 @@
         <!-- JavaScript -->
         <script src="${request.static_url('deform:static/scripts/jquery-2.0.3.min.js')}"
                 type="text/javascript"></script>
-        <script src="${request.static_url('deform:static/scripts/bootstrap.min.js')}"
+        <script src="${request.static_url('deform:static/scripts/bootstrap.bundle.min.js')}"
                 type="text/javascript"></script>
         <tal:block repeat="reqt js_links|[]">
             <script type="text/javascript" src="${request.static_url(reqt)}"></script>

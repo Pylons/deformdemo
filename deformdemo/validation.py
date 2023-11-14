@@ -1,17 +1,20 @@
 import gzip
-import json
+import http.client
+from io import BytesIO
 import sys
 import unittest
+import urllib.parse
 
 from pyramid.paster import bootstrap
 
-import StringIO
-import httplib
-from six.moves import input
-import urlparse
-
 # Deform Demo
 from deformdemo import DeformDemo
+
+
+UA = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, "
+    "like Gecko) Chrome/119.0.0.0 Safari/537.36"
+)
 
 
 def validate(data):
@@ -19,7 +22,7 @@ def validate(data):
     contentType = "text/html"
     service = "http://html5.validator.nu/"
 
-    buf = StringIO.StringIO()
+    buf = BytesIO()
     gzipper = gzip.GzipFile(fileobj=buf, mode="wb")
     gzipper.write(data)
     gzipper.close()
@@ -41,7 +44,7 @@ def validate(data):
     ) and redirectCount < 10:
         if redirectCount > 0:
             url = response.getheader("Location")
-        parsed = urlparse.urlsplit(url)
+        parsed = urllib.parse.urlsplit(url)
         if parsed[0] != "http":
             sys.stderr.write(
                 "URI scheme {0} not supported.\n".format(parsed[0])
@@ -56,7 +59,7 @@ def validate(data):
             )
             if input() != "":
                 sys.exit(0)
-        connection = httplib.HTTPConnection(parsed[1])
+        connection = http.client.HTTPConnection(parsed[1])
         connection.connect()
         connection.putrequest(
             "POST",
@@ -67,6 +70,7 @@ def validate(data):
         connection.putheader("Content-Type", contentType)
         connection.putheader("Content-Encoding", "gzip")
         connection.putheader("Content-Length", len(gzippeddata))
+        connection.putheader("User-Agent", UA)
         connection.endheaders()
         connection.send(gzippeddata)
         response = connection.getresponse()
@@ -78,12 +82,10 @@ def validate(data):
         sys.exit(5)
 
     if response.getheader("Content-Encoding", "identity").lower() == "gzip":
-        response = gzip.GzipFile(fileobj=StringIO.StringIO(response.read()))
+        response = gzip.GzipFile(fileobj=BytesIO(response.read()))
 
     connection.close()
     return response.read()
-    result = json.loads(response.read())
-    return result
 
 
 class FunctionalTests(unittest.TestCase):
@@ -91,6 +93,7 @@ class FunctionalTests(unittest.TestCase):
         bs = bootstrap("demo.ini")
         app = bs["app"]
         self.request = bs["request"]
+
         from webtest import TestApp
 
         self.testapp = TestApp(app)
@@ -109,7 +112,7 @@ class FunctionalTests(unittest.TestCase):
             except AssertionError:
                 errors.append((demo[0], check))
                 print(demo[0], "E")
-                print(check)
+                print(check.decode())
                 print("")
         # self.assertFalse(errors)
 

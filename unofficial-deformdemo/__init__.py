@@ -5,7 +5,6 @@ capabilities and which provides a functional test suite  """
 
 import inspect
 import logging
-import pprint
 import sys
 
 import colander
@@ -23,17 +22,6 @@ from pygments.lexers import PythonLexer
 
 
 log = logging.getLogger(__name__)
-
-
-PY3 = sys.version_info[0] == 3
-PY38MIN = sys.version_info[0] == 3 and sys.version_info[1] >= 8
-
-if PY3:
-
-    def unicode(val, encoding="utf-8"):
-        return val
-
-
 _ = TranslationStringFactory("unofficial-deformdemo")
 
 formatter = HtmlFormatter(nowrap=True)
@@ -49,22 +37,6 @@ class demonstrate(object):
     def __call__(self, method):
         method.demo = self.title
         return method
-
-
-# Py2/Py3 compat
-# http://stackoverflow.com/a/16888673/315168
-# eliminate u''
-def my_safe_repr(obj, context, maxlevels, level, sort_dicts=True):
-
-    if type(obj) == unicode:
-        obj = obj.encode("utf-8")
-
-    # Python 3.8 changed the call signature of pprint._safe_repr.
-    # by adding sort_dicts.
-    if PY38MIN:
-        return pprint._safe_repr(obj, context, maxlevels, level, sort_dicts)
-    else:
-        return pprint._safe_repr(obj, context, maxlevels, level)
 
 
 @view_defaults(route_name="unofficial-deformdemo")
@@ -84,6 +56,7 @@ class UnofficialDeformDemo(object):
     ):
 
         captured = None
+        output = None
 
         if submitted in self.request.POST:
             # the request represents a form submission
@@ -91,6 +64,9 @@ class UnofficialDeformDemo(object):
                 # try to validate the submitted values
                 controls = self.request.POST.items()
                 captured = form.validate(controls)
+                output = captured["text"]
+                output = highlight(output, PythonLexer(), formatter)
+
                 if success:
                     response = success()
                     if response is not None:
@@ -112,15 +88,10 @@ class UnofficialDeformDemo(object):
 
         reqts = form.get_widget_resources()
 
-        printer = pprint.PrettyPrinter()
-        printer.format = my_safe_repr
-        output = printer.pformat(captured)
-        captured = highlight(output, PythonLexer(), formatter)
-
         # values passed to template for rendering
         return {
             "form": html,
-            "captured": captured,
+            "captured": output,
             "code": code,
             "start": start,
             "end": end,
@@ -137,16 +108,7 @@ class UnofficialDeformDemo(object):
         lines, start = inspect.getsourcelines(frame.f_code)
         end = start + len(lines)
         code = "".join(lines)
-        if not PY3:
-            code = unicode(code, "utf-8")
         return highlight(code, PythonLexer(), formatter), start, end
-
-    @view_config(name="thanks.html", route_name="unofficial-deformdemo")
-    def thanks(self):
-        return Response(
-            "<html><body><p>Thanks!</p><small>"
-            '<a href="..">Up</a></small></body></html>'
-        )
 
     @view_config(name="allcode",
                  renderer="templates/code.pt",
@@ -217,7 +179,7 @@ class UnofficialDeformDemo(object):
                 colander.String(),
                 validator=colander.Length(max=100),
                 widget=deform.widget.TextInputWidget(),
-                description="Enter some text",
+                description="Enter some text (python will be highlighted)",
             )
 
         schema = Schema()
