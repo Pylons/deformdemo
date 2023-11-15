@@ -3372,7 +3372,7 @@ class SequenceOrderableTests(Base, unittest.TestCase):
             persons[0], 0, seq_height * 1.5
         ).perform()
 
-        findid("deformsubmit").click()
+        action_chains_on_id("deformsubmit").click()
 
         # sequences should be in reversed order
         inputs = findxpaths('//input[@name="name"]')
