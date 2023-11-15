@@ -260,13 +260,11 @@ def setUpModule():
         from selenium.webdriver import Chrome
 
         browser = Chrome()
-        return browser
 
     elif driver_name == "selenium_local_firefox":
         from selenium.webdriver import Firefox
 
         browser = Firefox()
-        return browser
 
     elif driver_name == "selenium_container_chrome":
         from selenium_containers import start_chrome
@@ -285,9 +283,6 @@ def setUpModule():
             desired_capabilities=capabilities,
         )
 
-        browser.set_window_size(1920, 1080)
-        return browser
-
     elif driver_name == "selenium_container_opera":
         from selenium_containers import start_opera
 
@@ -304,9 +299,6 @@ def setUpModule():
             command_executor=selenium_grid_url,
             desired_capabilities=capabilities,
         )
-
-        browser.set_window_size(1920, 1080)
-        return browser
 
     elif driver_name == "selenium_container_firefox":
         from selenium_containers import start_firefox
@@ -325,21 +317,16 @@ def setUpModule():
             desired_capabilities=capabilities,
         )
 
-        browser.set_window_size(1920, 1080)
-        return browser
-
     elif driver_name == "selenium_local_firefox":
         from selenium import webdriver
 
         try:
             browser = webdriver.Firefox()
-            browser.set_window_size(1920, 1080)
         except WebDriverException:
             if os.path.exists(BROKEN_SELENIUM_LOG_FILE):
                 print("Selenium says no")
                 print(open(BROKEN_SELENIUM_LOG_FILE, "rt").read())
             raise
-        return browser
 
     else:
         """
@@ -361,8 +348,8 @@ def setUpModule():
             desired_capabilities=capabilities,
         )
 
-        browser.set_window_size(1920, 1080)
-        return browser
+    browser.set_window_size(1920, 1080)
+    return browser
 
 
 def tearDownModule():
@@ -3323,6 +3310,7 @@ class SequenceOrderableTests(Base, unittest.TestCase):
         self.assertEqual(findid("deformField1-addtext").text, "Add Person")
 
     def test_submit_complex_interaction(self):
+        button = findid("deformsubmit")
         action_chains_on_id("deformField1-seqAdd").click().perform()
 
         # A single item shouldn't have an active reorder button.
@@ -3377,7 +3365,9 @@ class SequenceOrderableTests(Base, unittest.TestCase):
         ActionChains(browser).drag_and_drop_by_offset(
             persons[0], 0, seq_height * 1.5
         ).perform()
-
+        
+        ActionChains(browser).scroll_by_amount(0, 200).perform()
+        time.sleep(0.2)
         action_chains_on_id("deformsubmit").click().perform()
         time.sleep(0.2)
 
