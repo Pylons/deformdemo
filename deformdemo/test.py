@@ -262,6 +262,12 @@ def setUpModule():
         browser = Chrome()
         return browser
 
+    elif driver_name == "selenium_local_firefox":
+        from selenium.webdriver import Firefox
+
+        browser = Firefox()
+        return browser
+
     elif driver_name == "selenium_container_chrome":
         from selenium_containers import start_chrome
 
@@ -3372,7 +3378,8 @@ class SequenceOrderableTests(Base, unittest.TestCase):
             persons[0], 0, seq_height * 1.5
         ).perform()
 
-        action_chains_on_id("deformsubmit").click()
+        action_chains_on_id("deformsubmit").click().perform()
+        time.sleep(0.2)
 
         # sequences should be in reversed order
         inputs = findxpaths('//input[@name="name"]')
