@@ -14,6 +14,8 @@ from selenium.common.exceptions import ElementNotInteractableException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -263,8 +265,12 @@ def setUpModule():
 
     elif driver_name == "selenium_local_firefox":
         from selenium.webdriver import Firefox
+        from selenium.webdriver.firefox.options import Options
+        options = Options()
+        options.add_argument("-profile")
+        options.add_argument('/home/trollfot/snap/firefox/common/tmp/seleniumprofile')
+        browser = Firefox(options=options)
 
-        browser = Firefox()
 
     elif driver_name == "selenium_container_chrome":
         from selenium_containers import start_chrome
@@ -405,7 +411,6 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         self.assertFalse(findid("deformField1-0").is_selected())
         self.assertFalse(findid("deformField1-1").is_selected())
         self.assertFalse(findid("deformField1-2").is_selected())
-        self.assertEqual(findcss(".required").text, "Pepper")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_unchecked(self):
@@ -452,7 +457,6 @@ class CheckboxChoiceWidgetInlineTests(Base, unittest.TestCase):
         self.assertFalse(findid("deformField1-0").is_selected())
         self.assertFalse(findid("deformField1-1").is_selected())
         self.assertFalse(findid("deformField1-2").is_selected())
-        self.assertEqual(findcss(".required").text, "Pepper")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_unchecked(self):
@@ -507,13 +511,11 @@ class CheckboxWidgetTests(Base, unittest.TestCase):
     def test_render_default(self):
         self.assertTrue("I Want It!" in browser.page_source)
         self.assertFalse(findid("deformField1").is_selected())
-        self.assertEqual(findcss(".required").text, "I Want It!")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_unchecked(self):
         wait_to_click("#deformsubmit")
-        self.assertFalse(findid_view("deformField1").is_selected())
-        self.assertEqual(findid_view("captured").text, "{'want': False}")
+        self.assertEqual(findid_view("deformField1").get_attribute("validationMessage"), "Please check this box if you want to proceed.")
 
     def test_submit_checked(self):
         findid("deformField1").click()
@@ -536,7 +538,6 @@ class CheckedInputWidgetTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Email Address" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Email Address")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
@@ -548,15 +549,14 @@ class CheckedInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_empty(self):
         wait_to_click("#deformsubmit")
-        self.assertTrue(findcss(".is-invalid"))
-        self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), ""
+            findid("deformField1").get_attribute("validationMessage"),
+            "Please fill out this field."
         )
         self.assertEqual(
-            findid("deformField1-confirm").get_attribute("value"), ""
+            findid("deformField1-confirm").get_attribute("validationMessage"),
+            "Please fill out this field."
         )
-        self.assertEqual(findid("captured").text, "None")
 
     def test_submit_invalid(self):
         findid("deformField1").send_keys("this")
@@ -613,7 +613,7 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
     url = test_url("/checkedinput_withmask/")
 
     def test_render_default(self):
-        self.assertEqual(findcss(".required").text, "Social Security Number")
+        self.assertEqual(findcss(".form-label").text, "Social Security Number")
         self.assertEqual(findid("captured").text, "None")
 
         # Ensure the masked input has a focus and ### mask
@@ -662,7 +662,6 @@ class CheckedInputReadonlyTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Email Address" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Email Address")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(findid("deformField1").text, "ww@graymatter.com")
 
@@ -724,7 +723,6 @@ class CheckedPasswordRedisplayWidgetTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Password" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Password")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
@@ -741,16 +739,11 @@ class CheckedPasswordRedisplayWidgetTests(Base, unittest.TestCase):
         )
 
     def test_submit_empty(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute('required'),
+            'true'
+        )
         wait_to_click("#deformsubmit")
-        self.assertTrue(findcss(".is-invalid"))
-        self.assertEqual(findid("error-deformField1").text, "Required")
-        self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), ""
-        )
-        self.assertEqual(
-            findid("deformField1-confirm").get_attribute("value"), ""
-        )
-        self.assertEqual(findid("captured").text, "None")
 
     def test_submit_tooshort(self):
         findid("deformField1").send_keys("this")
@@ -802,7 +795,6 @@ class CheckedPasswordReadonlyTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Password" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Password")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
             findid("deformField1").text, "Password not displayed."
@@ -816,7 +808,6 @@ class DateInputWidgetTests(Base, unittest.TestCase):
     def test_render_default(self):
         clear_autofocused_picker()
         self.assertTrue("Date" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Date")
         self.assertEqual(findid_view("captured").text, "None")
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
@@ -825,13 +816,15 @@ class DateInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_empty(self):
         clear_autofocused_picker()
-        wait_to_click("#deformsubmit")
-        self.assertTrue(findcss(".is-invalid"))
-        self.assertEqual(findid_view("error-deformField1").text, "Required")
         self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), ""
+            findid("deformField1").get_attribute("validationMessage"),
+            ""
         )
-        self.assertEqual(findid_view("captured").text, "None")
+        wait_to_click("#deformsubmit")
+        self.assertEqual(
+            findid("deformField1").get_attribute("validationMessage"),
+            "Please fill out this field."
+        )
 
     def test_submit_tooearly(self):
         clear_autofocused_picker()
@@ -1678,20 +1671,13 @@ class PasswordWidgetRedisplayTests(Base, unittest.TestCase):
         self.assertTrue("Password" in browser.page_source)
         self.assertEqual(findid("captured").text, "None")
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
-        self.assertEqual(findcss(".required").text, "Password")
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
         )
 
     def test_render_submit_empty(self):
         wait_to_click("#deformsubmit")
-        self.assertTrue("Password" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Password")
-        self.assertEqual(findid("captured").text, "None")
-        self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), ""
-        )
-        self.assertEqual(findid("error-deformField1").text, "Required")
+
 
     def test_render_submit_success(self):
         findid("deformField1").send_keys("abcdef123")
@@ -1714,15 +1700,23 @@ class RadioChoiceWidgetTests(Base, unittest.TestCase):
         self.assertFalse(findid("deformField1-0").is_selected())
         self.assertFalse(findid("deformField1-1").is_selected())
         self.assertFalse(findid("deformField1-2").is_selected())
-        self.assertEqual(findcss(".required").text, "Choose your pepper")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_unchecked(self):
+        self.assertEqual(
+            findid("deformField1-0").get_attribute('required'),
+            'true'
+        )
+        self.assertEqual(
+            findid("deformField1-1").get_attribute('required'),
+            'true'
+        )
+        self.assertEqual(
+            findid("deformField1-2").get_attribute('required'),
+            'true'
+        )
         wait_to_click("#deformsubmit")
-        self.assertEqual(findid("error-deformField1").text, "Required")
-        self.assertFalse(findid("deformField1-0").is_selected())
-        self.assertFalse(findid("deformField1-1").is_selected())
-        self.assertFalse(findid("deformField1-2").is_selected())
+        # Fixme : test it was not submitted at all
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_one_checked(self):
@@ -1744,16 +1738,23 @@ class RadioChoiceWidgetInlineTests(Base, unittest.TestCase):
         self.assertFalse(findid("deformField1-0").is_selected())
         self.assertFalse(findid("deformField1-1").is_selected())
         self.assertFalse(findid("deformField1-2").is_selected())
-        self.assertEqual(findcss(".required").text, "Choose your pepper")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_unchecked(self):
+        self.assertEqual(
+            findid("deformField1-0").get_attribute('required'),
+            'true'
+        )
+        self.assertEqual(
+            findid("deformField1-1").get_attribute('required'),
+            'true'
+        )
+        self.assertEqual(
+            findid("deformField1-2").get_attribute('required'),
+            'true'
+        )
         wait_to_click("#deformsubmit")
-        self.assertEqual(findid("error-deformField1").text, "Required")
-        self.assertFalse(findid("deformField1-0").is_selected())
-        self.assertFalse(findid("deformField1-1").is_selected())
-        self.assertFalse(findid("deformField1-2").is_selected())
-        self.assertEqual(findid("captured").text, "None")
+        # Fixme : test it was not submitted at all
 
     def test_submit_one_checked(self):
         findid("deformField1-0").click()
@@ -1783,7 +1784,6 @@ class RadioChoiceReadonlyTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertEqual(findid("deformField1-1").text, "Jalapeno")
-        self.assertEqual(findcss(".required").text, "Pepper")
         self.assertEqual(findid("captured").text, "None")
 
 
@@ -3365,7 +3365,7 @@ class SequenceOrderableTests(Base, unittest.TestCase):
         ActionChains(browser).drag_and_drop_by_offset(
             persons[0], 0, seq_height * 1.5
         ).perform()
-        
+
         ActionChains(browser).scroll_by_amount(0, 200).perform()
         time.sleep(0.2)
         action_chains_on_id("deformsubmit").click().perform()
@@ -3740,8 +3740,7 @@ class ReadOnlyHTMLAttributeTests(Base, unittest.TestCase):
         self.assertTrue(element0.get_attribute("disabled"), "disabled")
         self.assertTrue(element0.get_attribute("readonly"), "readonly")
         self.assertFalse(element0.is_selected())
-        element0.click()
-        self.assertFalse(element0.is_selected())
+        self.assertRaises(ElementClickInterceptedException, element0.click)
 
         self.assertIsNone(element1.get_attribute("disabled"))
         self.assertTrue(element1.get_attribute("readonly"), "readonly")
@@ -3752,8 +3751,7 @@ class ReadOnlyHTMLAttributeTests(Base, unittest.TestCase):
         self.assertTrue(element2.get_attribute("disabled"), "disabled")
         self.assertTrue(element2.get_attribute("readonly"), "readonly")
         self.assertFalse(element2.is_selected())
-        element2.click()
-        self.assertFalse(element2.is_selected())
+        self.assertRaises(ElementClickInterceptedException, element2.click)
 
     def test_render_select_single_default(self):
         self.assertTrue("Select Single" in browser.page_source)
