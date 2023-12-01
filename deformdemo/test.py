@@ -265,12 +265,7 @@ def setUpModule():
 
     elif driver_name == "selenium_local_firefox":
         from selenium.webdriver import Firefox
-        from selenium.webdriver.firefox.options import Options
-        options = Options()
-        options.add_argument("-profile")
-        options.add_argument('/home/trollfot/snap/firefox/common/tmp/seleniumprofile')
-        browser = Firefox(options=options)
-
+        browser = Firefox()
 
     elif driver_name == "selenium_container_chrome":
         from selenium_containers import start_chrome
