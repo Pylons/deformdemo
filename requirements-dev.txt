@@ -1,3 +1,2 @@
--e git+https://github.com/Pylons/deform.git@main#egg=deform
+-e git+https://github.com/novareto/deform.git@main#egg=deform
 -e ".[testing]"
-
