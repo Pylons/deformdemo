@@ -817,14 +817,10 @@ class DateInputWidgetTests(Base, unittest.TestCase):
     def test_submit_empty(self):
         clear_autofocused_picker()
         self.assertEqual(
-            findid("deformField1").get_attribute("validationMessage"),
-            ""
+            findid("deformField1").get_attribute("validationMessage"), ""
         )
         wait_to_click("#deformsubmit")
-        self.assertEqual(
-            findid("deformField1").get_attribute("validationMessage"),
-            "Please fill out this field."
-        )
+        self.assertEqual(findid_view("captured").text, "None")
 
     def test_submit_tooearly(self):
         clear_autofocused_picker()
@@ -879,7 +875,6 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Time" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Time")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
@@ -888,13 +883,10 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_empty(self):
         clear_autofocused_picker()
-        wait_to_click("#deformsubmit")
-        self.assertTrue(findcss(".is-invalid"))
-        self.assertEqual(findid_view("error-deformField1").text, "Required")
         self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), ""
+            findid("deformField1").get_attribute("validationMessage"),
+            "Please enter a number."
         )
-        self.assertEqual(findid_view("captured").text, "None")
 
     def test_submit_tooearly(self):
         wait_to_click("#deformField1")
@@ -923,7 +915,6 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/datetimeinput/")
 
     def test_render_default(self):
-        self.assertEqual(findcss(".required").text, "Date Time")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
             findid("deformField1-date").get_attribute("value"), ""
@@ -1019,7 +1010,6 @@ class DateTimeInputReadonlyTests(Base, unittest.TestCase):
     url = test_url("/datetimeinput_readonly/")
 
     def test_render_default(self):
-        self.assertEqual(findcss(".required").text, "Date Time")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(findid("deformField1").text, "2011-05-05 01:02:00")
 
@@ -1029,7 +1019,6 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Date" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Date")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
@@ -1037,50 +1026,52 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid("deformField1-month").get_attribute("value"), ""
         )
-        self.assertEqual(findid("deformField1-day").get_attribute("value"), "")
+        self.assertEqual(
+            findid("deformField1-day").get_attribute("value"),
+            ""
+        )
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
     def test_submit_empty(self):
-        wait_to_click("#deformsubmit")
-        self.assertEqual(findid("error-deformField1").text, "Required")
-        self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), ""
+            findid("deformField1").get_attribute("validationMessage"),
+            "Please enter a number."
         )
         self.assertEqual(
-            findid("deformField1-month").get_attribute("value"), ""
+            findid("deformField1-month").get_attribute("validationMessage"),
+            "Please enter a number."
         )
-        self.assertEqual(findid("deformField1-day").get_attribute("value"), "")
-        self.assertTrue(findcss(".is-invalid"))
+        self.assertEqual(
+            findid("deformField1-day").get_attribute("validationMessage"),
+            "Please enter a number."
+        )
 
     def test_submit_only_year(self):
         findid("deformField1").send_keys("2010")
-        wait_to_click("#deformsubmit")
-        self.assertEqual(findid("error-deformField1").text, "Incomplete date")
-        self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), "2010"
+            findid("deformField1").get_attribute("validationMessage"), ""
         )
         self.assertEqual(
-            findid("deformField1-month").get_attribute("value"), ""
+            findid("deformField1-month").get_attribute("validationMessage"), "Please enter a number."
         )
-        self.assertEqual(findid("deformField1-day").get_attribute("value"), "")
-        self.assertTrue(findcss(".is-invalid"))
+        self.assertEqual(
+            findid("deformField1-day").get_attribute("validationMessage"), "Please enter a number."
+        )
 
     def test_submit_only_year_and_month(self):
         findid("deformField1").send_keys("2010")
         findid("deformField1-month").send_keys("1")
-        wait_to_click("#deformsubmit")
-        self.assertTrue(findcss(".is-invalid"))
-        self.assertEqual(findid("error-deformField1").text, "Incomplete date")
-        self.assertEqual(findid("captured").text, "None")
+
         self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), "2010"
+            findid("deformField1").get_attribute("validationMessage"), ""
         )
         self.assertEqual(
-            findid("deformField1-month").get_attribute("value"), "1"
+            findid("deformField1-month").get_attribute("validationMessage"), ""
         )
-        self.assertEqual(findid("deformField1-day").get_attribute("value"), "")
+
+        self.assertEqual(
+            findid("deformField1-day").get_attribute("validationMessage"), "Please enter a number."
+        )
 
     def test_submit_tooearly(self):
         findid("deformField1").send_keys("2008")
@@ -1128,7 +1119,6 @@ class DatePartsReadonlyTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Date" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Date")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(findid("deformField1").text, "2010/05/05")
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
@@ -2298,7 +2288,6 @@ class SelectWidgetTests(Base, unittest.TestCase):
             [o.text for o in options],
             ["- Select -", "Habanero", "Jalapeno", "Chipotle"],
         )
-        self.assertEqual(findcss(".required").text, "Pepper")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_default(self):
@@ -2367,7 +2356,6 @@ class SelectWidgetIntegerTests(Base, unittest.TestCase):
         self.assertEqual(
             [o.text for o in options], ["- Select -", "Zero", "One", "Two"]
         )
-        self.assertEqual(findcss(".required").text, "Number")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_default(self):
@@ -2414,7 +2402,6 @@ class SelectWidgetWithOptgroupTests(Base, unittest.TestCase):
                 "John Bonham",
             ],
         )
-        self.assertEqual(findcss(".required").text, "Musician")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(len(findxpaths("//optgroup")), 2)
 
@@ -2452,7 +2439,6 @@ class SelectWidgetWithOptgroupAndLabelTests(SelectWidgetWithOptgroupTests):
                 "Drummers - John Bonham",
             ],
         )
-        self.assertEqual(findcss(".required").text, "Musician")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(len(findxpaths("//optgroup")), 2)
 
@@ -2528,7 +2514,6 @@ class Select2WidgetTests(Base, unittest.TestCase):
             [o.text for o in options],
             ["- Select -", "Habanero", "Jalapeno", "Chipotle"],
         )
-        self.assertEqual(findcss(".required").text, "Pepper")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_default(self):
@@ -2612,7 +2597,6 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
                 "John Bonham",
             ],
         )
-        self.assertEqual(findcss(".required").text, "Musician")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(len(findxpaths("//optgroup")), 2)
 
@@ -2722,7 +2706,6 @@ class SelectizeWidgetTests(Base, unittest.TestCase):
             [o.text for o in options],
             ["- Select -", "Habanero", "Jalapeno", "Chipotle"],
         )
-        self.assertEqual(findcss(".required").text, "Pepper")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_default(self):
@@ -2804,7 +2787,6 @@ class SelectizeWidgetWithOptgroupTests(Base, unittest.TestCase):
         self.assertEqual(
             len(browser.find_elements(By.CSS_SELECTOR, "div.optgroup")), 2
         )
-        self.assertEqual(findcss(".required").text, "Musician")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_selected(self):
@@ -2911,7 +2893,6 @@ class TextInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(element.get_attribute("name"), "text")
         self.assertEqual(element.get_attribute("type"), "text")
         self.assertEqual(element.get_attribute("value"), "")
-        self.assertEqual(findcss(".required").text, "Text")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
@@ -2946,7 +2927,6 @@ class TextInputWidgetHtml5Tests(Base, unittest.TestCase):
         self.assertEqual(element.get_attribute("step"), "0.01")
         self.assertEqual(element.get_attribute("min"), "0")
         self.assertEqual(element.get_attribute("max"), "99.99")
-        self.assertEqual(findcss(".required").text, "Hours Worked")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
@@ -2996,7 +2976,6 @@ class MoneyInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), "0.12"
         )
-        self.assertEqual(findcss(".required").text, "Greenbacks")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
@@ -3036,7 +3015,6 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
         )
-        self.assertEqual(findcss(".required").text, "Text")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
@@ -3095,7 +3073,6 @@ class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
         )
-        self.assertEqual(findcss(".required").text, "Text")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
@@ -3133,7 +3110,6 @@ class TextAreaWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid_view("deformField1").get_attribute("cols"), "60"
         )
-        self.assertEqual(findcss(".required").text, "Text")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
@@ -3154,7 +3130,6 @@ class TextAreaReadonlyTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertEqual(findid("deformField1").text, "text")
-        self.assertEqual(findcss(".required").text, "Text")
         self.assertEqual(findid("captured").text, "None")
 
 
@@ -3186,7 +3161,6 @@ class RichTextWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
         )
-        self.assertEqual(findcss(".required").text, "Text")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
@@ -3220,7 +3194,6 @@ class RichTextReadonlyTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertEqual(findid("deformField1").text, "<p>Hi!</p>")
-        self.assertEqual(findcss(".required").text, "Text")
         self.assertEqual(findid("captured").text, "None")
 
 
@@ -3407,7 +3380,6 @@ class TextAreaCSVWidgetTests(Base, unittest.TestCase):
             findid_view("deformField1").get_attribute("value"),
             "1,hello,4.5\n2,goodbye,5.5\n",
         )
-        self.assertEqual(findcss(".required").text, "Csv")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_default(self):
@@ -3433,9 +3405,16 @@ class TextAreaCSVWidgetTests(Base, unittest.TestCase):
         )
 
     def test_submit_empty(self):
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            ""
+        )
         findid("deformField1").clear()
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            "Please fill out this field."
+        )
         wait_to_click("#deformsubmit")
-        self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertEqual(findid("captured").text, "None")
 
 
@@ -3451,7 +3430,6 @@ class TextInputCSVWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), "1,hello,4.5"
         )
-        self.assertEqual(findcss(".required").text, "Csv")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_default(self):
