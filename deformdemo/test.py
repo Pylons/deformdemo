@@ -3400,6 +3400,7 @@ class DelayedRichTextWidgetTests(Base, unittest.TestCase):
     def test_submit_filled(self):
         findcss(".tinymce-preload").click()
         time.sleep(0.5)
+        ActionChains(browser).scroll_by_amount(0, 200).perform()
         browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
         findid("tinymce").click()
         findid("tinymce").send_keys("hello")
