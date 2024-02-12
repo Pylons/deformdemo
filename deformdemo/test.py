@@ -14,6 +14,8 @@ from selenium.common.exceptions import ElementNotInteractableException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
+from selenium.common.exceptions import TimeoutException
+from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -102,6 +104,12 @@ def action_chains_xpath_on_select(option_xpath):
 
 def action_chains_on_css_selector(css_selector):
     return ActionChains(browser).move_to_element(findcss(css_selector))
+
+
+def disable_html5_validation():
+    browser.execute_script(
+        "document.getElementById('deform').noValidate = true;"
+    )
 
 
 @give_selenium_some_time
@@ -266,6 +274,13 @@ def setUpModule():
 
         browser = Firefox()
 
+        # from selenium.webdriver import Firefox
+        # from selenium.webdriver.firefox.options import Options
+        # options = Options()
+        # options.add_argument("-profile")
+        # options.add_argument('/home/trollfot/snap/firefox/common/tmp/seleniumprofile')
+        # browser = Firefox(options=options)
+
     elif driver_name == "selenium_container_chrome":
         from selenium_containers import start_chrome
 
@@ -405,7 +420,6 @@ class CheckboxChoiceWidgetTests(Base, unittest.TestCase):
         self.assertFalse(findid("deformField1-0").is_selected())
         self.assertFalse(findid("deformField1-1").is_selected())
         self.assertFalse(findid("deformField1-2").is_selected())
-        self.assertEqual(findcss(".required").text, "Pepper")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_unchecked(self):
@@ -452,7 +466,6 @@ class CheckboxChoiceWidgetInlineTests(Base, unittest.TestCase):
         self.assertFalse(findid("deformField1-0").is_selected())
         self.assertFalse(findid("deformField1-1").is_selected())
         self.assertFalse(findid("deformField1-2").is_selected())
-        self.assertEqual(findcss(".required").text, "Pepper")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_unchecked(self):
@@ -507,13 +520,11 @@ class CheckboxWidgetTests(Base, unittest.TestCase):
     def test_render_default(self):
         self.assertTrue("I Want It!" in browser.page_source)
         self.assertFalse(findid("deformField1").is_selected())
-        self.assertEqual(findcss(".required").text, "I Want It!")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_unchecked(self):
         wait_to_click("#deformsubmit")
-        self.assertFalse(findid_view("deformField1").is_selected())
-        self.assertEqual(findid_view("captured").text, "{'want': False}")
+        self.assertEqual(findid_view("deformField1").get_attribute("validationMessage"), "Please check this box if you want to proceed.")
 
     def test_submit_checked(self):
         findid("deformField1").click()
@@ -536,7 +547,6 @@ class CheckedInputWidgetTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Email Address" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Email Address")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
@@ -547,6 +557,7 @@ class CheckedInputWidgetTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertEqual(findid("error-deformField1").text, "Required")
@@ -557,6 +568,16 @@ class CheckedInputWidgetTests(Base, unittest.TestCase):
             findid("deformField1-confirm").get_attribute("value"), ""
         )
         self.assertEqual(findid("captured").text, "None")
+
+    def test_submit_empty_html5(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute("validationMessage"),
+            "Please fill out this field."
+        )
+        self.assertEqual(
+            findid("deformField1-confirm").get_attribute("validationMessage"),
+            "Please fill out this field."
+        )
 
     def test_submit_invalid(self):
         findid("deformField1").send_keys("this")
@@ -613,7 +634,7 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
     url = test_url("/checkedinput_withmask/")
 
     def test_render_default(self):
-        self.assertEqual(findcss(".required").text, "Social Security Number")
+        self.assertEqual(findcss(".form-label").text, "Social Security Number")
         self.assertEqual(findid("captured").text, "None")
 
         # Ensure the masked input has a focus and ### mask
@@ -662,7 +683,6 @@ class CheckedInputReadonlyTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Email Address" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Email Address")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(findid("deformField1").text, "ww@graymatter.com")
 
@@ -724,7 +744,6 @@ class CheckedPasswordRedisplayWidgetTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Password" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Password")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
@@ -741,6 +760,7 @@ class CheckedPasswordRedisplayWidgetTests(Base, unittest.TestCase):
         )
 
     def test_submit_empty(self):
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertEqual(findid("error-deformField1").text, "Required")
@@ -751,6 +771,16 @@ class CheckedPasswordRedisplayWidgetTests(Base, unittest.TestCase):
             findid("deformField1-confirm").get_attribute("value"), ""
         )
         self.assertEqual(findid("captured").text, "None")
+
+    def test_submit_empty_html5(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute('required'),
+            'true'
+        )
+        self.assertEqual(
+            findid("deformField1").get_attribute("validationMessage"),
+            "Please fill out this field."
+        )
 
     def test_submit_tooshort(self):
         findid("deformField1").send_keys("this")
@@ -802,7 +832,6 @@ class CheckedPasswordReadonlyTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Password" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Password")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
             findid("deformField1").text, "Password not displayed."
@@ -816,7 +845,6 @@ class DateInputWidgetTests(Base, unittest.TestCase):
     def test_render_default(self):
         clear_autofocused_picker()
         self.assertTrue("Date" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Date")
         self.assertEqual(findid_view("captured").text, "None")
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
@@ -824,6 +852,7 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         clear_autofocused_picker()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
@@ -832,6 +861,12 @@ class DateInputWidgetTests(Base, unittest.TestCase):
             findid_view("deformField1").get_attribute("value"), ""
         )
         self.assertEqual(findid_view("captured").text, "None")
+
+    def test_submit_empty_html5(self):
+        clear_autofocused_picker()
+        self.assertEqual(
+            findid("deformField1").get_attribute("validationMessage"), ""
+        )
 
     def test_submit_tooearly(self):
         clear_autofocused_picker()
@@ -886,7 +921,6 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Time" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Time")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
@@ -894,6 +928,7 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         clear_autofocused_picker()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
@@ -902,6 +937,12 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
             findid_view("deformField1").get_attribute("value"), ""
         )
         self.assertEqual(findid_view("captured").text, "None")
+
+    def test_submit_empty_html5(self):
+        clear_autofocused_picker()
+        self.assertEqual(
+            findid("deformField1").get_attribute("validationMessage"), ""
+        )
 
     def test_submit_tooearly(self):
         wait_to_click("#deformField1")
@@ -930,7 +971,6 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/datetimeinput/")
 
     def test_render_default(self):
-        self.assertEqual(findcss(".required").text, "Date Time")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
             findid("deformField1-date").get_attribute("value"), ""
@@ -1026,7 +1066,6 @@ class DateTimeInputReadonlyTests(Base, unittest.TestCase):
     url = test_url("/datetimeinput_readonly/")
 
     def test_render_default(self):
-        self.assertEqual(findcss(".required").text, "Date Time")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(findid("deformField1").text, "2011-05-05 01:02:00")
 
@@ -1036,7 +1075,6 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Date" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Date")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
@@ -1044,10 +1082,14 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid("deformField1-month").get_attribute("value"), ""
         )
-        self.assertEqual(findid("deformField1-day").get_attribute("value"), "")
+        self.assertEqual(
+            findid("deformField1-day").get_attribute("value"),
+            ""
+        )
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertEqual(findid("captured").text, "None")
@@ -1060,7 +1102,22 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("deformField1-day").get_attribute("value"), "")
         self.assertTrue(findcss(".is-invalid"))
 
+    def test_submit_empty_html5(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute("validationMessage"),
+            "Please enter a number."
+        )
+        self.assertEqual(
+            findid("deformField1-month").get_attribute("validationMessage"),
+            "Please enter a number."
+        )
+        self.assertEqual(
+            findid("deformField1-day").get_attribute("validationMessage"),
+            "Please enter a number."
+        )
+
     def test_submit_only_year(self):
+        disable_html5_validation()
         findid("deformField1").send_keys("2010")
         wait_to_click("#deformsubmit")
         self.assertEqual(findid("error-deformField1").text, "Incomplete date")
@@ -1075,6 +1132,7 @@ class DatePartsWidgetTests(Base, unittest.TestCase):
         self.assertTrue(findcss(".is-invalid"))
 
     def test_submit_only_year_and_month(self):
+        disable_html5_validation()
         findid("deformField1").send_keys("2010")
         findid("deformField1-month").send_keys("1")
         wait_to_click("#deformsubmit")
@@ -1135,7 +1193,6 @@ class DatePartsReadonlyTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertTrue("Date" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Date")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(findid("deformField1").text, "2010/05/05")
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
@@ -1171,15 +1228,21 @@ class EditFormTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertEqual(findid("error-deformField3").text, "Required")
         self.assertEqual(findid("captured").text, "None")
 
+    def test_submit_empty_html5(self):
+        self.assertEqual(
+            findid("deformField3").get_attribute(
+                "validationMessage"), "Please fill out this field."
+        )
+
     def test_submit_success(self):
         findid("deformField3").send_keys("name")
         wait_to_click("#deformsubmit")
-        self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), "42"
         )
@@ -1217,6 +1280,7 @@ class MappingWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("deformField4-day").get_attribute("value"), "")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertEqual(findid("error-deformField1").text, "Required")
@@ -1224,15 +1288,39 @@ class MappingWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("error-deformField4").text, "Required")
         self.assertEqual(findid("captured").text, "None")
 
+    def test_submit_empty_html5(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute(
+                "validationMessage"), "Please fill out this field."
+        )
+        self.assertEqual(
+            findid("deformField3").get_attribute(
+                "validationMessage"), "Please fill out this field."
+        )
+        self.assertEqual(
+            findid("deformField4").get_attribute(
+                "validationMessage"), "Please enter a number."
+        )
+        self.assertEqual(
+            findid("deformField4-month").get_attribute(
+                "validationMessage"), "Please enter a number."
+        )
+        self.assertEqual(
+            findid("deformField4-day").get_attribute(
+                "validationMessage"), "Please enter a number."
+        )
+
     def test_submit_invalid_number(self):
         findid("deformField1").send_keys("notanumber")
+        findid("deformField3").send_keys("test")
+        findid("deformField4").send_keys("2023")
+        findid("deformField4-month").send_keys("12")
+        findid("deformField4-day").send_keys("24")
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertEqual(
             findid("error-deformField1").text, '"notanumber" is not a number'
         )
-        self.assertEqual(findid("error-deformField3").text, "Required")
-        self.assertEqual(findid("error-deformField4").text, "Required")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_invalid_date(self):
@@ -1300,6 +1388,7 @@ class FieldDefaultTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertEqual(
@@ -1311,6 +1400,19 @@ class FieldDefaultTests(Base, unittest.TestCase):
         )
         self.assertEqual(findid("deformField3").get_attribute("value"), "")
         self.assertEqual(findid("error-deformField3").text, "Required")
+
+    def test_submit_empty_html5(self):
+        self.assertEqual(
+            findid("deformField3").get_attribute(
+                "validationMessage"), "Please fill out this field."
+        )
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("value"), "Grandaddy"
+        )
+        self.assertEqual(
+            findid("deformField2").get_attribute("value"),
+            "Just Like the Fambly Cat",
+        )
 
     def test_submit_success(self):
         findid("deformField1").clear()
@@ -1344,6 +1446,7 @@ class NonRequiredFieldTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertEqual(
@@ -1352,6 +1455,16 @@ class NonRequiredFieldTests(Base, unittest.TestCase):
         self.assertEqual(findid("deformField2").get_attribute("value"), "")
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertEqual(findid("captured").text, "None")
+
+    def test_submit_empty_html5(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute(
+                "validationMessage"), "Please fill out this field."
+        )
+        self.assertEqual(
+            findid("deformField2").get_attribute(
+                "validationMessage"), ""
+        )
 
     def test_submit_success_required_filled_notrequired_empty(self):
         findid("deformField1").send_keys("abc")
@@ -1437,40 +1550,48 @@ class FileUploadTests(Base, unittest.TestCase):
             findcss("input[type=file]").get_attribute("value"), ""
         )
         self.assertEqual(
-            findcss(".upload-filename").get_attribute("value"), ""
+            findcss("input[type=file]").get_attribute("data-filename"), None
         )
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertEqual(findid("captured").text, "None")
+
+    def test_html5_attributes(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute("required"),
+            "true"
+        )
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            "Please select a file."
+        )
 
     def test_submit_filled(self):
         # submit one first
         path, filename = _getFile()
         findcss("input[type=file]").send_keys(path)
         self.assertEqual(
-            findcss(".upload-filename").get_attribute("value"), filename
+            findcss("input[type=file]").get_attribute("value"), f"C:\\fakepath\\{filename}"
         )
         wait_to_click("#deformsubmit")
 
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
-        self.assertEqual(
-            findcss("input[type=file]").get_attribute("value"), ""
-        )
-        self.assertEqual(
-            findcss(".upload-filename").get_attribute("value"), filename
-        )
         self.assertTrue(filename in findid("captured").text)
+        self.assertEqual(
+            findcss("input[type=file]").get_attribute("data-filename"), filename
+        )
         uid = findcss("[name=uid]").get_attribute("value")
         self.assertTrue(uid in findid("captured").text)
 
         # resubmit without entering a new filename should not change the file
         wait_to_click("#deformsubmit")
         self.assertEqual(
-            findcss(".upload-filename").get_attribute("value"), filename
+            findcss("input[type=file]").get_attribute("data-filename"), filename
         )
         self.assertEqual(findcss("[name=uid]").get_attribute("value"), uid)
 
@@ -1478,8 +1599,9 @@ class FileUploadTests(Base, unittest.TestCase):
         path2, filename2 = _getFile("validation.py")
         findcss("input[type=file]").send_keys(path2)
         wait_to_click("#deformsubmit")
-        got_name = findcss(".upload-filename").get_attribute("value")
-        self.assertEqual(got_name, filename2)
+        self.assertEqual(
+            findcss("input[type=file]").get_attribute("data-filename"), filename2
+        )
         self.assertTrue("filename" in findid("captured").text)
         self.assertTrue(uid in findid("captured").text)
 
@@ -1507,6 +1629,7 @@ class InterFieldValidationTests(Base, unittest.TestCase):
         self.assertEqual(findid_view("captured").text, "None")
 
     def test_submit_both_empty(self):
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertEqual(findid_view("error-deformField1").text, "Required")
@@ -1520,6 +1643,7 @@ class InterFieldValidationTests(Base, unittest.TestCase):
         self.assertEqual(findid_view("captured").text, "None")
 
     def test_submit_one_empty(self):
+        disable_html5_validation()
         findid("deformField1").send_keys("abc")
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
@@ -1606,6 +1730,7 @@ class InternationalizationTests(Base, unittest.TestCase):
 
     def test_submit_empty_en(self):
         browser.get("%s?_LOCALE_=en" % self.url)
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertEqual(
             findcss(".alert-danger").text,
@@ -1618,6 +1743,7 @@ class InternationalizationTests(Base, unittest.TestCase):
 
     def test_submit_empty_ru(self):
         browser.get("%s?_LOCALE_=ru" % self.url)
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertEqual(
             findcss(".alert-danger .error-msg-lbl").text,
@@ -1678,20 +1804,29 @@ class PasswordWidgetRedisplayTests(Base, unittest.TestCase):
         self.assertTrue("Password" in browser.page_source)
         self.assertEqual(findid("captured").text, "None")
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
-        self.assertEqual(findcss(".required").text, "Password")
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
         )
 
     def test_render_submit_empty(self):
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertTrue("Password" in browser.page_source)
-        self.assertEqual(findcss(".required").text, "Password")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
         )
         self.assertEqual(findid("error-deformField1").text, "Required")
+
+    def test_html5_attributes(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute("required"),
+            "true"
+        )
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            "Please fill out this field."
+        )
 
     def test_render_submit_success(self):
         findid("deformField1").send_keys("abcdef123")
@@ -1714,16 +1849,30 @@ class RadioChoiceWidgetTests(Base, unittest.TestCase):
         self.assertFalse(findid("deformField1-0").is_selected())
         self.assertFalse(findid("deformField1-1").is_selected())
         self.assertFalse(findid("deformField1-2").is_selected())
-        self.assertEqual(findcss(".required").text, "Choose your pepper")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_unchecked(self):
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertFalse(findid("deformField1-0").is_selected())
         self.assertFalse(findid("deformField1-1").is_selected())
         self.assertFalse(findid("deformField1-2").is_selected())
         self.assertEqual(findid("captured").text, "None")
+
+    def test_html5_attributes(self):
+        self.assertEqual(
+            findid("deformField1-0").get_attribute('required'),
+            'true'
+        )
+        self.assertEqual(
+            findid("deformField1-1").get_attribute('required'),
+            'true'
+        )
+        self.assertEqual(
+            findid("deformField1-2").get_attribute('required'),
+            'true'
+        )
 
     def test_submit_one_checked(self):
         findid("deformField1-0").click()
@@ -1744,16 +1893,30 @@ class RadioChoiceWidgetInlineTests(Base, unittest.TestCase):
         self.assertFalse(findid("deformField1-0").is_selected())
         self.assertFalse(findid("deformField1-1").is_selected())
         self.assertFalse(findid("deformField1-2").is_selected())
-        self.assertEqual(findcss(".required").text, "Choose your pepper")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_unchecked(self):
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertFalse(findid("deformField1-0").is_selected())
         self.assertFalse(findid("deformField1-1").is_selected())
         self.assertFalse(findid("deformField1-2").is_selected())
         self.assertEqual(findid("captured").text, "None")
+
+    def test_html5_attributes(self):
+        self.assertEqual(
+            findid("deformField1-0").get_attribute('required'),
+            'true'
+        )
+        self.assertEqual(
+            findid("deformField1-1").get_attribute('required'),
+            'true'
+        )
+        self.assertEqual(
+            findid("deformField1-2").get_attribute('required'),
+            'true'
+        )
 
     def test_submit_one_checked(self):
         findid("deformField1-0").click()
@@ -1783,7 +1946,6 @@ class RadioChoiceReadonlyTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertEqual(findid("deformField1-1").text, "Jalapeno")
-        self.assertEqual(findcss(".required").text, "Pepper")
         self.assertEqual(findid("captured").text, "None")
 
 
@@ -1893,6 +2055,7 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
     def test_submit_two_unfilled(self):
+        disable_html5_validation()
         findid("deformField1-seqAdd").click()
         findid("deformField1-seqAdd").click()
         wait_to_click("#deformsubmit")
@@ -1911,7 +2074,7 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
             findcss("input[type=file]").get_attribute("value"), ""
         )
         self.assertEqual(
-            findcss(".upload-filename").get_attribute("value"), filename
+            findcss("input[type=file]").get_attribute("data-filename"), filename
         )
         uid = findcss("[name=uid]").get_attribute("value")
         self.assertTrue(filename in findid("captured").text)
@@ -1929,7 +2092,7 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
             findcss("input[type=file]").get_attribute("value"), ""
         )
         self.assertEqual(
-            findcss(".upload-filename").get_attribute("value"), filename
+            findcss("input[type=file]").get_attribute("data-filename"), filename
         )
         uid = findcss("[name=uid]").get_attribute("value")
         self.assertTrue(filename in findid("captured").text)
@@ -1945,7 +2108,7 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
         findcss("input[type=file]").send_keys(path2)
         wait_to_click("#deformsubmit")
         self.assertEqual(
-            findcss(".upload-filename").get_attribute("value"), filename2
+            findcss("input[type=file]").get_attribute("data-filename"), filename2
         )
         self.assertTrue(filename2 in findid("captured").text)
 
@@ -1954,21 +2117,21 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
         findid("deformField1-seqAdd").click()
         findxpaths('//input[@name="upload"]')[1].send_keys(path)
         wait_to_click("#deformsubmit")
-        upload_filenames = findcsses(".upload-filename")
-        self.assertEqual(upload_filenames[0].get_attribute("value"), filename2)
-        self.assertEqual(upload_filenames[1].get_attribute("value"), filename)
+        upload_filenames = findcsses("input[type=file]")
+        self.assertEqual(upload_filenames[0].get_attribute("data-filename"), filename2)
+        self.assertEqual(upload_filenames[1].get_attribute("data-filename"), filename)
 
         # resubmit should not change either file
         wait_to_click("#deformsubmit")
-        upload_filenames = findcsses(".upload-filename")
-        self.assertEqual(upload_filenames[0].get_attribute("value"), filename2)
-        self.assertEqual(upload_filenames[1].get_attribute("value"), filename)
+        upload_filenames = findcsses("input[type=file]")
+        self.assertEqual(upload_filenames[0].get_attribute("data-filename"), filename2)
+        self.assertEqual(upload_filenames[1].get_attribute("data-filename"), filename)
 
         # remove a file
         findid("deformField4-close").click()
         wait_to_click("#deformsubmit")
-        upload_filenames = findcsses(".upload-filename")
-        self.assertEqual(upload_filenames[0].get_attribute("value"), filename2)
+        upload_filenames = findcsses("input[type=file]")
+        self.assertEqual(upload_filenames[0].get_attribute("data-filename"), filename2)
         self.assertEqual(len(upload_filenames), 1)
 
 
@@ -1981,6 +2144,7 @@ class SequenceOfFileUploadsWithInitialItemTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_none_added(self):
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertEqual(findid("error-deformField3").text, "Required")
         self.assertEqual(findid("captured").text, "None")
@@ -1990,18 +2154,18 @@ class SequenceOfFileUploadsWithInitialItemTests(Base, unittest.TestCase):
         findid("deformField1-seqAdd").click()
         findxpaths('//input[@name="upload"]')[0].send_keys(path)
         upload_filenames = [
-            elem.get_attribute("value")
-            for elem in findcsses(".upload-filename")
+            elem.get_attribute("data-filename")
+            for elem in findcsses("input[type=file]")
         ]
-        self.assertEqual(upload_filenames[0], filename)
-        self.assertEqual(upload_filenames[1], "")
+        self.assertEqual(upload_filenames[0], None)
+        self.assertEqual(upload_filenames[1], None)
         findxpaths('//input[@name="upload"]')[1].send_keys(path)
         wait_to_click("#deformsubmit")
 
         # first element present
         upload_filenames = [
-            elem.get_attribute("value")
-            for elem in findcsses(".upload-filename")
+            elem.get_attribute("data-filename")
+            for elem in findcsses("input[type=file]")
         ]
         uid_elems = findcsses("[name=uid]")
         self.assertEqual(upload_filenames[0], filename)
@@ -2028,6 +2192,7 @@ class SequenceOfMappingsTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "{'people': []}")
 
     def test_submit_two_unfilled(self):
+        disable_html5_validation()
         findid("deformField1-seqAdd").click()
         findid("deformField1-seqAdd").click()
         wait_to_click("#deformsubmit")
@@ -2083,6 +2248,7 @@ class SequenceOfMappingsWithInitialItemTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_none_added(self):
+        disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertEqual(findid("error-deformField6").text, "Required")
         self.assertEqual(findid("error-deformField7").text, "Required")
@@ -2120,6 +2286,7 @@ class SequenceOfAutocompletes(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "{'texts': []}")
 
     def test_submit_two_unfilled(self):
+        disable_html5_validation()
         findid("deformField1-seqAdd").click()
         findid("deformField1-seqAdd").click()
         wait_to_click("#deformsubmit")
@@ -2261,6 +2428,7 @@ class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
     def test_submit_two_unfilled(self):
+        disable_html5_validation()
         findid("deformField1-seqAdd").click()
         findid("deformField1-seqAdd").click()
         findid("deformsubmit").click()
@@ -2298,16 +2466,26 @@ class SelectWidgetTests(Base, unittest.TestCase):
             [o.text for o in options],
             ["- Select -", "Habanero", "Jalapeno", "Chipotle"],
         )
-        self.assertEqual(findcss(".required").text, "Pepper")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_default(self):
+        disable_html5_validation()
         findid("deformsubmit").click()
         self.assertTrue("Pepper" in browser.page_source)
         select = findid("deformField1")
         self.assertEqual(select.get_attribute("name"), "pepper")
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertEqual(findid("captured").text, "None")
+
+    def test_html5_attributes(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute("required"),
+            "true"
+        )
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            "Please select an item in the list."
+        )
 
     def test_submit_selected(self):
         select = findid("deformField1")
@@ -2327,6 +2505,12 @@ class SelectWidgetTests(Base, unittest.TestCase):
 
 class SelectWidgetWithSizeTests(SelectWidgetTests):
     url = test_url("/select_with_size/")
+
+    def test_html5_attributes(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute("required"),
+            "true"
+        )
 
 
 class SelectWidgetWithUnicodeTests(SelectWidgetTests):
@@ -2367,10 +2551,10 @@ class SelectWidgetIntegerTests(Base, unittest.TestCase):
         self.assertEqual(
             [o.text for o in options], ["- Select -", "Zero", "One", "Two"]
         )
-        self.assertEqual(findcss(".required").text, "Number")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_default(self):
+        disable_html5_validation()
         findid("deformsubmit").click()
         self.assertTrue("Number" in browser.page_source)
         select = findid("deformField1")
@@ -2379,6 +2563,16 @@ class SelectWidgetIntegerTests(Base, unittest.TestCase):
         self.assertTrue(options[0].is_selected())
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertEqual(findid("captured").text, "None")
+
+    def test_html5_attributes(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute("required"),
+            "true"
+        )
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            "Please select an item in the list."
+        )
 
     def test_submit_selected(self):
         select = findid("deformField1")
@@ -2414,7 +2608,6 @@ class SelectWidgetWithOptgroupTests(Base, unittest.TestCase):
                 "John Bonham",
             ],
         )
-        self.assertEqual(findcss(".required").text, "Musician")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(len(findxpaths("//optgroup")), 2)
 
@@ -2452,7 +2645,6 @@ class SelectWidgetWithOptgroupAndLabelTests(SelectWidgetWithOptgroupTests):
                 "Drummers - John Bonham",
             ],
         )
-        self.assertEqual(findcss(".required").text, "Musician")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(len(findxpaths("//optgroup")), 2)
 
@@ -2528,10 +2720,20 @@ class Select2WidgetTests(Base, unittest.TestCase):
             [o.text for o in options],
             ["- Select -", "Habanero", "Jalapeno", "Chipotle"],
         )
-        self.assertEqual(findcss(".required").text, "Pepper")
         self.assertEqual(findid("captured").text, "None")
 
+    def test_html5_attributes(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute("required"),
+            "true"
+        )
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            "Please select an item in the list."
+        )
+
     def test_submit_default(self):
+        disable_html5_validation()
         findid("deformsubmit").click()
         self.assertTrue("Pepper" in browser.page_source)
         select = findid("deformField1")
@@ -2542,6 +2744,7 @@ class Select2WidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_selected(self):
+        disable_html5_validation()
         findid("deformsubmit").click()
         self.assertTrue(findcss(".is-invalid").is_displayed())
 
@@ -2612,7 +2815,6 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
                 "John Bonham",
             ],
         )
-        self.assertEqual(findcss(".required").text, "Musician")
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(len(findxpaths("//optgroup")), 2)
 
@@ -2722,7 +2924,6 @@ class SelectizeWidgetTests(Base, unittest.TestCase):
             [o.text for o in options],
             ["- Select -", "Habanero", "Jalapeno", "Chipotle"],
         )
-        self.assertEqual(findcss(".required").text, "Pepper")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_default(self):
@@ -2804,7 +3005,6 @@ class SelectizeWidgetWithOptgroupTests(Base, unittest.TestCase):
         self.assertEqual(
             len(browser.find_elements(By.CSS_SELECTOR, "div.optgroup")), 2
         )
-        self.assertEqual(findcss(".required").text, "Musician")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_selected(self):
@@ -2911,10 +3111,10 @@ class TextInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(element.get_attribute("name"), "text")
         self.assertEqual(element.get_attribute("type"), "text")
         self.assertEqual(element.get_attribute("value"), "")
-        self.assertEqual(findcss(".required").text, "Text")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         findid("deformsubmit").click()
         element = findid("deformField1")
         self.assertEqual(element.get_attribute("name"), "text")
@@ -2946,10 +3146,10 @@ class TextInputWidgetHtml5Tests(Base, unittest.TestCase):
         self.assertEqual(element.get_attribute("step"), "0.01")
         self.assertEqual(element.get_attribute("min"), "0")
         self.assertEqual(element.get_attribute("max"), "99.99")
-        self.assertEqual(findcss(".required").text, "Hours Worked")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         findid("deformField1").clear()
         findid("deformsubmit").click()
         element = findid("deformField1")
@@ -2996,14 +3196,21 @@ class MoneyInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), "0.12"
         )
-        self.assertEqual(findcss(".required").text, "Greenbacks")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
-        findid("deformField1").send_keys("12")
-        findid("deformsubmit").click()
+        # Cannot submit empty money field.
+        # default value is always 0.00
+        pass
+
+    def test_html5_attributes(self):
         self.assertEqual(
-            findid("captured").text, "{'greenbacks': Decimal('0.12')}"
+            findid("deformField1").get_attribute("required"),
+            "true"
+        )
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            ""
         )
 
     def test_submit_filled(self):
@@ -3036,14 +3243,24 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
         )
-        self.assertEqual(findcss(".required").text, "Text")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         findid("deformsubmit").click()
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertTrue(findcss(".is-invalid"))
         self.assertEqual(findid("captured").text, "None")
+
+    def test_submit_empty_html5(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute("required"),
+            "true"
+        )
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            "Please fill out this field."
+        )
 
     def test_submit_filled(self):
         findid("deformField1").send_keys("ba")
@@ -3095,13 +3312,23 @@ class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
         )
-        self.assertEqual(findcss(".required").text, "Text")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         findid("deformsubmit").click()
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertEqual(findid("captured").text, "None")
+
+    def test_html5_attributes(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute("required"),
+            "true"
+        )
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            "Please fill out this field."
+        )
 
     def test_submit_filled(self):
         findid("deformField1").send_keys("t")
@@ -3133,14 +3360,24 @@ class TextAreaWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid_view("deformField1").get_attribute("cols"), "60"
         )
-        self.assertEqual(findcss(".required").text, "Text")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         findid("deformsubmit").click()
         self.assertEqual(findid("captured").text, "None")
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertTrue(findcss(".is-invalid"))
+
+    def test_html5_attributes(self):
+        self.assertEqual(
+            findid("deformField1").get_attribute("required"),
+            "true"
+        )
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            "Please fill out this field."
+        )
 
     def test_submit_filled(self):
         findid("deformField1").send_keys("hello")
@@ -3154,7 +3391,6 @@ class TextAreaReadonlyTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertEqual(findid("deformField1").text, "text")
-        self.assertEqual(findcss(".required").text, "Text")
         self.assertEqual(findid("captured").text, "None")
 
 
@@ -3162,9 +3398,10 @@ class DelayedRichTextWidgetTests(Base, unittest.TestCase):
     url = test_url("/delayed_richtext/")
 
     def test_submit_filled(self):
-        findcss(".tinymce-preload").click()
+        findcss(".tinymce").click()
         time.sleep(0.5)
         browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
+        ActionChains(browser).scroll_by_amount(0, 200).perform()
         findid("tinymce").click()
         findid("tinymce").send_keys("hello")
         browser.switch_to.default_content()
@@ -3186,7 +3423,6 @@ class RichTextWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
         )
-        self.assertEqual(findcss(".required").text, "Text")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty(self):
@@ -3220,7 +3456,6 @@ class RichTextReadonlyTests(Base, unittest.TestCase):
 
     def test_render_default(self):
         self.assertEqual(findid("deformField1").text, "<p>Hi!</p>")
-        self.assertEqual(findcss(".required").text, "Text")
         self.assertEqual(findid("captured").text, "None")
 
 
@@ -3365,7 +3600,7 @@ class SequenceOrderableTests(Base, unittest.TestCase):
         ActionChains(browser).drag_and_drop_by_offset(
             persons[0], 0, seq_height * 1.5
         ).perform()
-        
+
         ActionChains(browser).scroll_by_amount(0, 200).perform()
         time.sleep(0.2)
         action_chains_on_id("deformsubmit").click().perform()
@@ -3407,7 +3642,6 @@ class TextAreaCSVWidgetTests(Base, unittest.TestCase):
             findid_view("deformField1").get_attribute("value"),
             "1,hello,4.5\n2,goodbye,5.5\n",
         )
-        self.assertEqual(findcss(".required").text, "Csv")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_default(self):
@@ -3433,10 +3667,22 @@ class TextAreaCSVWidgetTests(Base, unittest.TestCase):
         )
 
     def test_submit_empty(self):
+        disable_html5_validation()
         findid("deformField1").clear()
         wait_to_click("#deformsubmit")
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertEqual(findid("captured").text, "None")
+
+    def test_submit_empty_html5(self):
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            ""
+        )
+        findid("deformField1").clear()
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            "Please fill out this field."
+        )
 
 
 class WidgetAdapterTests(TextAreaCSVWidgetTests):
@@ -3451,7 +3697,6 @@ class TextInputCSVWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), "1,hello,4.5"
         )
-        self.assertEqual(findcss(".required").text, "Csv")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_default(self):
@@ -3472,9 +3717,10 @@ class TextInputCSVWidgetTests(Base, unittest.TestCase):
 
     def test_submit_empty(self):
         findid("deformField1").clear()
-        wait_to_click("#deformsubmit")
-        self.assertEqual(findid("error-deformField1").text, "Required")
-        self.assertEqual(findid("captured").text, "None")
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            "Please fill out this field."
+        )
 
 
 class MultipleFormsTests(Base, unittest.TestCase):
@@ -3553,6 +3799,7 @@ class AjaxFormTests(Base, unittest.TestCase):
         self.assertEqual(findid("deformField4-day").get_attribute("value"), "")
 
     def test_submit_empty(self):
+        disable_html5_validation()
         source = browser.page_source
         wait_to_click("#deformsubmit")
         wait_for_ajax(source)
@@ -3561,16 +3808,41 @@ class AjaxFormTests(Base, unittest.TestCase):
         self.assertEqual(findid("error-deformField4").text, "Required")
         self.assertEqual(findid("captured").text, "None")
 
+    def test_submit_empty_html5(self):
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            "Please fill out this field."
+        )
+        self.assertEqual(
+            findid_view("deformField3").get_attribute("validationMessage"),
+            "Please fill out this field."
+        )
+        self.assertEqual(
+            findid_view("deformField4").get_attribute("validationMessage"),
+            "Please enter a number."
+        )
+        self.assertEqual(
+            findid_view("deformField4-month").get_attribute("validationMessage"),
+            "Please enter a number."
+        )
+        self.assertEqual(
+            findid_view("deformField4-day").get_attribute("validationMessage"),
+            "Please enter a number."
+        )
+
     def test_submit_invalid(self):
         findid("deformField1").send_keys("notanumber")
+        findid("deformField3").send_keys("name")
+        findid("deformField4").send_keys("2010")
+        findid("deformField4-month").send_keys("1")
+        findid("deformField4-day").send_keys("1")
+
         source = browser.page_source
         wait_to_click("#deformsubmit")
         wait_for_ajax(source)
         self.assertEqual(
             findid("error-deformField1").text, '"notanumber" is not a number'
         )
-        self.assertEqual(findid("error-deformField3").text, "Required")
-        self.assertEqual(findid("error-deformField4").text, "Required")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_success(self):
@@ -3740,8 +4012,7 @@ class ReadOnlyHTMLAttributeTests(Base, unittest.TestCase):
         self.assertTrue(element0.get_attribute("disabled"), "disabled")
         self.assertTrue(element0.get_attribute("readonly"), "readonly")
         self.assertFalse(element0.is_selected())
-        element0.click()
-        self.assertFalse(element0.is_selected())
+        self.assertRaises(ElementClickInterceptedException, element0.click)
 
         self.assertIsNone(element1.get_attribute("disabled"))
         self.assertTrue(element1.get_attribute("readonly"), "readonly")
@@ -3752,8 +4023,7 @@ class ReadOnlyHTMLAttributeTests(Base, unittest.TestCase):
         self.assertTrue(element2.get_attribute("disabled"), "disabled")
         self.assertTrue(element2.get_attribute("readonly"), "readonly")
         self.assertFalse(element2.is_selected())
-        element2.click()
-        self.assertFalse(element2.is_selected())
+        self.assertRaises(ElementClickInterceptedException, element2.click)
 
     def test_render_select_single_default(self):
         self.assertTrue("Select Single" in browser.page_source)
