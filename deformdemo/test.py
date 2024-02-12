@@ -3398,7 +3398,7 @@ class DelayedRichTextWidgetTests(Base, unittest.TestCase):
     url = test_url("/delayed_richtext/")
 
     def test_submit_filled(self):
-        findcss(".tinymce-preload").click()
+        findcss(".tinymce").click()
         time.sleep(0.5)
         browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
         ActionChains(browser).scroll_by_amount(0, 200).perform()
