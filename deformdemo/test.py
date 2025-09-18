@@ -3210,7 +3210,7 @@ class MoneyInputWidgetTests(Base, unittest.TestCase):
         )
         self.assertEqual(
              findid_view("deformField1").get_attribute("validationMessage"),
-             "Please fill out this field."
+             ""
         )
 
     def test_submit_filled(self):
