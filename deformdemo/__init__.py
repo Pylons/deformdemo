@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 
-""" A Pyramid app that demonstrates various Deform widgets and
-capabilities and which provides a functional test suite  """
+"""A Pyramid app that demonstrates various Deform widgets and
+capabilities and which provides a functional test suite"""
 
 import csv
 import decimal
@@ -1664,7 +1664,9 @@ class DeformDemo(object):
                 colander.String(),
                 title=unicode("По оживлённым берегам", "utf-8"),
                 description=unicode(
-                    "子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？ " "人不知而不慍，不亦君子乎？」", "utf-8"
+                    "子曰：「學而時習之，不亦說乎？有朋自遠方來，不亦樂乎？ "
+                    "人不知而不慍，不亦君子乎？」",
+                    "utf-8",
                 ),
                 default=unicode("☃", "utf-8"),
             )
