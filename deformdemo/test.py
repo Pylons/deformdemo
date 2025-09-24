@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import ast
 import datetime
 from decimal import Decimal
@@ -14,7 +13,6 @@ from selenium.common.exceptions import ElementNotInteractableException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
-from selenium.common.exceptions import TimeoutException
 from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
@@ -524,7 +522,10 @@ class CheckboxWidgetTests(Base, unittest.TestCase):
 
     def test_submit_unchecked(self):
         wait_to_click("#deformsubmit")
-        self.assertEqual(findid_view("deformField1").get_attribute("validationMessage"), "Please check this box if you want to proceed.")
+        self.assertEqual(
+            findid_view("deformField1").get_attribute("validationMessage"),
+            "Please check this box if you want to proceed."
+        )
 
     def test_submit_checked(self):
         findid("deformField1").click()
@@ -1576,14 +1577,16 @@ class FileUploadTests(Base, unittest.TestCase):
         path, filename = _getFile()
         findcss("input[type=file]").send_keys(path)
         self.assertEqual(
-            findcss("input[type=file]").get_attribute("value"), f"C:\\fakepath\\{filename}"
+            findcss("input[type=file]").get_attribute("value"),
+            f"C:\\fakepath\\{filename}"
         )
         wait_to_click("#deformsubmit")
 
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         self.assertTrue(filename in findid("captured").text)
         self.assertEqual(
-            findcss("input[type=file]").get_attribute("data-filename"), filename
+            findcss("input[type=file]").get_attribute("data-filename"),
+            filename
         )
         uid = findcss("[name=uid]").get_attribute("value")
         self.assertTrue(uid in findid("captured").text)
@@ -1591,16 +1594,21 @@ class FileUploadTests(Base, unittest.TestCase):
         # resubmit without entering a new filename should not change the file
         wait_to_click("#deformsubmit")
         self.assertEqual(
-            findcss("input[type=file]").get_attribute("data-filename"), filename
+            findcss("input[type=file]").get_attribute("data-filename"),
+            filename
         )
-        self.assertEqual(findcss("[name=uid]").get_attribute("value"), uid)
+        self.assertEqual(
+            findcss("[name=uid]").get_attribute("value"),
+            uid
+        )
 
         # resubmit after entering a new filename should change the file
         path2, filename2 = _getFile("validation.py")
         findcss("input[type=file]").send_keys(path2)
         wait_to_click("#deformsubmit")
         self.assertEqual(
-            findcss("input[type=file]").get_attribute("data-filename"), filename2
+            findcss("input[type=file]").get_attribute("data-filename"),
+            filename2
         )
         self.assertTrue("filename" in findid("captured").text)
         self.assertTrue(uid in findid("captured").text)
@@ -1632,8 +1640,14 @@ class InterFieldValidationTests(Base, unittest.TestCase):
         disable_html5_validation()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
-        self.assertEqual(findid_view("error-deformField1").text, "Required")
-        self.assertEqual(findid_view("error-deformField2").text, "Required")
+        self.assertEqual(
+            findid_view("error-deformField1").text,
+            "Required"
+        )
+        self.assertEqual(
+            findid_view("error-deformField2").text,
+            "Required"
+        )
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), ""
         )
@@ -1650,7 +1664,10 @@ class InterFieldValidationTests(Base, unittest.TestCase):
         self.assertRaises(
             NoSuchElementException, findid_view, "error-deformField1"
         )
-        self.assertEqual(findid_view("error-deformField2").text, "Required")
+        self.assertEqual(
+            findid_view("error-deformField2").text,
+            "Required"
+        )
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), "abc"
         )
@@ -1673,7 +1690,10 @@ class InterFieldValidationTests(Base, unittest.TestCase):
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), "abc"
         )
-        self.assertEqual(findid("deformField2").get_attribute("value"), "def")
+        self.assertEqual(
+            findid("deformField2").get_attribute("value"),
+            "def"
+        )
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_success(self):
@@ -2045,12 +2065,18 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
     url = test_url("/sequence_of_fileuploads/")
 
     def test_render_default(self):
-        self.assertEqual(findid("deformField1-addtext").text, "Add Upload")
+        self.assertEqual(
+            findid("deformField1-addtext").text,
+            "Add Upload"
+        )
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_none_added(self):
         wait_to_click("#deformsubmit")
-        self.assertEqual(findid("deformField1-addtext").text, "Add Upload")
+        self.assertEqual(
+            findid("deformField1-addtext").text,
+            "Add Upload"
+        )
         self.assertEqual(findid("captured").text, "{'uploads': []}")
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
@@ -2074,7 +2100,8 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
             findcss("input[type=file]").get_attribute("value"), ""
         )
         self.assertEqual(
-            findcss("input[type=file]").get_attribute("data-filename"), filename
+            findcss("input[type=file]").get_attribute("data-filename"),
+            filename
         )
         uid = findcss("[name=uid]").get_attribute("value")
         self.assertTrue(filename in findid("captured").text)
@@ -2092,7 +2119,8 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
             findcss("input[type=file]").get_attribute("value"), ""
         )
         self.assertEqual(
-            findcss("input[type=file]").get_attribute("data-filename"), filename
+            findcss("input[type=file]").get_attribute("data-filename"),
+            filename
         )
         uid = findcss("[name=uid]").get_attribute("value")
         self.assertTrue(filename in findid("captured").text)
@@ -2108,7 +2136,8 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
         findcss("input[type=file]").send_keys(path2)
         wait_to_click("#deformsubmit")
         self.assertEqual(
-            findcss("input[type=file]").get_attribute("data-filename"), filename2
+            findcss("input[type=file]").get_attribute("data-filename"),
+            filename2
         )
         self.assertTrue(filename2 in findid("captured").text)
 
@@ -2118,20 +2147,35 @@ class SequenceOfFileUploadsTests(Base, unittest.TestCase):
         findxpaths('//input[@name="upload"]')[1].send_keys(path)
         wait_to_click("#deformsubmit")
         upload_filenames = findcsses("input[type=file]")
-        self.assertEqual(upload_filenames[0].get_attribute("data-filename"), filename2)
-        self.assertEqual(upload_filenames[1].get_attribute("data-filename"), filename)
+        self.assertEqual(
+            upload_filenames[0].get_attribute("data-filename"),
+            filename2
+        )
+        self.assertEqual(
+            upload_filenames[1].get_attribute("data-filename"),
+            filename
+        )
 
         # resubmit should not change either file
         wait_to_click("#deformsubmit")
         upload_filenames = findcsses("input[type=file]")
-        self.assertEqual(upload_filenames[0].get_attribute("data-filename"), filename2)
-        self.assertEqual(upload_filenames[1].get_attribute("data-filename"), filename)
+        self.assertEqual(
+            upload_filenames[0].get_attribute("data-filename"),
+            filename2
+        )
+        self.assertEqual(
+            upload_filenames[1].get_attribute("data-filename"),
+            filename
+        )
 
         # remove a file
         findid("deformField4-close").click()
         wait_to_click("#deformsubmit")
         upload_filenames = findcsses("input[type=file]")
-        self.assertEqual(upload_filenames[0].get_attribute("data-filename"), filename2)
+        self.assertEqual(
+            upload_filenames[0].get_attribute("data-filename"),
+            filename2
+        )
         self.assertEqual(len(upload_filenames), 1)
 
 
@@ -3818,7 +3862,9 @@ class AjaxFormTests(Base, unittest.TestCase):
             "Please enter a number."
         )
         self.assertEqual(
-            findid_view("deformField4-month").get_attribute("validationMessage"),
+            findid_view("deformField4-month").get_attribute(
+                "validationMessage"
+            ),
             "Please enter a number."
         )
         self.assertEqual(
