@@ -3586,6 +3586,8 @@ class SequenceOrderableTests(Base, unittest.TestCase):
 
     def test_submit_complex_interaction(self):
         button = findid("deformsubmit")
+        self.assertIsNotNone(button, "Button not found")
+
         action_chains_on_id("deformField1-seqAdd").click().perform()
 
         # A single item shouldn't have an active reorder button.
