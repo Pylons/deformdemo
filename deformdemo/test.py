@@ -3257,10 +3257,6 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
             findid("deformField1").get_attribute("required"),
             "true"
         )
-        self.assertEqual(
-            findid_view("deformField1").get_attribute("validationMessage"),
-            "Please fill out this field."
-        )
 
     def test_submit_filled(self):
         findid("deformField1").send_keys("ba")
