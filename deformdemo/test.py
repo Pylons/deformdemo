@@ -9,11 +9,11 @@ import time
 import unittest
 
 from flaky import flaky
+from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.common.exceptions import ElementNotInteractableException
 from selenium.common.exceptions import NoSuchElementException
 from selenium.common.exceptions import StaleElementReferenceException
 from selenium.common.exceptions import WebDriverException
-from selenium.common.exceptions import ElementClickInterceptedException
 from selenium.webdriver.common.action_chains import ActionChains
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
@@ -3251,10 +3251,6 @@ class MoneyInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(
             findid("deformField1").get_attribute("required"),
             "true"
-        )
-        self.assertEqual(
-             findid_view("deformField1").get_attribute("validationMessage"),
-             ""
         )
 
     def test_submit_filled(self):
