@@ -3040,6 +3040,35 @@ class DeformDemo(object):
         return self.render_form(deform.Form(Schema(), buttons=("submit",)))
 
 
+    @view_config(renderer='templates/form.pt',
+                 name='accordion_as_sequenze_item_and_form_element_inside_mapping_header')
+    @demonstrate('accordion as sequenze item and form element inside mapping header')
+    def custom_classes_on_outermost_html_element(self):
+
+        class Application(colander.Schema):
+            applications = ['dummy1', 'dummy2']
+            slot = colander.SchemaNode(colander.Integer(), widget=deform.widget.TextInputWidget(item_css_class="col-xs-2"))
+            application = colander.SchemaNode(colander.String(),
+                                              widget=deform.widget.AutocompleteInputWidget(values=applications,
+                                                                                           min_length=1,
+                                                                                           item_css_class="col-xs-10",
+                                                                                           ))
+
+        class Mapping(colander.Schema):
+            # application is inside panel header
+            application = Application()
+            title = 'open'  # to open the accordion
+            # text is iside panel body
+            text = colander.SchemaNode(colander.String())
+
+        class Applications(colander.SequenceSchema):
+            application = Mapping(widget=deform.widget.MappingWidget(template='mapping_accordion', open=False))
+
+        class Schema(colander.Schema):
+            applications = Applications(widget=deform.widget.SequenceWidget(min_len=1, orderable=True))
+
+        return self.render_form(deform.Form(Schema(), buttons=('submit',)))
+
 class MemoryTmpStore(dict):
     """Instances of this class implement the
     :class:`deform.interfaces.FileUploadTempStore` interface"""
