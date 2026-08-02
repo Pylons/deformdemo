@@ -6,6 +6,7 @@ include *.sh
 include *.toml
 include *.txt
 include .isort.cfg .flake8 .dockerignore
+include .mailmap
 include buildout.cfg
 include demo.ini
 include Dockerfile
