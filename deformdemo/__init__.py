@@ -4,15 +4,19 @@
 capabilities and which provides a functional test suite"""
 
 import csv
+import datetime
 import decimal
 import inspect
+import json
 import logging
 import pprint
 import random
 import sys
+from html import escape
 
 import colander
 from pyramid.config import Configurator
+from pyramid.httpexceptions import HTTPFound
 from pyramid.i18n import TranslationStringFactory
 from pyramid.i18n import get_locale_name
 from pyramid.i18n import get_localizer
@@ -100,7 +104,12 @@ class DeformDemo(object):
         readonly=False,
         is_i18n=False,
     ):
+        if getattr(form, "use_ajax", False):
+            if not form.action:
+                form.action = self.request.path
+
         captured = None
+        validation_failed = False
 
         if submitted in self.request.POST:
             # the request represents a form submission
@@ -116,13 +125,20 @@ class DeformDemo(object):
             except deform.ValidationFailure as e:
                 # the submitted values could not be validated
                 html = e.render()
+                validation_failed = True
 
         else:
             # the request requires a simple form rendering
             html = form.render(appstruct, readonly=readonly)
 
-        if self.request.is_xhr:
-            return Response(html)
+        # An AJAX (use_ajax) request wants just the form fragment, which
+        # replaces the form in place. On validation failure, respond with
+        # HTTP 422 so the client knows to re-render with errors.
+        is_submission = submitted in self.request.POST
+        is_ajax_submit = is_submission and getattr(form, "use_ajax", False)
+        if self.request.is_xhr or is_ajax_submit:
+            status = 422 if validation_failed else 200
+            return Response(html, status=status)
 
         code, start, end = self.get_code(2)
         locale_name = get_locale_name(self.request)
@@ -158,6 +174,19 @@ class DeformDemo(object):
         if not PY3:
             code = unicode(code, "utf-8")
         return highlight(code, PythonLexer(), formatter), start, end
+
+    def code_for(self, *method_names):
+        """Return highlighted source for one or more view methods by name,
+        for display in a demo's "Code" panel."""
+        chunks = []
+        for name in method_names:
+            method = getattr(type(self), name, None)
+            if method is None:
+                continue
+            src = inspect.getsource(method)
+            chunks.append(src)
+        code = "\n".join(chunks)
+        return highlight(code, PythonLexer(), formatter)
 
     @view_config(name="thanks.html")
     def thanks(self):
@@ -969,38 +998,25 @@ class DeformDemo(object):
             mapping = Mapping()
 
         schema = Schema()
-        options = """
-        {success:
-          function (rText, sText, xhr, form) {
-            var loc = xhr.getResponseHeader('X-Relocate');
-            if (loc) {
-              document.location = loc;
-            };
-           }
-        }
-        """
 
         def succeed():
             location = self.request.resource_url(
                 self.request.context, "thanks.html", route_name="deformdemo"
             )
-            # To appease jquery 1.6+, we need to return something that smells
-            # like HTML, or we get a "Node cannot be inserted at the
-            # specified point in the hierarchy" Javascript error.  This didn't
-            # used to be required under JQuery 1.4.
+            # The AJAX client (deform's vanilla JS) follows the X-Redirect
+            # response header for a client-side redirect on success.
             return Response(
-                "<div>hurr</div>",
+                "",
                 headers=[
-                    ("X-Relocate", location),
+                    ("X-Redirect", location),
                     ("Content-Type", "text/html"),
                 ],
             )
 
-        form = deform.Form(
-            schema, buttons=("submit",), use_ajax=True, ajax_options=options
-        )
+        form = deform.Form(schema, buttons=("submit",), use_ajax=True)
 
         return self.render_form(form, success=succeed)
+
 
     @view_config(renderer="templates/form.pt", name="sequence_of_radiochoices")
     @demonstrate("Sequence of Radio Choice Widgets")
