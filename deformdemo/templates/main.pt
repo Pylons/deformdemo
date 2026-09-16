@@ -41,18 +41,13 @@
         </tal:block>
 
         <!-- JavaScript -->
-        <script src="${request.static_url('deform:static/scripts/jquery-2.0.3.min.js')}"
+        <script src="${request.static_url('deform:static/scripts/deform.js')}"
                 type="text/javascript"></script>
         <script src="${request.static_url('deform:static/scripts/bootstrap.bundle.min.js')}"
                 type="text/javascript"></script>
         <tal:block repeat="reqt js_links|[]">
             <script type="text/javascript" src="${request.static_url(reqt)}"></script>
         </tal:block>
-
-        <script>
-            // This forces us to use JS date time picker polyfill so that our functional tests can run properly regardless of a browser
-            window.forceDateTimePolyfill = true;
-        </script>
 
         <tal:slot metal:define-slot="head_end"></tal:slot>
 

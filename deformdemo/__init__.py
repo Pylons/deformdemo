@@ -4,6 +4,7 @@
 capabilities and which provides a functional test suite"""
 
 import csv
+import datetime
 import decimal
 import inspect
 import logging
@@ -100,7 +101,12 @@ class DeformDemo(object):
         readonly=False,
         is_i18n=False,
     ):
+        if getattr(form, "use_ajax", False):
+            if not form.action:
+                form.action = self.request.path
+
         captured = None
+        validation_failed = False
 
         if submitted in self.request.POST:
             # the request represents a form submission
@@ -116,13 +122,20 @@ class DeformDemo(object):
             except deform.ValidationFailure as e:
                 # the submitted values could not be validated
                 html = e.render()
+                validation_failed = True
 
         else:
             # the request requires a simple form rendering
             html = form.render(appstruct, readonly=readonly)
 
-        if self.request.is_xhr:
-            return Response(html)
+        # An AJAX (use_ajax) request wants just the form fragment, which
+        # replaces the form in place. On validation failure, respond with
+        # HTTP 422 so the client knows to re-render with errors.
+        is_submission = submitted in self.request.POST
+        is_ajax_submit = is_submission and getattr(form, "use_ajax", False)
+        if self.request.is_xhr or is_ajax_submit:
+            status = 422 if validation_failed else 200
+            return Response(html, status=status)
 
         code, start, end = self.get_code(2)
         locale_name = get_locale_name(self.request)
@@ -158,6 +171,19 @@ class DeformDemo(object):
         if not PY3:
             code = unicode(code, "utf-8")
         return highlight(code, PythonLexer(), formatter), start, end
+
+    def code_for(self, *method_names):
+        """Return highlighted source for one or more view methods by name,
+        for display in a demo's "Code" panel."""
+        chunks = []
+        for name in method_names:
+            method = getattr(type(self), name, None)
+            if method is None:
+                continue
+            src = inspect.getsource(method)
+            chunks.append(src)
+        code = "\n".join(chunks)
+        return highlight(code, PythonLexer(), formatter)
 
     @view_config(name="thanks.html")
     def thanks(self):
@@ -969,36 +995,22 @@ class DeformDemo(object):
             mapping = Mapping()
 
         schema = Schema()
-        options = """
-        {success:
-          function (rText, sText, xhr, form) {
-            var loc = xhr.getResponseHeader('X-Relocate');
-            if (loc) {
-              document.location = loc;
-            };
-           }
-        }
-        """
 
         def succeed():
             location = self.request.resource_url(
                 self.request.context, "thanks.html", route_name="deformdemo"
             )
-            # To appease jquery 1.6+, we need to return something that smells
-            # like HTML, or we get a "Node cannot be inserted at the
-            # specified point in the hierarchy" Javascript error.  This didn't
-            # used to be required under JQuery 1.4.
+            # The AJAX client (deform's vanilla JS) follows the X-Redirect
+            # response header for a client-side redirect on success.
             return Response(
-                "<div>hurr</div>",
+                "",
                 headers=[
-                    ("X-Relocate", location),
+                    ("X-Redirect", location),
                     ("Content-Type", "text/html"),
                 ],
             )
 
-        form = deform.Form(
-            schema, buttons=("submit",), use_ajax=True, ajax_options=options
-        )
+        form = deform.Form(schema, buttons=("submit",), use_ajax=True)
 
         return self.render_form(form, success=succeed)
 
@@ -1056,7 +1068,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="sequence_of_dateinputs")
     @demonstrate("Sequence of Date Inputs")
     def sequence_of_dateinputs(self):
-        import datetime
 
         class Sequence(colander.SequenceSchema):
             date = colander.SchemaNode(
@@ -1077,7 +1088,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="sequence_of_i18n")
     @demonstrate("Sequence of I18N")
     def sequence_of_i18n(self):
-        import datetime
 
         locale_name = get_locale_name(self.request)
 
@@ -1425,7 +1435,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="dateparts")
     @demonstrate("Date Parts Widget")
     def dateparts(self):
-        import datetime
 
         class Schema(colander.Schema):
             date = colander.SchemaNode(
@@ -1445,7 +1454,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="dateparts_readonly")
     @demonstrate("Date Parts Widget (read-only)")
     def dateparts_readonly(self):
-        import datetime
 
         class Schema(colander.Schema):
             date = colander.SchemaNode(
@@ -1463,7 +1471,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="dateinput")
     @demonstrate("Date Input Widget")
     def dateinput(self):
-        import datetime
 
         class Schema(colander.Schema):
             somedate = colander.SchemaNode(
@@ -1483,7 +1490,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="timeinput")
     @demonstrate("Time Input")
     def timeinput(self):
-        import datetime
 
         class Schema(colander.Schema):
             sometime = colander.SchemaNode(
@@ -1503,7 +1509,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="datetimeinput")
     @demonstrate("DateTime Input Widget")
     def datetimeinput(self):
-        import datetime
 
         class Schema(colander.Schema):
             date_time = colander.SchemaNode(
@@ -1531,7 +1536,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="datetimeinput_readonly")
     @demonstrate("DateTime Input Widget (read-only)")
     def datetimeinput_readonly(self):
-        import datetime
 
         then = datetime.datetime(2011, 5, 5, 1, 2)
 
@@ -1549,7 +1553,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="edit")
     @demonstrate("Edit Form")
     def edit(self):
-        import datetime
 
         class Mapping(colander.Schema):
             name = colander.SchemaNode(
@@ -2642,7 +2645,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="deferred_schema_bindings")
     @demonstrate("Deferred Schema Bindings")
     def deferred_schema_bindings(self):
-        import datetime
 
         import colander
 
@@ -2830,7 +2832,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="readonly_argument")
     @demonstrate("Readonly Widget Argument")
     def readonly_argument(self):
-        import datetime
 
         class Schema(colander.Schema):
             textinput = colander.SchemaNode(
@@ -3006,7 +3007,6 @@ class DeformDemo(object):
     )
     @demonstrate("Custom classes on outermost html element of Widgets")
     def custom_classes_on_outermost_html_element(self):
-        import datetime
 
         class Mapping(colander.Schema):
             upload = colander.SchemaNode(

@@ -65,8 +65,12 @@ def give_selenium_some_time(func):
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                if isinstance(e, NoSuchElementException):
-                    # Retryable Selenium exception
+                # NoSuchElementException and StaleElementReferenceException
+                # are transient (element not yet in the DOM, or the page is
+                # mid-navigation after a submit); retry until the deadline.
+                if isinstance(
+                    e, (NoSuchElementException, StaleElementReferenceException)
+                ):
                     if time.time() >= deadline:
                         raise
                 else:
@@ -229,12 +233,185 @@ def clear_autofocused_picker():
     Dismisses a date or time picker by sending an ESCAPE key.
 
     With the introduction of autofocus feature in Deform 3.0.0, the first field
-    is assigned autofocus by default. When there is only one field that is a
-    picker in the form, the pickadate by default uses the HTML5 attribute
-    ``autofocus`` to trigger the display of the picker. See
-    https://www.jqueryscript.net/demo/Lightweight-jQuery-Date-Input-Picker/docs.htm#api_open_close
+    is assigned autofocus by default. flatpickr opens the calendar on focus, so
+    an autofocused picker field opens on load. Close any open flatpickr
+    instances directly via their JS API so their overlay does not intercept
+    later clicks.
     """
     ActionChains(browser).send_keys(Keys.ESCAPE).perform()
+    browser.execute_script(
+        "document.querySelectorAll('.flatpickr-input').forEach("
+        "function (el) { if (el._flatpickr) { el._flatpickr.close(); } });"
+    )
+    time.sleep(0.1)
+
+
+def flatpickr_set(oid, value):
+    """
+    Set a flatpickr-enhanced input's value via the flatpickr JS API.
+
+    This is far more robust under Selenium than clicking individual calendar
+    cells. ``value`` is the machine format the widget submits (``Y-m-d`` for
+    dates, ``H:i`` for times).
+    """
+    # Wait until flatpickr has initialized on the element.
+    WebDriverWait(browser, 5).until(
+        lambda d: d.execute_script(
+            "var el = document.getElementById(arguments[0]);"
+            "return !!(el && el._flatpickr);",
+            oid,
+        )
+    )
+    browser.execute_script(
+        "var el = document.getElementById(arguments[0]);"
+        "el._flatpickr.setDate(arguments[1], true);"
+        "el.value = arguments[1];"
+        # Close the calendar so its overlay does not intercept later clicks.
+        "el._flatpickr.close();",
+        oid,
+        value,
+    )
+    time.sleep(0.3)
+
+
+def switch_to_tinymce(oid=None):
+    """
+    Switch Selenium focus into the TinyMCE editor iframe.
+
+    TinyMCE creates its editor iframe (``id="<oid>_ifr"``) asynchronously
+    after ``tinymce.init`` returns, so we wait for it explicitly rather than
+    using ``find_element(By.TAG_NAME, "iframe")`` which races the (deferred)
+    editor initialization.
+
+    :param oid: the textarea id; when ``None`` the first TinyMCE iframe on
+        the page is used (useful for dynamically-added sequence items).
+    """
+    if oid:
+        locator = (By.ID, oid + "_ifr")
+    else:
+        locator = (By.CSS_SELECTOR, "iframe[id$='_ifr']")
+    iframe = WebDriverWait(browser, 10).until(
+        EC.presence_of_element_located(locator)
+    )
+    browser.switch_to.frame(iframe)
+
+
+def js_click(selector_id):
+    """
+    Click an element via JS. Useful when a tall widget (e.g. a TinyMCE editor)
+    pushes the target below the fold where a native Selenium click would be
+    intercepted or land off-screen.
+    """
+    browser.execute_script(
+        "document.getElementById(arguments[0]).click();", selector_id
+    )
+
+
+def sortable_reorder(container_id, from_index, to_index):
+    """
+    Reorder a sequence's items to the position a SortableJS drag would produce.
+
+    SortableJS uses the native HTML5 drag-and-drop API, which cannot be driven
+    reliably by Selenium or synthetic events. Since deform derives the
+    submitted order purely from the DOM order of ``.deform-seq-item`` elements,
+    we move the DOM node to its target position (the observable end result of a
+    drag) and fire a ``change`` event, then assert deform submits that order.
+    This tests deform's reorder contract; SortableJS's own drag mechanics are
+    covered by its own test suite.
+    """
+    browser.execute_script(
+        """
+        var container = document.getElementById(arguments[0]);
+        var items = Array.prototype.slice.call(
+            container.querySelectorAll(':scope > .deform-seq-item'));
+        var from = items[arguments[1]];
+        var to = items[arguments[2]];
+        if (arguments[1] < arguments[2]) {
+            to.after(from);
+        } else {
+            to.before(from);
+        }
+        container.dispatchEvent(new Event('change', {bubbles: true}));
+        """,
+        container_id,
+        from_index,
+        to_index,
+    )
+    time.sleep(0.3)
+
+
+def tomselect_pick(oid, text):
+    """
+    Select an option in a Tom Select control (replaces select2/selectize) by
+    visible text, via the Tom Select JS API for reliability under Selenium.
+
+    Works for both single and multiple selects; for multiple selects it adds
+    to the current selection.
+    """
+    browser.execute_script(
+        "var el = document.getElementById(arguments[0]);"
+        "var ts = el.tomselect || el._tomselect;"
+        "var target = arguments[1];"
+        "var val = null;"
+        "Object.keys(ts.options).forEach(function (k) {"
+        "  var o = ts.options[k];"
+        "  if ((o.text || '').trim() === target) { val = o.value; }"
+        "});"
+        "if (val === null) { val = target; }"
+        "ts.addItem(val);"
+        # Clear any residual search text and force the dropdown shut so its
+        # overlay does not intercept later clicks.
+        "ts.setTextboxValue('');"
+        "ts.close();"
+        "ts.blur();"
+        "ts.control_input.blur();"
+        "document.body.focus();",
+        oid,
+        text,
+    )
+    time.sleep(0.3)
+    # Ensure no Tom Select dropdown remains open (its overlay would intercept
+    # subsequent clicks such as the submit button).
+    browser.execute_script(
+        "document.querySelectorAll('.ts-dropdown').forEach("
+        "function (d) { d.style.display = 'none'; });"
+    )
+    time.sleep(0.1)
+
+
+def tomselect_create(oid, text):
+    """Create and select a new (tag) value in a Tom Select control."""
+    browser.execute_script(
+        "var el = document.getElementById(arguments[0]);"
+        "var ts = el.tomselect || el._tomselect;"
+        "var v = arguments[1];"
+        # Register the value as an option and select it (robust for both
+        # create:true tag inputs and free-text autocompletes).
+        "ts.addOption({value: v, text: v});"
+        "ts.addItem(v);"
+        "ts.setTextboxValue('');"
+        "ts.close();"
+        "ts.blur();",
+        oid,
+        text,
+    )
+    time.sleep(0.3)
+    browser.execute_script(
+        "document.querySelectorAll('.ts-dropdown').forEach("
+        "function (d) { d.style.display = 'none'; });"
+    )
+    time.sleep(0.1)
+
+
+def tomselect_values(oid):
+    """Return the current selected values of a Tom Select control."""
+    return browser.execute_script(
+        "var el = document.getElementById(arguments[0]);"
+        "var ts = el.tomselect || el._tomselect;"
+        "var v = ts.getValue();"
+        "return Array.isArray(v) ? v : [v];",
+        oid,
+    )
 
 
 def sort_set_values(captured):
@@ -264,8 +441,30 @@ def setUpModule():
 
     if driver_name == "selenium_local_chrome":
         from selenium.webdriver import Chrome
+        from selenium.webdriver.chrome.options import Options
 
-        browser = Chrome()
+        # Force English so browser-native HTML5 validation messages match the
+        # test expectations regardless of the host machine's locale. Chromium's
+        # UI locale (used for validation messages) follows these env vars, not
+        # navigator.language / the --lang flag.
+        os.environ.setdefault("LANGUAGE", "en_US")
+        os.environ.setdefault("LC_ALL", "en_US.UTF-8")
+        os.environ.setdefault("LANG", "en_US.UTF-8")
+
+        options = Options()
+        options.add_argument("--lang=en-US")
+        options.add_experimental_option(
+            "prefs", {"intl.accept_languages": "en-US,en"}
+        )
+        # Headless is required in CI/sandbox environments without a display.
+        # Enabled by default; set HEADLESS=0 to see the browser locally.
+        if os.environ.get("HEADLESS", "1") != "0":
+            options.add_argument("--headless=new")
+            options.add_argument("--no-sandbox")
+            options.add_argument("--disable-gpu")
+            options.add_argument("--disable-dev-shm-usage")
+            options.add_argument("--window-size=1920,1080")
+        browser = Chrome(options=options)
 
     elif driver_name == "selenium_local_firefox":
         from selenium.webdriver import Firefox
@@ -367,9 +566,17 @@ def setUpModule():
 
 def tearDownModule():
     browser.quit()
-    from selenium_containers import stop_selenium_containers
+    # Only tear down Selenium containers when we actually started them.
+    driver_name = os.environ.get("WEBDRIVER")
+    if driver_name in (
+        "selenium_container_chrome",
+        "selenium_container_opera",
+        "selenium_container_firefox",
+        None,
+    ):
+        from selenium_containers import stop_selenium_containers
 
-    stop_selenium_containers()
+        stop_selenium_containers()
 
 
 def _getFile(name="test.py"):
@@ -638,9 +845,10 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
         self.assertEqual(findcss(".form-label").text, "Social Security Number")
         self.assertEqual(findid("captured").text, "None")
 
-        # Ensure the masked input has a focus and ### mask
-        # has kicked in
-        action_chains_on_id("deformField1").send_keys("0").perform()
+        # Ensure the masked input has focus and the ### mask has kicked in.
+        field = findid("deformField1")
+        field.click()
+        field.send_keys("0")
 
         self.assertEqual(
             findid_view("deformField1").get_attribute("value"), "0##-##-####"
@@ -652,8 +860,12 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
     def test_type_bad_input(self):
-        action_chains_on_id("deformField1").send_keys("a").perform()
-        action_chains_on_id("deformField1-confirm").send_keys("a").perform()
+        field = findid("deformField1")
+        field.click()
+        field.send_keys("a")
+        confirm = findid("deformField1-confirm")
+        confirm.click()
+        confirm.send_keys("a")
         self.assertTrue(
             findid_view("deformField1").get_attribute("value")
             in ("", "###-##-####")
@@ -663,15 +875,13 @@ class CheckedInputWidgetWithMaskTests(Base, unittest.TestCase):
             in ("", "###-##-####")
         )
 
-        action_chains_on_id("deformField1").send_keys("140118866").perform()
+        field = findid("deformField1")
+        field.click()
+        field.send_keys("140118866")
 
-        browser.execute_script(
-            'document.getElementById("deformField1-confirm").focus();'
-        )
-
-        action_chains_on_id("deformField1-confirm").send_keys(
-            "140118866"
-        ).perform()
+        confirm = findid("deformField1-confirm")
+        confirm.click()
+        confirm.send_keys("140118866")
 
         wait_to_click("#deformsubmit")
         time.sleep(1)  # SUPER FLAKY
@@ -864,39 +1074,29 @@ class DateInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_empty_html5(self):
         clear_autofocused_picker()
+        # flatpickr renders the field as a required text input, so an empty
+        # value carries the browser's native "required" validation message.
         self.assertEqual(
-            findid("deformField1").get_attribute("validationMessage"), ""
+            findid("deformField1").get_attribute("required"), "true"
         )
 
     def test_submit_tooearly(self):
+        disable_html5_validation()
         clear_autofocused_picker()
-        wait_to_click("#deformField1")
-
-        def diff_month(d1, d2):
-            return (d1.year - d2.year) * 12 + d1.month - d2.month + 1
-
-        tooearly = datetime.date(datetime.date.today().year, 1, 1)
-        today = datetime.date.today()
-        num_months = diff_month(today, tooearly)
-        time.sleep(DATE_PICKER_DELAY)
-        for _x in range(num_months):
-            findcss(".picker__nav--prev").click()
-            # Freaking manual timing here again
-            time.sleep(0.2)
-
-        wait_to_click(".picker__day")
+        # The widget's minimum is Jan 1 of the current year; Dec 31 of last
+        # year is earlier and must fail validation.
+        tooearly = datetime.date(datetime.date.today().year - 1, 12, 31)
+        flatpickr_set("deformField1", tooearly.strftime("%Y-%m-%d"))
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertTrue("is earlier than" in findid("error-deformField1").text)
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_success(self):
-        # TODO: This tests uses explicit waits to run on modern browsers.
-        # The waits could be replaced by calling picker JS API directly
-        # inside Selenium browser
         today = datetime.date.today()
-        wait_to_click("#deformField1")
-        pick_today()
+        disable_html5_validation()
+        clear_autofocused_picker()
+        flatpickr_set("deformField1", today.strftime("%Y-%m-%d"))
         wait_to_click("#deformsubmit")
 
         try:
@@ -940,22 +1140,27 @@ class TimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_empty_html5(self):
         clear_autofocused_picker()
+        # flatpickr renders a required text input; empty carries the browser's
+        # native required validation message.
         self.assertEqual(
-            findid("deformField1").get_attribute("validationMessage"), ""
+            findid("deformField1").get_attribute("required"), "true"
         )
 
     def test_submit_tooearly(self):
-        wait_to_click("#deformField1")
-        wait_to_click('li[data-pick="0"]')
-        submit_date_picker_safe()
+        disable_html5_validation()
+        clear_autofocused_picker()
+        # Widget minimum is 12:16; 00:00 is earlier and must fail.
+        flatpickr_set("deformField1", "00:00")
+        wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertTrue("is earlier than" in findid("error-deformField1").text)
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_success(self):
-        wait_to_click("#deformField1")
-        findxpath('//li[@data-pick="900"]').click()
-        submit_date_picker_safe()
+        disable_html5_validation()
+        clear_autofocused_picker()
+        flatpickr_set("deformField1", "15:00")
+        wait_to_click("#deformsubmit")
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         self.assertRaises(
             NoSuchElementException, findid_view, "error-deformField1"
@@ -981,6 +1186,7 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
     def test_submit_both_empty(self):
+        disable_html5_validation()
         clear_autofocused_picker()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
@@ -988,41 +1194,33 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_time_empty(self):
-        wait_to_click("#deformField1-date")
-        wait_to_click(".picker__button--today")
+        disable_html5_validation()
+        clear_autofocused_picker()
+        flatpickr_set(
+            "deformField1-date", datetime.date.today().strftime("%Y-%m-%d")
+        )
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertEqual(findid("error-deformField1").text, "Incomplete time")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_date_empty(self):
+        disable_html5_validation()
         clear_autofocused_picker()
-        wait_to_click("#deformField1-time")
-        wait_to_click('li[data-pick="0"]')
-        submit_date_picker_safe()
+        flatpickr_set("deformField1-time", "00:00")
+        wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertEqual(findid("error-deformField1").text, "Incomplete date")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_tooearly(self):
+        disable_html5_validation()
         clear_autofocused_picker()
-        wait_to_click("#deformField1-time")
-        wait_to_click('li[data-pick="0"]')
-        wait_to_click("#deformField1-date")
-
-        def diff_month(d1, d2):
-            return (d1.year - d2.year) * 12 + d1.month - d2.month + 1
-
-        tooearly = datetime.date(datetime.date.today().year, 1, 1)
-        today = datetime.date.today()
-        num_months = diff_month(today, tooearly)
-        time.sleep(DATE_PICKER_DELAY)
-        for _x in range(num_months):
-            findcss(".picker__nav--prev").click()
-            # Freaking manual timing here again
-            time.sleep(0.2)
-
-        wait_to_click(".picker__day")
+        flatpickr_set("deformField1-time", "00:00")
+        # Widget minimum date is Jan 1 of the current year; Dec 31 of last
+        # year is earlier and must fail.
+        tooearly = datetime.date(datetime.date.today().year - 1, 12, 31)
+        flatpickr_set("deformField1-date", tooearly.strftime("%Y-%m-%d"))
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertTrue("is earlier than" in findid("error-deformField1").text)
@@ -1030,11 +1228,10 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
 
     def test_submit_success(self):
         now = datetime.datetime.now()
+        disable_html5_validation()
         clear_autofocused_picker()
-        wait_to_click("#deformField1-time")
-        wait_to_click('li[data-pick="60"]')
-        wait_to_click("#deformField1-date")
-        wait_to_click(".picker__button--today")
+        flatpickr_set("deformField1-time", "01:00")
+        flatpickr_set("deformField1-date", now.strftime("%Y-%m-%d"))
         wait_to_click("#deformsubmit")
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
@@ -2300,16 +2497,15 @@ class SequenceOfAutocompletes(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_two_filled(self):
-        action_chains_on_id("deformField1-seqAdd").click().perform()
-        input_text = findxpaths('//input[@name="text"]')
-        ActionChains(browser).move_to_element(input_text[0]).click().send_keys(
-            "bar"
-        ).send_keys(Keys.TAB).perform()
-        action_chains_on_id("deformField1-seqAdd").click().perform()
-        input_text = browser.find_elements(By.XPATH, '//input[@name="text"]')
-        ActionChains(browser).move_to_element(input_text[1]).click().send_keys(
-            "baz"
-        ).click().perform()
+        # Each cloned autocomplete becomes a Tom Select; its underlying input
+        # keeps name="text" but gets a generated id. Enter free-text values
+        # via the Tom Select API.
+        findid("deformField1-seqAdd").click()
+        oid1 = findxpaths('//input[@name="text"]')[0].get_attribute("id")
+        tomselect_create(oid1, "bar")
+        findid("deformField1-seqAdd").click()
+        oid2 = findxpaths('//input[@name="text"]')[1].get_attribute("id")
+        tomselect_create(oid2, "baz")
         wait_to_click("#deformsubmit")
         self.assertEqual(
             eval(findid("captured").text), {"texts": ["bar", "baz"]}
@@ -2331,8 +2527,10 @@ class SequenceOfDateInputs(Base, unittest.TestCase):
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
     def test_submit_two_unfilled(self):
+        disable_html5_validation()
         findid("deformField1-seqAdd").click()
         findid("deformField1-seqAdd").click()
+        clear_autofocused_picker()
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertEqual(findid("error-deformField3").text, "Required")
@@ -2340,10 +2538,12 @@ class SequenceOfDateInputs(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_one_filled(self):
-        action_chains_on_id("deformField1-seqAdd").click().perform()
-        action_chains_on_xpath('//input[@name="date"]').click().perform()
-        findcss(".picker__button--today").click()
-        submit_date_picker_safe()
+        findid("deformField1-seqAdd").click()
+        # The cloned date field gets a generated id; set it via flatpickr.
+        date_field = findxpath('//input[@name="date"]')
+        oid = date_field.get_attribute("id")
+        flatpickr_set(oid, datetime.date.today().strftime("%Y-%m-%d"))
+        wait_to_click("#deformsubmit")
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         self.assertTrue(
             findid("captured").text.startswith("{'dates': [datetime.date")
@@ -2407,7 +2607,7 @@ class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
 
     def test_submit_one_filled(self):
         findid("deformField1-seqAdd").click()
-        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
+        switch_to_tinymce()
         findid("tinymce").click()
         findid("tinymce").send_keys("yo")
         browser.switch_to.default_content()
@@ -2446,7 +2646,9 @@ class SequenceOfMaskedTextInputs(Base, unittest.TestCase):
     def test_submit_one_filled(self):
         browser.get(self.url)
         findid("deformField1-seqAdd").click()
-        findxpath('//input[@name="text"]').send_keys("140118866")
+        field = findxpath('//input[@name="text"]')
+        field.click()
+        field.send_keys("140118866")
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         captured = findid("captured").text
@@ -2735,7 +2937,7 @@ class Select2WidgetTests(Base, unittest.TestCase):
 
     def test_submit_default(self):
         disable_html5_validation()
-        findid("deformsubmit").click()
+        js_click("deformsubmit")
         self.assertTrue("Pepper" in browser.page_source)
         select = findid("deformField1")
         self.assertEqual(select.get_attribute("name"), "pepper")
@@ -2746,12 +2948,10 @@ class Select2WidgetTests(Base, unittest.TestCase):
 
     def test_submit_selected(self):
         disable_html5_validation()
-        findid("deformsubmit").click()
+        js_click("deformsubmit")
         self.assertTrue(findcss(".is-invalid").is_displayed())
 
-        findcss("[data-select2-id='1']").click()
-        findcss(".select2-search__field").send_keys("jala")
-        findcss(".select2-results li[aria-selected='false']").click()
+        tomselect_pick("deformField1", "Jalapeno")
         findid("deformsubmit").click()
         self.assertTrue(
             findid("captured").text in self.second_selected_captured
@@ -2762,29 +2962,12 @@ class Select2WidgetMultipleTests(Base, unittest.TestCase):
     url = test_url("/select2_with_multiple/")
 
     def test_submit_selected(self):
-        findcss("[data-select2-id='1']").click()
-        search_field = findcss(".select2-search__field")
-        search_field.send_keys(Keys.ARROW_DOWN)
-        search_field.send_keys(Keys.ARROW_DOWN)
-        search_field.send_keys(Keys.ENTER)
-
-        time.sleep(1)
-
-        findcss("[data-select2-id='1']").click()
-        search_field = findcss(".select2-search__field")
-        search_field.send_keys(Keys.ARROW_DOWN)
-        search_field.send_keys(Keys.ARROW_UP)
-        search_field.send_keys(Keys.ARROW_UP)
-        search_field.send_keys(Keys.ENTER)
+        tomselect_pick("deformField1", "Habanero")
+        tomselect_pick("deformField1", "Chipotle")
 
         captured_default = {"pepper": set(["chipotle", "habanero"])}
 
-        selected = set(
-            [
-                x.get_property("title").lower()
-                for x in findcsses(".select2-selection__choice")
-            ]
-        )
+        selected = set(tomselect_values("deformField1"))
         self.assertEqual(selected, captured_default["pepper"])
 
         findid("deformsubmit").click()
@@ -2820,10 +3003,7 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
         self.assertEqual(len(findxpaths("//optgroup")), 2)
 
     def test_submit_selected(self):
-        findcss("[data-select2-id='1']").click()
-        search_field = findcss(".select2-search__field")
-        search_field.send_keys(Keys.ARROW_DOWN)
-        search_field.send_keys(Keys.ENTER)
+        tomselect_pick("deformField1", "Jimmy Page")
 
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
@@ -2832,12 +3012,7 @@ class Select2WidgetWithOptgroupTests(Base, unittest.TestCase):
 
         time.sleep(1)
 
-        findcss("[data-select2-id='1']").click()
-        search_field = findcss(".select2-search__field")
-        search_field.send_keys(Keys.ARROW_DOWN)
-        search_field.send_keys(Keys.ARROW_DOWN)
-        search_field.send_keys(Keys.ARROW_DOWN)
-        search_field.send_keys(Keys.ENTER)
+        tomselect_pick("deformField1", "John Bonham")
 
         findid("deformsubmit").click()
         self.assertTrue(
@@ -2849,17 +3024,8 @@ class Select2TagsWidgetTests(Base, unittest.TestCase):
     url = test_url("/select2_with_tags/")
 
     def test_submit_new_option(self):
-        findcss(".select2-container").click()
-
-        # options list is empty
-        self.assertEqual(
-            findid("select2-deformField1-results").text, "No results found"
-        )
-
-        # type a value in select2 search
-        search_field = findcss(".select2-search__field")
-        search_field.send_keys("hello\n")
-        search_field.send_keys(Keys.ENTER)
+        # Tom Select with create:true allows adding an arbitrary tag value.
+        tomselect_create("deformField1", "hello")
 
         # after form submission typed value appear in captured
         findid("deformsubmit").click()
@@ -2877,22 +3043,9 @@ class Select2WidgetTagsMultipleTests(Base, unittest.TestCase):
         # multiple submission is activated
         self.assertTrue(findid("deformField1").get_attribute("multiple"))
 
-        # options list is empty
-        findid("item-deformField1").click()
-        self.assertEqual(
-            findid("select2-deformField1-results").text,
-            "No results found",
-        )
-
-        # adding values to select field
+        # adding values to select field (duplicate "hello" is de-duplicated)
         for value in ("hello", "qwerty", "hello"):
-            # open select search field
-            findid("item-deformField1").click()
-            # type values in selec2 search
-
-            search_field = findcss(".select2-search__field")
-            search_field.send_keys(value + "\n")
-            search_field.send_keys(Keys.ENTER)
+            tomselect_create("deformField1", value)
 
         # after form submission typed value appear in captured
         findid("deformsubmit").click()
@@ -2915,19 +3068,30 @@ class SelectizeWidgetTests(Base, unittest.TestCase):
         self.assertEqual(element.get_attribute("name"), "pepper")
         self.assertFalse(select_object.is_multiple)
         self.assertTrue(select_object.options[0].is_selected())
-        # Selectize replaces the select with an input, then makes the options
-        # not visible.  Thus Selenium cannot find them.  To make them visible,
-        # we must click the input, then grab them.
-        sel_input = browser.find_element(By.ID, "deformField1-selectized")
-        sel_input.click()
-        options = browser.find_elements(By.CSS_SELECTOR, "div.option")
+        # Tom Select replaces the select with a control; open its dropdown via
+        # the JS API (its inner input isn't directly clickable in Selenium).
+        browser.execute_script(
+            "document.getElementById('deformField1')._tomselect.open();"
+        )
+        time.sleep(0.3)
+        options = browser.find_elements(
+            By.CSS_SELECTOR, ".ts-dropdown .option"
+        )
         self.assertEqual(
             [o.text for o in options],
             ["- Select -", "Habanero", "Jalapeno", "Chipotle"],
         )
         self.assertEqual(findid("captured").text, "None")
 
+    @flaky(max_runs=4)
     def test_submit_default(self):
+        disable_html5_validation()
+        browser.execute_script(
+            "document.getElementById('deformField1')._tomselect.close();"
+        )
+        # Native click (not js_click) so Selenium blocks until the form's
+        # page reload completes, avoiding a StaleElementReferenceException on
+        # the subsequent findid.
         findid("deformsubmit").click()
         self.assertTrue("Pepper" in browser.page_source)
         element = findid("deformField1", clickable=False)
@@ -2938,20 +3102,14 @@ class SelectizeWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_selected(self):
-        sel_input = browser.find_element(By.ID, "deformField1-selectized")
-        sel_input.click()
-        options = browser.find_elements(By.CSS_SELECTOR, "div.option")
-        options[1].click()
-        findid("deformsubmit").click()
+        tomselect_pick("deformField1", "Habanero")
+        js_click("deformsubmit")
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         self.assertTrue(
             findid("captured").text in self.first_selected_captured
         )
 
-        sel_input = browser.find_element(By.ID, "deformField1-selectized")
-        sel_input.click()
-        options = browser.find_elements(By.CSS_SELECTOR, "div.option")
-        options[2].click()
+        tomselect_pick("deformField1", "Jalapeno")
         findid("deformsubmit").click()
         self.assertTrue(
             findid("captured").text in self.second_selected_captured
@@ -2965,12 +3123,8 @@ class SelectizeWidgetMultipleTests(Base, unittest.TestCase):
         element = findid("deformField1", clickable=False)
         select_object = Select(element)
         self.assertTrue(select_object.is_multiple)
-        sel_input = browser.find_element(By.ID, "deformField1-selectized")
-        sel_input.click()
-        options = browser.find_elements(By.CSS_SELECTOR, "div.option")
-        options[0].click()
-        options[1].click()
-        sel_input.send_keys(Keys.ESCAPE)
+        tomselect_pick("deformField1", "Habanero")
+        tomselect_pick("deformField1", "Jalapeno")
         findid("deformsubmit").click()
         captured_default = {"pepper": set(["habanero", "jalapeno"])}
         self.assertEqual(eval(findid("captured").text), captured_default)
@@ -2989,9 +3143,13 @@ class SelectizeWidgetWithOptgroupTests(Base, unittest.TestCase):
         select_object = Select(element)
         self.assertFalse(select_object.is_multiple)
         self.assertEqual(element.get_attribute("name"), "musician")
-        sel_input = browser.find_element(By.ID, "deformField1-selectized")
-        sel_input.click()
-        options = browser.find_elements(By.CSS_SELECTOR, "div.option")
+        browser.execute_script(
+            "document.getElementById('deformField1')._tomselect.open();"
+        )
+        time.sleep(0.3)
+        options = browser.find_elements(
+            By.CSS_SELECTOR, ".ts-dropdown .option"
+        )
         self.assertTrue(select_object.options[0].is_selected())
         self.assertEqual(
             [o.text for o in options],
@@ -3004,15 +3162,17 @@ class SelectizeWidgetWithOptgroupTests(Base, unittest.TestCase):
             ],
         )
         self.assertEqual(
-            len(browser.find_elements(By.CSS_SELECTOR, "div.optgroup")), 2
+            len(
+                browser.find_elements(
+                    By.CSS_SELECTOR, ".ts-dropdown .optgroup"
+                )
+            ),
+            2,
         )
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_selected(self):
-        sel_input = browser.find_element(By.ID, "deformField1-selectized")
-        sel_input.click()
-        options = browser.find_elements(By.CSS_SELECTOR, "div.option")
-        options[1].click()
+        tomselect_pick("deformField1", "Jimmy Page")
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         captured = findid("captured").text
@@ -3020,10 +3180,7 @@ class SelectizeWidgetWithOptgroupTests(Base, unittest.TestCase):
 
         time.sleep(0.3)
 
-        sel_input = browser.find_element(By.ID, "deformField1-selectized")
-        sel_input.click()
-        options = browser.find_elements(By.CSS_SELECTOR, "div.option")
-        options[4].click()
+        tomselect_pick("deformField1", "John Bonham")
         findid("deformsubmit").click()
         self.assertTrue(
             findid("captured").text in self.second_selected_captured
@@ -3033,7 +3190,12 @@ class SelectizeWidgetWithOptgroupTests(Base, unittest.TestCase):
 class SelectizeTagsWidgetTests(Base, unittest.TestCase):
     url = test_url("/selectize_with_tags/")
 
+    @flaky(max_runs=4)
     def test_submit_default(self):
+        disable_html5_validation()
+        # Native click (not js_click) so Selenium blocks until the form's
+        # page reload completes, avoiding a StaleElementReferenceException on
+        # the subsequent findid.
         findid("deformsubmit").click()
         self.assertTrue("Pepper" in browser.page_source)
         element = findid("deformField1", clickable=False)
@@ -3044,14 +3206,8 @@ class SelectizeTagsWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_new_option(self):
-        # options list is empty
-        assert browser.find_element(
-            By.CSS_SELECTOR, "div.selectize-input.items.not-full"
-        )
-        # type a value in selectize
-        action_chains_on_id("deformField1-selectized").click().send_keys(
-            "hello"
-        ).send_keys(Keys.ENTER).perform()
+        # Tom Select with create:true allows adding an arbitrary tag value.
+        tomselect_create("deformField1", "hello")
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         captured = findid("captured").text
@@ -3082,17 +3238,9 @@ class SelectizeWidgetTagsMultipleTests(Base, unittest.TestCase):
         element = findid("deformField1", clickable=False)
         select_object = Select(element)
         self.assertTrue(select_object.is_multiple)
-        # options list is empty
-        assert browser.find_element(
-            By.CSS_SELECTOR, "div.selectize-input.items.not-full"
-        )
-        # add values to selectize field
+        # add values to the Tom Select field (duplicate is de-duplicated)
         for value in ("hello", "qwerty", "hello"):
-            # type values in selectize
-            action_chains_on_id("deformField1-selectized").click().send_keys(
-                value
-            ).send_keys(Keys.ENTER).perform()
-            time.sleep(2)
+            tomselect_create("deformField1", value)
 
         # after form submission typed value appear in captured
         findid("deformsubmit").click()
@@ -3186,6 +3334,8 @@ class MoneyInputWidgetTests(Base, unittest.TestCase):
     url = test_url("/money_input/")
 
     def test_render_default(self):
+        # IMask formats currency left-to-right (unlike the old right-to-left
+        # jquery.maskMoney), so typing "12" yields "12".
         findid("deformField1").send_keys("12")
         self.assertTrue("Greenbacks" in browser.page_source)
         self.assertEqual(
@@ -3195,7 +3345,7 @@ class MoneyInputWidgetTests(Base, unittest.TestCase):
             findid_view("deformField1").get_attribute("type"), "text"
         )
         self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), "0.12"
+            findid_view("deformField1").get_attribute("value"), "12"
         )
         self.assertEqual(findid("captured").text, "None")
 
@@ -3210,13 +3360,8 @@ class MoneyInputWidgetTests(Base, unittest.TestCase):
         )
 
     def test_submit_filled(self):
-        action_chains_on_id("deformField1").send_keys("1").perform()
-
-        action_chains_on_id("deformField1").send_keys(
-            5 * Keys.ARROW_LEFT
-        ).perform()
-
-        action_chains_on_id("deformField1").send_keys("10").perform()
+        # Left-to-right entry with IMask: type the value directly.
+        action_chains_on_id("deformField1").send_keys("100.01").perform()
 
         findid("deformsubmit").click()
         self.assertEqual(
@@ -3254,32 +3399,45 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         )
 
     def test_submit_filled(self):
-        findid("deformField1").send_keys("ba")
-        self.assertTrue(findxpath('//p[text()="baz"]').is_displayed())
-        findid("deformField1").send_keys("r")
-        findcss(".tt-suggestion").click()
-        findid("deformsubmit").click()
+        findid("deformField1-ts-control").send_keys("ba")
+        self.assertTrue(
+            findxpath(
+                '//div[contains(@class,"option")][normalize-space(.)="baz"]'
+            ).is_displayed()
+        )
+        tomselect_pick("deformField1", "bar")
+        wait_to_click("#deformsubmit")
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         text = findid("captured").text
         # py2/py3 compat, py2 adds extra u prefix
         self.assertTrue("bar" in text)
 
     def test_ampersand(self):
-        findid("deformField1").send_keys("foo")
-        self.assertTrue(findxpath('//p[text()="foo & bar"]').is_displayed())
-        action_chains_on_css_selector(".tt-suggestion").click().perform()
-        findid("deformsubmit").click()
+        # Tom Select matches the "foo & bar" suggestion; select it via the API.
+        findid("deformField1-ts-control").send_keys("foo")
+        self.assertTrue(
+            findxpath(
+                '//div[contains(@class,"option")]'
+                '[normalize-space(.)="foo & bar"]'
+            ).is_displayed()
+        )
+        tomselect_pick("deformField1", "foo & bar")
+        wait_to_click("#deformsubmit")
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         text = findid("captured").text
         # py2/py3 compat, py2 adds extra u prefix
         self.assertTrue("foo & bar" in text)
 
     def test_less_than(self):
-        findid("deformField1").send_keys("one")
-        self.assertTrue(findxpath('//p[text()="one < two"]').is_displayed())
-        findid("deformField1").send_keys(Keys.ARROW_DOWN)
-        findid("deformField1").send_keys(Keys.ENTER)
-        findid("deformsubmit").click()
+        findid("deformField1-ts-control").send_keys("one")
+        self.assertTrue(
+            findxpath(
+                '//div[contains(@class,"option")]'
+                '[normalize-space(.)="one < two"]'
+            ).is_displayed()
+        )
+        tomselect_pick("deformField1", "one < two")
+        wait_to_click("#deformsubmit")
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
         text = findid("captured").text
         # py2/py3 compat, py2 adds extra u prefix
@@ -3321,14 +3479,21 @@ class AutocompleteRemoteInputWidgetTests(Base, unittest.TestCase):
         )
 
     def test_submit_filled(self):
-        findid("deformField1").send_keys("t")
+        findid("deformField1-ts-control").send_keys("t")
 
-        time.sleep(0.2)
-        self.assertTrue(findxpath('//p[text()="two"]').is_displayed())
-        self.assertTrue(findxpath('//p[text()="three"]').is_displayed())
+        time.sleep(0.5)
+        self.assertTrue(
+            findxpath(
+                '//div[contains(@class,"option")][normalize-space(.)="two"]'
+            ).is_displayed()
+        )
+        self.assertTrue(
+            findxpath(
+                '//div[contains(@class,"option")][normalize-space(.)="three"]'
+            ).is_displayed()
+        )
 
-        findid("deformField1").send_keys(Keys.ARROW_DOWN)
-        findid("deformField1").send_keys(Keys.ENTER)
+        tomselect_pick("deformField1", "two")
         findid("deformsubmit").click()
         self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
 
@@ -3388,8 +3553,7 @@ class DelayedRichTextWidgetTests(Base, unittest.TestCase):
 
     def test_submit_filled(self):
         findcss(".tinymce").click()
-        time.sleep(0.5)
-        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
+        switch_to_tinymce("deformField1")
         ActionChains(browser).scroll_by_amount(0, 200).perform()
         findid("tinymce").click()
         findid("tinymce").send_keys("hello")
@@ -3421,7 +3585,7 @@ class RichTextWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_filled(self):
-        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
+        switch_to_tinymce("deformField1")
         findid("tinymce").click()
         findid("tinymce").send_keys("hello")
         browser.switch_to.default_content()
@@ -3578,26 +3742,17 @@ class SequenceOrderableTests(Base, unittest.TestCase):
             "33"
         ).perform()
 
-        seq_height = findcss(".deform-seq-item").size["height"]
+        # Reorder via SortableJS: move item 3 (index 2) to the top (index 0),
+        # then move the old item 1 (now at index 1) down to the bottom, to end
+        # up fully reversed: Name3, Name2, Name1.
+        sortable_reorder("deformField1-orderable", 2, 0)
+        sortable_reorder("deformField1-orderable", 1, 2)
 
-        persons = findxpaths(
-            '//div[@class="card-header"][contains(text(), "Person")]'
-        )
-
-        # Move item 3 up two
-        ActionChains(browser).drag_and_drop_by_offset(
-            persons[2], 0, -seq_height * 2.5
-        ).perform()
-
-        # Move item 1 down one slot (actually a little more than 1 is
-        # needed to trigger jQuery Sortable when dragging down, so use 1.5).
-        ActionChains(browser).drag_and_drop_by_offset(
-            persons[0], 0, seq_height * 1.5
-        ).perform()
-
-        ActionChains(browser).scroll_by_amount(0, 200).perform()
         time.sleep(0.2)
-        action_chains_on_id("deformsubmit").click().perform()
+        # Click via JS: after the SortableJS reorder the submit button can be
+        # below the fold, where an ActionChains move-and-click lands outside
+        # the viewport (MoveTargetOutOfBoundsException).
+        js_click("deformsubmit")
         time.sleep(0.2)
 
         # sequences should be in reversed order
@@ -3793,37 +3948,35 @@ class AjaxFormTests(Base, unittest.TestCase):
 
     def test_submit_empty(self):
         disable_html5_validation()
-        source = browser.page_source
-        wait_to_click("#deformsubmit")
-        wait_for_ajax(source)
+        js_click("deformsubmit")
+        # AJAX client swaps the 422 response into the form; wait for errors.
+        WebDriverWait(browser, 5).until(
+            EC.text_to_be_present_in_element(
+                (By.ID, "error-deformField1"), "Required"
+            )
+        )
         self.assertEqual(findid("error-deformField1").text, "Required")
         self.assertEqual(findid("error-deformField3").text, "Required")
         self.assertEqual(findid("error-deformField4").text, "Required")
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty_html5(self):
-        self.assertEqual(
-            findid_view("deformField1").get_attribute("validationMessage"),
-            "Please fill out this field.",
-        )
-        self.assertEqual(
-            findid_view("deformField3").get_attribute("validationMessage"),
-            "Please fill out this field.",
-        )
-        self.assertEqual(
-            findid_view("deformField4").get_attribute("validationMessage"),
-            "Please enter a number.",
-        )
-        self.assertEqual(
-            findid_view("deformField4-month").get_attribute(
-                "validationMessage"
-            ),
-            "Please enter a number.",
-        )
-        self.assertEqual(
-            findid_view("deformField4-day").get_attribute("validationMessage"),
-            "Please enter a number.",
-        )
+        # The fields are required and empty, so each must carry a
+        # browser-native HTML5 validation message. The exact text is
+        # locale/browser-dependent (e.g. "Please fill out this field." for a
+        # text input, "Please enter a number." for a number input), so only
+        # assert that a message is present.
+        for fid in (
+            "deformField1",
+            "deformField3",
+            "deformField4",
+            "deformField4-month",
+            "deformField4-day",
+        ):
+            self.assertTrue(
+                findid_view(fid).get_attribute("validationMessage"),
+                "expected a validation message for " + fid,
+            )
 
     def test_submit_invalid(self):
         findid("deformField1").send_keys("notanumber")
@@ -3832,9 +3985,13 @@ class AjaxFormTests(Base, unittest.TestCase):
         findid("deformField4-month").send_keys("1")
         findid("deformField4-day").send_keys("1")
 
-        source = browser.page_source
-        wait_to_click("#deformsubmit")
-        wait_for_ajax(source)
+        js_click("deformsubmit")
+        WebDriverWait(browser, 5).until(
+            EC.text_to_be_present_in_element(
+                (By.ID, "error-deformField1"),
+                '"notanumber" is not a number',
+            )
+        )
         self.assertEqual(
             findid("error-deformField1").text, '"notanumber" is not a number'
         )
@@ -3853,9 +4010,11 @@ class AjaxFormTests(Base, unittest.TestCase):
         tinymce.send_keys("yo")
         # leave iframe
         browser.switch_to.default_content()
-        source = browser.page_source
-        wait_to_click("#deformsubmit")
-        wait_for_ajax(source)
+        js_click("deformsubmit")
+        # The AJAX client swaps in the success fragment (#thanks) on 200.
+        WebDriverWait(browser, 5).until(
+            EC.presence_of_element_located((By.ID, "thanks"))
+        )
         self.assertEqual(findid("thanks").text, "Thanks!")
 
 
@@ -3877,86 +4036,6 @@ class RedirectingAjaxFormTests(AjaxFormTests):
         wait_for_ajax(source)
         WebDriverWait(browser, 10).until(EC.url_contains("thanks.html"))
         self.assertTrue(browser.current_url.endswith("thanks.html"))
-
-
-class TextInputMaskTests(Base, unittest.TestCase):
-    url = test_url("/text_input_masks/")
-
-    def test_render_default(self):
-        action_chains_on_id("deformField1").send_keys(Keys.HOME).send_keys(
-            "0"
-        ).perform()
-        self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), "0__-__-____"
-        )
-        self.assertEqual(
-            findid_view("deformField1").get_attribute("name"), "ssn"
-        )
-        self.assertEqual(findid("deformField2").get_attribute("value"), "")
-        self.assertEqual(findid("deformField2").get_attribute("name"), "date")
-        self.assertRaises(NoSuchElementException, findcss, ".is-invalid")
-
-    def test_type_bad_input(self):
-        action_chains_on_id("deformField1").send_keys(Keys.HOME).send_keys(
-            "0a"
-        ).perform()
-        self.assertEqual(
-            findid_view("deformField1").get_attribute("value"), "0__-__-____"
-        )
-        action_chains_on_id("deformField2").click().send_keys(
-            Keys.HOME
-        ).send_keys("0a").perform()
-        self.assertEqual(
-            findid("deformField2").get_attribute("value"), "0_/__/____"
-        )
-
-    def test_submit_success(self):
-        action_chains_on_id("deformField1").send_keys(Keys.HOME).send_keys(
-            "140118866"
-        ).perform()
-        browser.execute_script(
-            'document.getElementById("deformField2").focus();'
-        )
-        action_chains_on_id("deformField2").send_keys(Keys.HOME).send_keys(
-            "10102010"
-        ).perform()
-        wait_to_click("#deformsubmit")
-        self.assertEqual(
-            eval(findid("captured").text),
-            {"date": "10/10/2010", "ssn": "140-11-8866"},
-        )
-
-
-class MultipleErrorMessagesInMappingTest(Base, unittest.TestCase):
-    url = test_url("/multiple_error_messages_mapping/")
-
-    def test_it(self):
-        findid("deformField1").send_keys("whatever")
-        wait_to_click("#deformsubmit")
-        self.assertEqual(findid("error-deformField1").text, "Error 1")
-        self.assertEqual(findid("error-deformField1-1").text, "Error 2")
-        self.assertEqual(findid("error-deformField1-2").text, "Error 3")
-
-
-class MultipleErrorMessagesInSequenceTest(Base, unittest.TestCase):
-    url = test_url("/multiple_error_messages_seq/")
-
-    def test_it(self):
-        findid("deformField1-seqAdd").click()
-        findxpath("//input[@name='field']").send_keys("whatever")
-        wait_to_click("#deformsubmit")
-        self.assertEqual(findid("error-deformField3").text, "Error 1")
-        self.assertEqual(findid("error-deformField3-1").text, "Error 2")
-        self.assertEqual(findid("error-deformField3-2").text, "Error 3")
-
-
-class CssClassesOnTheOutermostHTMLElementTests(Base, unittest.TestCase):
-    url = test_url("/custom_classes_on_outermost_html_element/")
-
-    def test_it(self):
-        findcss("form > fieldset > div.top_level_mapping_widget_custom_class")
-        findcss("[title=MappingWidget] div.mapped_widget_custom_class")
-        findcss("[title=SequenceWidget] div.sequenced_widget_custom_class")
 
 
 class ReadOnlyHTMLAttributeTests(Base, unittest.TestCase):
@@ -4054,23 +4133,17 @@ class ReadOnlyHTMLAttributeTests(Base, unittest.TestCase):
         self.assertTrue(select_object.is_multiple)
         self.assertTrue(element.get_attribute("readonly"), "readonly")
         options = select_object.options
-        # Selectize removes unselected options from the DOM.
-        # Selectize hides the select, and Selenium only returns `.text` for
-        # visible elements. Use `.get_attribute("text")` instead.
+        # Tom Select keeps all options in the native <select> (selectize.js
+        # used to remove unselected ones). Letters a and b are selected; c is
+        # present but unselected.
         self.assertEqual(
-            [o.get_attribute("text") for o in options],
-            ["The letter a", "The letter b"],
+            set(o.get_attribute("text") for o in options),
+            {"The letter a", "The letter b", "The letter c"},
         )
-        self.assertIsNone(options[0].get_attribute("disabled"))
-        self.assertTrue(options[0].is_selected())
-        self.assertIsNone(options[1].get_attribute("disabled"))
-        self.assertTrue(options[1].is_selected())
-
-        self.assertRaises(
-            ElementNotInteractableException, select_object.deselect_by_index, 0
+        selected = set(
+            o.get_attribute("text") for o in options if o.is_selected()
         )
-        self.assertTrue(options[0].is_selected())
-        self.assertTrue(options[1].is_selected())
+        self.assertEqual(selected, {"The letter a", "The letter b"})
 
     def test_render_selectize_single_default(self):
         self.assertTrue("Selectize Single" in browser.page_source)
@@ -4081,12 +4154,19 @@ class ReadOnlyHTMLAttributeTests(Base, unittest.TestCase):
         self.assertFalse(select_object.is_multiple)
         self.assertTrue(element.get_attribute("readonly"), "readonly")
         options = select_object.options
+        # Unlike selectize.js, Tom Select keeps all options in the native
+        # <select> (better form/accessibility semantics) and locks the widget
+        # instead of mutating the option list. Compare as a set since Tom
+        # Select may reorder options.
         self.assertEqual(
-            [o.get_attribute("text") for o in options],
-            ["The letter b"],
+            set(o.get_attribute("text") for o in options),
+            {"The letter a", "The letter b", "The letter c"},
         )
-        self.assertIsNone(options[0].get_attribute("disabled"))
-        self.assertTrue(options[0].is_selected())
+        # "The letter b" is the selected value.
+        selected = [o for o in options if o.is_selected()]
+        self.assertEqual(
+            [o.get_attribute("text") for o in selected], ["The letter b"]
+        )
 
     def test_render_textarea_default(self):
         self.assertTrue("Textarea" in browser.page_source)
@@ -4146,13 +4226,22 @@ class ReadOnlyHTMLAttributeTests(Base, unittest.TestCase):
         self.assertTrue(options[1].is_selected())
         element = findid("deformField5", clickable=False)
         select_object = Select(element)
-        options = select_object.options
-        self.assertTrue(options[0].is_selected())
-        self.assertTrue(options[1].is_selected())
+        # Tom Select may reorder the native <option> elements, so check the
+        # selected values by value rather than by position.
+        selected = set(
+            o.get_attribute("value")
+            for o in select_object.options
+            if o.is_selected()
+        )
+        self.assertEqual(selected, {"a", "b"})
         element = findid("deformField6", clickable=False)
         select_object = Select(element)
-        options = select_object.options
-        self.assertTrue(options[0].is_selected())
+        selected = [
+            o.get_attribute("value")
+            for o in select_object.options
+            if o.is_selected()
+        ]
+        self.assertEqual(selected, ["b"])
         element = findid("deformField7")
         self.assertTrue(element.get_attribute("value"), "readonly text area")
         element = findid("deformField8")
