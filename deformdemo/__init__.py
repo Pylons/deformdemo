@@ -7,16 +7,13 @@ import csv
 import datetime
 import decimal
 import inspect
-import json
 import logging
 import pprint
 import random
 import sys
-from html import escape
 
 import colander
 from pyramid.config import Configurator
-from pyramid.httpexceptions import HTTPFound
 from pyramid.i18n import TranslationStringFactory
 from pyramid.i18n import get_locale_name
 from pyramid.i18n import get_localizer
@@ -1072,7 +1069,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="sequence_of_dateinputs")
     @demonstrate("Sequence of Date Inputs")
     def sequence_of_dateinputs(self):
-        import datetime
 
         class Sequence(colander.SequenceSchema):
             date = colander.SchemaNode(
@@ -1093,7 +1089,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="sequence_of_i18n")
     @demonstrate("Sequence of I18N")
     def sequence_of_i18n(self):
-        import datetime
 
         locale_name = get_locale_name(self.request)
 
@@ -1441,7 +1436,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="dateparts")
     @demonstrate("Date Parts Widget")
     def dateparts(self):
-        import datetime
 
         class Schema(colander.Schema):
             date = colander.SchemaNode(
@@ -1461,7 +1455,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="dateparts_readonly")
     @demonstrate("Date Parts Widget (read-only)")
     def dateparts_readonly(self):
-        import datetime
 
         class Schema(colander.Schema):
             date = colander.SchemaNode(
@@ -1479,7 +1472,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="dateinput")
     @demonstrate("Date Input Widget")
     def dateinput(self):
-        import datetime
 
         class Schema(colander.Schema):
             somedate = colander.SchemaNode(
@@ -1499,7 +1491,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="timeinput")
     @demonstrate("Time Input")
     def timeinput(self):
-        import datetime
 
         class Schema(colander.Schema):
             sometime = colander.SchemaNode(
@@ -1519,7 +1510,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="datetimeinput")
     @demonstrate("DateTime Input Widget")
     def datetimeinput(self):
-        import datetime
 
         class Schema(colander.Schema):
             date_time = colander.SchemaNode(
@@ -1547,7 +1537,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="datetimeinput_readonly")
     @demonstrate("DateTime Input Widget (read-only)")
     def datetimeinput_readonly(self):
-        import datetime
 
         then = datetime.datetime(2011, 5, 5, 1, 2)
 
@@ -1565,7 +1554,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="edit")
     @demonstrate("Edit Form")
     def edit(self):
-        import datetime
 
         class Mapping(colander.Schema):
             name = colander.SchemaNode(
@@ -2658,7 +2646,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="deferred_schema_bindings")
     @demonstrate("Deferred Schema Bindings")
     def deferred_schema_bindings(self):
-        import datetime
 
         import colander
 
@@ -2846,7 +2833,6 @@ class DeformDemo(object):
     @view_config(renderer="templates/form.pt", name="readonly_argument")
     @demonstrate("Readonly Widget Argument")
     def readonly_argument(self):
-        import datetime
 
         class Schema(colander.Schema):
             textinput = colander.SchemaNode(
@@ -3022,7 +3008,6 @@ class DeformDemo(object):
     )
     @demonstrate("Custom classes on outermost html element of Widgets")
     def custom_classes_on_outermost_html_element(self):
-        import datetime
 
         class Mapping(colander.Schema):
             upload = colander.SchemaNode(
