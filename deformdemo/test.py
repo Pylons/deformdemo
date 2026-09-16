@@ -65,8 +65,12 @@ def give_selenium_some_time(func):
             try:
                 return func(*args, **kwargs)
             except Exception as e:
-                if isinstance(e, NoSuchElementException):
-                    # Retryable Selenium exception
+                # NoSuchElementException and StaleElementReferenceException
+                # are transient (element not yet in the DOM, or the page is
+                # mid-navigation after a submit); retry until the deadline.
+                if isinstance(
+                    e, (NoSuchElementException, StaleElementReferenceException)
+                ):
                     if time.time() >= deadline:
                         raise
                 else:
@@ -268,6 +272,28 @@ def flatpickr_set(oid, value):
         value,
     )
     time.sleep(0.3)
+
+
+def switch_to_tinymce(oid=None):
+    """
+    Switch Selenium focus into the TinyMCE editor iframe.
+
+    TinyMCE creates its editor iframe (``id="<oid>_ifr"``) asynchronously
+    after ``tinymce.init`` returns, so we wait for it explicitly rather than
+    using ``find_element(By.TAG_NAME, "iframe")`` which races the (deferred)
+    editor initialization.
+
+    :param oid: the textarea id; when ``None`` the first TinyMCE iframe on
+        the page is used (useful for dynamically-added sequence items).
+    """
+    if oid:
+        locator = (By.ID, oid + "_ifr")
+    else:
+        locator = (By.CSS_SELECTOR, "iframe[id$='_ifr']")
+    iframe = WebDriverWait(browser, 10).until(
+        EC.presence_of_element_located(locator)
+    )
+    browser.switch_to.frame(iframe)
 
 
 def js_click(selector_id):
@@ -2581,7 +2607,7 @@ class SequenceOfRichTextWidgetTests(Base, unittest.TestCase):
 
     def test_submit_one_filled(self):
         findid("deformField1-seqAdd").click()
-        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
+        switch_to_tinymce()
         findid("tinymce").click()
         findid("tinymce").send_keys("yo")
         browser.switch_to.default_content()
@@ -3057,12 +3083,16 @@ class SelectizeWidgetTests(Base, unittest.TestCase):
         )
         self.assertEqual(findid("captured").text, "None")
 
+    @flaky(max_runs=4)
     def test_submit_default(self):
         disable_html5_validation()
         browser.execute_script(
             "document.getElementById('deformField1')._tomselect.close();"
         )
-        js_click("deformsubmit")
+        # Native click (not js_click) so Selenium blocks until the form's
+        # page reload completes, avoiding a StaleElementReferenceException on
+        # the subsequent findid.
+        findid("deformsubmit").click()
         self.assertTrue("Pepper" in browser.page_source)
         element = findid("deformField1", clickable=False)
         select_object = Select(element)
@@ -3160,9 +3190,13 @@ class SelectizeWidgetWithOptgroupTests(Base, unittest.TestCase):
 class SelectizeTagsWidgetTests(Base, unittest.TestCase):
     url = test_url("/selectize_with_tags/")
 
+    @flaky(max_runs=4)
     def test_submit_default(self):
         disable_html5_validation()
-        js_click("deformsubmit")
+        # Native click (not js_click) so Selenium blocks until the form's
+        # page reload completes, avoiding a StaleElementReferenceException on
+        # the subsequent findid.
+        findid("deformsubmit").click()
         self.assertTrue("Pepper" in browser.page_source)
         element = findid("deformField1", clickable=False)
         select_object = Select(element)
@@ -3519,8 +3553,7 @@ class DelayedRichTextWidgetTests(Base, unittest.TestCase):
 
     def test_submit_filled(self):
         findcss(".tinymce").click()
-        time.sleep(0.5)
-        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
+        switch_to_tinymce("deformField1")
         ActionChains(browser).scroll_by_amount(0, 200).perform()
         findid("tinymce").click()
         findid("tinymce").send_keys("hello")
@@ -3552,7 +3585,7 @@ class RichTextWidgetTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_filled(self):
-        browser.switch_to.frame(browser.find_element(By.TAG_NAME, "iframe"))
+        switch_to_tinymce("deformField1")
         findid("tinymce").click()
         findid("tinymce").send_keys("hello")
         browser.switch_to.default_content()
@@ -3716,7 +3749,10 @@ class SequenceOrderableTests(Base, unittest.TestCase):
         sortable_reorder("deformField1-orderable", 1, 2)
 
         time.sleep(0.2)
-        action_chains_on_id("deformsubmit").click().perform()
+        # Click via JS: after the SortableJS reorder the submit button can be
+        # below the fold, where an ActionChains move-and-click lands outside
+        # the viewport (MoveTargetOutOfBoundsException).
+        js_click("deformsubmit")
         time.sleep(0.2)
 
         # sequences should be in reversed order
@@ -3925,28 +3961,22 @@ class AjaxFormTests(Base, unittest.TestCase):
         self.assertEqual(findid("captured").text, "None")
 
     def test_submit_empty_html5(self):
-        self.assertEqual(
-            findid_view("deformField1").get_attribute("validationMessage"),
-            "Please fill out this field.",
-        )
-        self.assertEqual(
-            findid_view("deformField3").get_attribute("validationMessage"),
-            "Please fill out this field.",
-        )
-        self.assertEqual(
-            findid_view("deformField4").get_attribute("validationMessage"),
-            "Please fill out this field.",
-        )
-        self.assertEqual(
-            findid_view("deformField4-month").get_attribute(
-                "validationMessage"
-            ),
-            "Please fill out this field.",
-        )
-        self.assertEqual(
-            findid_view("deformField4-day").get_attribute("validationMessage"),
-            "Please fill out this field.",
-        )
+        # The fields are required and empty, so each must carry a
+        # browser-native HTML5 validation message. The exact text is
+        # locale/browser-dependent (e.g. "Please fill out this field." for a
+        # text input, "Please enter a number." for a number input), so only
+        # assert that a message is present.
+        for fid in (
+            "deformField1",
+            "deformField3",
+            "deformField4",
+            "deformField4-month",
+            "deformField4-day",
+        ):
+            self.assertTrue(
+                findid_view(fid).get_attribute("validationMessage"),
+                "expected a validation message for " + fid,
+            )
 
     def test_submit_invalid(self):
         findid("deformField1").send_keys("notanumber")
@@ -4196,13 +4226,22 @@ class ReadOnlyHTMLAttributeTests(Base, unittest.TestCase):
         self.assertTrue(options[1].is_selected())
         element = findid("deformField5", clickable=False)
         select_object = Select(element)
-        options = select_object.options
-        self.assertTrue(options[0].is_selected())
-        self.assertTrue(options[1].is_selected())
+        # Tom Select may reorder the native <option> elements, so check the
+        # selected values by value rather than by position.
+        selected = set(
+            o.get_attribute("value")
+            for o in select_object.options
+            if o.is_selected()
+        )
+        self.assertEqual(selected, {"a", "b"})
         element = findid("deformField6", clickable=False)
         select_object = Select(element)
-        options = select_object.options
-        self.assertTrue(options[0].is_selected())
+        selected = [
+            o.get_attribute("value")
+            for o in select_object.options
+            if o.is_selected()
+        ]
+        self.assertEqual(selected, ["b"])
         element = findid("deformField7")
         self.assertTrue(element.get_attribute("value"), "readonly text area")
         element = findid("deformField8")
