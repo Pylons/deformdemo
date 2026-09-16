@@ -1060,9 +1060,7 @@ class DateInputWidgetTests(Base, unittest.TestCase):
         # The widget's minimum is Jan 1 of the current year; Dec 31 of last
         # year is earlier and must fail validation.
         tooearly = datetime.date(datetime.date.today().year - 1, 12, 31)
-        flatpickr_set(
-            "deformField1", tooearly.strftime("%Y-%m-%d")
-        )
+        flatpickr_set("deformField1", tooearly.strftime("%Y-%m-%d"))
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertTrue("is earlier than" in findid("error-deformField1").text)
@@ -1172,8 +1170,9 @@ class DateTimeInputWidgetTests(Base, unittest.TestCase):
     def test_submit_time_empty(self):
         disable_html5_validation()
         clear_autofocused_picker()
-        flatpickr_set("deformField1-date", datetime.date.today().strftime(
-            "%Y-%m-%d"))
+        flatpickr_set(
+            "deformField1-date", datetime.date.today().strftime("%Y-%m-%d")
+        )
         wait_to_click("#deformsubmit")
         self.assertTrue(findcss(".is-invalid"))
         self.assertEqual(findid("error-deformField1").text, "Incomplete time")
@@ -3368,7 +3367,9 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
     def test_submit_filled(self):
         findid("deformField1-ts-control").send_keys("ba")
         self.assertTrue(
-            findxpath('//div[contains(@class,"option")][normalize-space(.)="baz"]').is_displayed()
+            findxpath(
+                '//div[contains(@class,"option")][normalize-space(.)="baz"]'
+            ).is_displayed()
         )
         tomselect_pick("deformField1", "bar")
         wait_to_click("#deformsubmit")
@@ -3382,7 +3383,8 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         findid("deformField1-ts-control").send_keys("foo")
         self.assertTrue(
             findxpath(
-                '//div[contains(@class,"option")][normalize-space(.)="foo & bar"]'
+                '//div[contains(@class,"option")]'
+                '[normalize-space(.)="foo & bar"]'
             ).is_displayed()
         )
         tomselect_pick("deformField1", "foo & bar")
@@ -3396,7 +3398,8 @@ class AutocompleteInputWidgetTests(Base, unittest.TestCase):
         findid("deformField1-ts-control").send_keys("one")
         self.assertTrue(
             findxpath(
-                '//div[contains(@class,"option")][normalize-space(.)="one < two"]'
+                '//div[contains(@class,"option")]'
+                '[normalize-space(.)="one < two"]'
             ).is_displayed()
         )
         tomselect_pick("deformField1", "one < two")
@@ -3910,7 +3913,7 @@ class AjaxFormTests(Base, unittest.TestCase):
     def test_submit_empty(self):
         disable_html5_validation()
         js_click("deformsubmit")
-        # The AJAX client swaps the 422 response into the form; wait for errors.
+        # AJAX client swaps the 422 response into the form; wait for errors.
         WebDriverWait(browser, 5).until(
             EC.text_to_be_present_in_element(
                 (By.ID, "error-deformField1"), "Required"
@@ -4003,7 +4006,6 @@ class RedirectingAjaxFormTests(AjaxFormTests):
         wait_for_ajax(source)
         WebDriverWait(browser, 10).until(EC.url_contains("thanks.html"))
         self.assertTrue(browser.current_url.endswith("thanks.html"))
-
 
 
 class ReadOnlyHTMLAttributeTests(Base, unittest.TestCase):

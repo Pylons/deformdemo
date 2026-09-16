@@ -1014,7 +1014,6 @@ class DeformDemo(object):
 
         return self.render_form(form, success=succeed)
 
-
     @view_config(renderer="templates/form.pt", name="sequence_of_radiochoices")
     @demonstrate("Sequence of Radio Choice Widgets")
     def sequence_of_radiochoices(self):
