@@ -28,7 +28,6 @@ import sys
 
 from six.moves import input  # noqa: A004
 
-
 # Several "try" blocks for python2/3 differences (@secretrobotron)
 try:
     import httplib

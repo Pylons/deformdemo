@@ -21,7 +21,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.support.select import Select
 from selenium.webdriver.support.wait import WebDriverWait
 
-
 browser = None
 
 #: Where we write stuff when Selenium doesn't work
