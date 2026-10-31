@@ -14,10 +14,11 @@
     <script>
       "use strict";
 
-      $(document).ready(function() {
-        // Automatically show pop up if the form contains validation errors
-        if($("#my-pop-up .error-msg-detail").length > 0) {
-          $("#my-pop-up").modal("show");
+      // Automatically show the pop up if the form contains validation errors.
+      document.addEventListener("DOMContentLoaded", function () {
+        var popup = document.getElementById("my-pop-up");
+        if (popup && popup.querySelector(".error-msg-detail")) {
+          bootstrap.Modal.getOrCreateInstance(popup).show();
         }
       });
     </script>

@@ -1,2 +1,5 @@
--e git+https://github.com/Pylons/deform.git#egg=deform
+# The demo tests on this branch target the jQuery-free deform widgets; install
+# the matching deform branch. Switch back to the default branch once
+# Pylons/deform "byebyejquery" is merged.
+-e git+https://github.com/Pylons/deform.git@byebyejquery#egg=deform
 -e ".[testing]"

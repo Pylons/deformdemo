@@ -1,7 +1,6 @@
 [tool.black]
 line-length = 79
 skip-string-normalization = true
-py36 = false
 include = '\.pyi?$'
 exclude = '''
 /(
@@ -27,8 +26,14 @@ known_first_party = "deformdemo"
 known_pyramid = "colander,jinja2,plaster,pyramid,pyramid_layout,venusian,zope,transaction,pyramid_chameleon,Chameleon"
 known_tests="flaky,selenium"
 line_length = 79
-lines_after_imports = 2
+lines_after_imports = -1
 multi_line_output = 3
 no_lines_before = "THIRDPARTY"
 profile = "black"
 sections = ["FUTURE","STDLIB","PYRAMID","DEFORM","THIRDPARTY","FIRSTPARTY","LOCALFOLDER","TESTS"]
+
+[tool.ruff]
+line-length = 79
+extend-exclude = [
+  "bootstrap.py",
+]

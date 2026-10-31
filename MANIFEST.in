@@ -5,6 +5,7 @@ include *.py
 include *.sh
 include *.toml
 include *.txt
+include AGENTS.md
 include .isort.cfg .flake8 .dockerignore
 include buildout.cfg
 include demo.ini
